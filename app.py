@@ -498,10 +498,16 @@ def delete_stockinfo(id):
 
 #navigate from dashboard to members
 
-#navigate from dashboard to sales
 @app.route('/sales')
 def sales():
-    return render_template('sales.html')
+    return render_template('sales.html',
+                           sales=[],
+                           summary=[],
+                           weekly_summary=[],
+                           monthly_summary=[],
+                           page=1,
+                           total_pages=1)
+
 
 #navigate from dashboard to accounting and bookkeeping
 @app.route('/accounting')
@@ -844,7 +850,13 @@ def daily_summary():
     
     summary = c.fetchall()
     conn.close()
-    return render_template('sales.html', sales=[],page=1, total_pages=1, summary=summary)
+    return render_template('sales.html',
+                       sales=[],
+                       summary=[],
+                       weekly_summary=[],
+                       monthly_summary=[],
+                       page=1,
+                       total_pages=1)
 
 
 
@@ -870,7 +882,13 @@ def weekly_summary():
             """)
     weekly_sales = c.fetchall()
     conn.close()
-    return render_template('sales.html', weekly_sales=weekly_sales)
+    return render_template('sales.html',
+                       sales=[],
+                       summary=[],
+                       weekly_summary=weekly_sales,
+                       monthly_summary=[],
+                       page=1,
+                       total_pages=1)
 
 #monthly summary
 @app.route('/monthly_summary')
@@ -894,7 +912,13 @@ def monthly_summary():
             """)
     monthly_sales = c.fetchall()
     conn.close()
-    return render_template('sales.html', monthly_sales=monthly_sales)   
+    return render_template('sales.html',
+                       sales=[],
+                       summary=[],
+                       weekly_summary=[],
+                       monthly_summary=monthly_sales,
+                       page=1,
+                       total_pages=1)
 
 
 
