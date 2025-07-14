@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Finance Dashboard</title>
   <style>
     * {
@@ -17,20 +17,26 @@
       padding-bottom: 100px;
     }
 
+    /* Sidebar Styles */
     .sidebar {
       position: fixed;
-      left: -250px;
       top: 0;
+      left: 0;
       width: 250px;
       height: 100%;
       background: #2c2cd8;
       color: white;
       padding-top: 60px;
-      transition: left 0.5s ease;
+      transition: transform 0.3s ease;
+      z-index: 1000;
     }
 
-    .sidebar.active {
-      left: 0;
+    .sidebar.hidden {
+      transform: translateX(-100%);
+    }
+
+    .sidebar.visible {
+      transform: translateX(0);
     }
 
     .sidebar h1 {
@@ -44,7 +50,7 @@
       padding: 15px 30px;
       color: white;
       text-decoration: none;
-      transition: background 0.3s;
+      transition: background 0.3s, color 0.3s;
     }
 
     .sidebar a:hover {
@@ -52,14 +58,46 @@
       color: #2c2cd8;
     }
 
+    /* Content Styles */
     .content {
-      margin-left: 0;
+      margin-left: 250px;
       padding: 20px;
-      transition: margin-left 0.5s;
+      transition: margin-left 0.3s ease;
     }
 
-    .content.shifted {
-      margin-left: 250px;
+    /* Menu Toggle Button */
+    .menu-toggle {
+      display: none;
+      background-color: #0f3460;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      font-size: 20px;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1001;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.visible {
+        transform: translateX(0);
+      }
+
+      .content {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
     }
 
     .label {
@@ -132,23 +170,12 @@
       align-items: center;
       padding: 0 20px;
     }
-
-    .menu-toggle {
-      cursor: pointer;
-      margin-right: 15px;
-      font-size: 24px;
-    }
-
-    h2 {
-      text-align: center;
-      color: #0e0e70;
-      margin-top: 20px;
-    }
   </style>
 </head>
 <body>
+  <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
 
-  <div class="sidebar" id="sidebar">
+  <div class="sidebar hidden" id="sidebar">
     <h1>📊 Finance Hub</h1>
     <a href="{{ url_for('accounting') }}">📚 Ledger & Records</a>
     <a href="{{ url_for('daily_income_expenses') }}">💰 Daily Inflow</a>
@@ -162,6 +189,8 @@
   </div>
 
   <div class="content" id="content">
+    <div class="topbar"></div>
+
     <h2 class="label">DAILY INCOME AND EXPENSES</h2>
     <div class="table-wrapper">
       <table class="table-modern">
@@ -298,19 +327,27 @@
         </tbody>
       </table>
     </div>
-
   </div>
 
   <script>
     function toggleSidebar() {
-      document.getElementById("sidebar").classList.toggle("active");
-      document.getElementById("content").classList.toggle("shifted");
+      const sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("hidden");
+      sidebar.classList.toggle("visible");
+      const content = document.getElementById("content");
+      content.classList.toggle("shifted");
     }
 
-    window.onload = function () {
-      toggleSidebar();
-    };
+    // Set initial sidebar state based on screen size
+    document.addEventListener("DOMContentLoaded", () => {
+      const sidebar = document.getElementById("sidebar");
+      const content = document.getElementById("content");
+      if (window.innerWidth > 768) {
+        sidebar.classList.remove("hidden");
+        sidebar.classList.add("visible");
+        content.classList.add("shifted");
+      }
+    });
   </script>
-
 </body>
 </html>
