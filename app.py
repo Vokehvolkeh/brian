@@ -699,12 +699,32 @@ def summary():
 #show all sales from the dashboard sales
 @app.route('/dashboard_sales')
 def dashboard_sales():
+    page = int(request.args.get('page', 1))
+    per_page = 10
+    offset = (page - 1) * per_page
+
     conn = sqlite3.connect('furniture.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM sales')
+
+    # Paginate sales (show 10 per page)
+    c.execute("SELECT * FROM sales ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
     sales = c.fetchall()
+
+    # Count total sales
+    c.execute("SELECT COUNT(*) FROM sales")
+    total_sales = c.fetchone()[0]
+    total_pages = (total_sales + per_page - 1) // per_page
+
+
+
     conn.close()
-    return render_template('sales.html', sales=sales)
+
+    return render_template('sales.html',
+                           sales=sales,
+
+                           page=page,
+                           total_pages=total_pages)
+
 
 #navigate from sales.html to record_sales.html
 @app.route('/record_sales')
@@ -824,7 +844,7 @@ def daily_summary():
     
     summary = c.fetchall()
     conn.close()
-    return render_template('sales.html', summary=summary)
+    return render_template('sales.html', sales=[],page=1, total_pages=1, summary=summary)
 
 
 
@@ -1031,14 +1051,12 @@ def create_invoice():
         conn = sqlite3.connect('furniture.db')
         cursor = conn.cursor()
 
-        # Insert into invoices table — no status here, safe
         cursor.execute(
             "INSERT INTO invoices (customer_name, total_price) VALUES (?, ?)",
             (name, total)
         )
         invoice_id = cursor.lastrowid
 
-        # Insert invoice items with status
         for i in range(len(item_type)):
             if item_type[i].strip() == "" or item_quantity[i].strip() == "" or selling_price[i].strip() == "":
                 continue
@@ -1057,8 +1075,9 @@ def create_invoice():
         conn.close()
         return redirect(url_for('all_invoices'))
 
-    return render_template('create_invoice.html')
-
+    # ✅ This fixes the Jinja error
+    invoice = {'status': 'not paid'}
+    return render_template('create_invoice.html', invoice=invoice)
 
 
 # Route to show all invoices

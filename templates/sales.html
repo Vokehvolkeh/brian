@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Animated Dashboard</title>
   <style>
     * {
@@ -16,23 +16,29 @@
       background: #f4f4f4;
     }
 
+    /* Sidebar Styles */
     .sidebar {
       position: fixed;
-      left: -250px;
       top: 0;
+      left: 0;
       width: 250px;
       height: 100%;
       background: #2c2cd8;
       color: white;
       padding-top: 60px;
-      transition: left 0.5s ease;
+      transition: transform 0.3s ease;
       border-top-right-radius: 15px;
       border-bottom-right-radius: 15px;
       box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+      z-index: 1000;
     }
 
-    .sidebar.active {
-      left: 0;
+    .sidebar.hidden {
+      transform: translateX(-100%);
+    }
+
+    .sidebar.visible {
+      transform: translateX(0);
     }
 
     .sidebar h1 {
@@ -57,14 +63,46 @@
       border-radius: 8px;
     }
 
+    /* Content Styles */
     .content {
-      margin-left: 0;
+      margin-left: 250px;
       padding: 20px;
-      transition: margin-left 0.5s;
+      transition: margin-left 0.3s ease;
     }
 
-    .content.shifted {
-      margin-left: 250px;
+    /* Menu Toggle Button */
+    .menu-toggle {
+      display: none;
+      background-color: #0f3460;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      font-size: 20px;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1001;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.visible {
+        transform: translateX(0);
+      }
+
+      .content {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
     }
 
     .topbar {
@@ -76,12 +114,6 @@
       padding: 0 20px;
     }
 
-    .menu-toggle {
-      cursor: pointer;
-      margin-right: 15px;
-      font-size: 24px;
-    }
-
     .label {
       font-size: 28px;
       font-weight: bold;
@@ -90,16 +122,13 @@
       text-transform: uppercase;
       text-align: center;
     }
-
     .table-container {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      overflow-x: auto;
-      max-height: 400px;
-      margin-bottom: 40px;
-    }
+  background: white;
+  overflow-y: auto;
+  max-height: 400px;
+  position: relative;
+  padding-top: 0px;   /* ⛔ Remove any top padding that could cause the gap */
+}
 
     table {
       border-collapse: collapse;
@@ -117,12 +146,16 @@
     }
 
     th {
-      background: white;
-      color: black;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
+  background: white;
+  color: black;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  font-size: 18px;         /* Bigger text */
+  padding: 24px 20px;      /* More height */
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);  /* Optional but nice */
+}
 
     tr:nth-child(even) {
       background-color: #f9f9f9;
@@ -184,12 +217,38 @@
     .weekly-summary tr:hover {
       background-color: #fff3e0;
     }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
 
+    .pagination button {
+      padding: 8px 16px;
+      background-color: #2c2cd8;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+
+    .pagination button:hover {
+      background-color: #0f3460;
+    }
+
+    .pagination button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
+  <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
 
-  <div class="sidebar" id="sidebar">
+  <div class="sidebar hidden" id="sidebar">
     <h1>📊 SALES HUB</h1>
     <a href="/record_sales">➕ New Sale</a>
     <a href="{{url_for('dashboard_sales')}}">📈 Sales Overview</a>
@@ -202,9 +261,9 @@
   </div>
 
   <div class="content" id="content">
+    <div class="topbar"></div>
 
     <h2 class="label">Sales Record</h2>
-
     <div class="table-container">
       <table>
         <thead>
@@ -241,6 +300,20 @@
           {% endfor %}
         </tbody>
       </table>
+      <div class="pagination">
+        <form method="get" style="display: inline;">
+			<input type="hidden" name="page" value="{{ page | default(1) - 1 }}">
+			<button type="submit" {% if page <= 1 %}disabled{% endif %}>Previous</button>
+        </form>
+      
+        <span>Page {{ page }} of {{ total_pages }}</span>
+      
+        <form method="get" style="display: inline;">
+          <input type="hidden" name="page" value="{{ page + 1 }}">
+          <button type="submit" {% if page >= total_pages %}disabled{% endif %}>Next</button>
+        </form>
+      </div>
+      
     </div>
 
     <h2 class="label">Daily Summary</h2>
@@ -308,19 +381,27 @@
         {% endfor %}
       </table>
     </div>
-
   </div>
 
   <script>
     function toggleSidebar() {
-      document.getElementById("sidebar").classList.toggle("active");
-      document.getElementById("content").classList.toggle("shifted");
+      const sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("hidden");
+      sidebar.classList.toggle("visible");
+      const content = document.getElementById("content");
+      content.classList.toggle("shifted");
     }
 
-    window.onload = function () {
-      toggleSidebar();
-    };
+    // Set initial sidebar state based on screen size
+    document.addEventListener("DOMContentLoaded", () => {
+      const sidebar = document.getElementById("sidebar");
+      const content = document.getElementById("content");
+      if (window.innerWidth > 768) {
+        sidebar.classList.remove("hidden");
+        sidebar.classList.add("visible");
+        content.classList.add("shifted");
+      }
+    });
   </script>
-
 </body>
 </html>
