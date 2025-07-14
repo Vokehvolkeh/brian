@@ -60,23 +60,7 @@
         <p>No contracts found.</p>
     {% else %}
         {% for contract in contracts %}
-        <div style="text-align: right; margin-bottom: 20px;">
-            <a href="{{ url_for('add_contract') }}"
-               style="
-                   background-color: #007bff;
-                   color: white;
-                   padding: 8px 16px;
-                   border-radius: 6px;
-                   text-decoration: none;
-                   font-weight: 500;
-                   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                   transition: background-color 0.3s ease;
-               "
-               onmouseover="this.style.backgroundColor='#0056b3'"
-               onmouseout="this.style.backgroundColor='#007bff'">
-                ➕ Add Contract
-            </a>
-        </div>
+
         
             <div class="contract-box">
                 <h2>{{ contract.title | e }}</h2>
@@ -171,6 +155,23 @@
             </div>
         {% endfor %}
     {% endif %}
+    <div style="text-align: right; margin-bottom: 20px;">
+        <a href="{{ url_for('add_contract') }}"
+           style="
+               background-color: #007bff;
+               color: white;
+               padding: 8px 16px;
+               border-radius: 6px;
+               text-decoration: none;
+               font-weight: 500;
+               box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+               transition: background-color 0.3s ease;
+           "
+           onmouseover="this.style.backgroundColor='#0056b3'"
+           onmouseout="this.style.backgroundColor='#007bff'">
+            ➕ Add Contract
+        </a>
+    </div>
     <div style="text-align: right; margin-bottom: 20px;">
         <a href="/dashboard"
            style="
