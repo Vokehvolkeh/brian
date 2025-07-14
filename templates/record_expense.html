@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Member</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background-color: #f5f5f5;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            max-width: 400px;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h2>Record Expense</h2>
+
+    {% if message %}
+    <p style="color:red;">{{ message }}</p>
+    {% endif %}
+    
+    <form method="POST" action="{{form_action}}">
+        <input type="number" name="electricity" value="{{ expense[4] if expense else '' }}">
+        Water: <input type="number" name="water" value="{{ expense[5] if expense else ''}}"><br><br>
+        Internet : <input type="number" name="internet" value="{{ expense[6] if expense else ''}}"><br><br>
+        Rent: <input type="number" name="rent" value="{{ expense[7] if expense else ''}}"><br><br>
+        Supplies: <input type="number" name="supplies" value="{{ expense[8] if expense else ''}}"><br><br>
+        Ads: <input type="number" name="ads" value="{{ expense[9] if expense else ''}}"><br><br>
+        Insuarance : <input type="number" name="insuarance" value="{{ expense[10] if expense else ''}}"><br><br>
+        Maintanance: <input type="number" name="maintanance" value="{{ expense[11] if expense else ''}}"><br><br>
+        Transport : <input type="number" name="transport" value="{{ expense[12] if expense else ''}}"><br><br>
+        Taxes : <input type="number" name="taxes" value="{{ expense[13] if expense else ''}}"><br><br>
+
+        <button type="submit">Record Expense</button>
+    </form>
+
+    <br>
+    <a href="/accounting">← Back to Dashboard</a>
+</body>
+</html>

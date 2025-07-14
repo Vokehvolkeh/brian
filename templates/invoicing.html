@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Animated Dashboard</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: -250px;
+      top: 0;
+      width: 250px;
+      height: 100%;
+      background: linear-gradient(180deg, #1e3c29, #000000);
+      color: white;
+      padding-top: 60px;
+      transition: left 0.5s ease;
+      font-family: 'Segoe UI', sans-serif;
+      transition: left 0.5s ease;
+      border-top-right-radius: 15px;
+      border-bottom-right-radius: 15px;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 24px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 15px 30px;
+      color: white;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    .sidebar a:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .content {
+      margin-left: 0;
+      padding: 20px;
+      transition: margin-left 0.5s;
+    }
+
+    .content.shifted {
+      margin-left: 250px;
+    }
+
+    .topbar {
+      height: 60px;
+      background: #0f3460;
+      color: white;
+      display: flex;
+      align-align-items: center;
+      padding: 0 20px;
+    }
+
+    .menu-toggle {
+      cursor: pointer;
+      margin-right: 15px;
+      font-size: 24px;
+    }
+
+    .main-content {
+      margin-top: 30px;
+    }
+
+    .invoice-box {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .invoice-box h3 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .invoice-box .button-group {
+      margin-bottom: 15px;
+    }
+
+    .invoice-box .button-group button {
+      margin-right: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+
+    .invoice-box .button-group .delete-btn {
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .invoice-box p {
+      color: #333;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .sales_summary {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin-top: 10px;
+    }
+
+    .sales_summary th,
+    .sales_summary td {
+      padding: 10px;
+      border: 1px solid #000000;
+      text-align: center;
+      background-color: #fff8dc;
+      overflow-wrap: break-word;
+    }
+
+    .sales_summary th {
+      background-color: #daa520;
+      color: black;
+      border-color: #000000;
+    }
+
+    .sales_summary th:nth-child(1),
+    .sales_summary td:nth-child(1) {
+      width: 40%; /* ITEM column */
+    }
+
+    .sales_summary th:nth-child(2),
+    .sales_summary td:nth-child(2) {
+      width: 20%; /* QUANTITY column */
+    }
+
+    .sales_summary th:nth-child(3),
+    .sales_summary td:nth-child(3) {
+      width: 20%; /* SELLING PRICE column */
+    }
+
+    .sales_summary th:nth-child(4),
+    .sales_summary td:nth-child(4) {
+      width: 20%; /* TOTAL AMOUNT column */
+    }
+
+    .main {
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .logo {
+      width: 200px;
+    }
+	.invoice-container {
+    width: 794px; /* A4 width in px at 96dpi */
+    min-height: 1123px; /* A4 height */
+    margin: 20px auto;
+    padding: 40px;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+  }
+
+    .print-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .print-button:hover {
+            background-color: #2980b9;
+        }
+		@media print {
+    body * {
+      visibility: hidden;
+    }
+
+    .print-area, .print-area * {
+      visibility: visible;
+    }
+
+    .print-area {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+
+    .print-button,
+    .button-group {
+      display: none !important;
+    }
+  }
+
+  .totals-section {
+    margin-top: 15px;
+    text-align: right;
+  }
+
+  .sales_summary {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  .sales_summary th, .sales_summary td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+  }
+
+  .invoice-container {
+    padding-bottom: 40px;
+  }
+
+  .sales_summary {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 16px;
+  }
+
+  .sales_summary th, .sales_summary td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+  }
+
+  .sales_summary th {
+    background-color: #f2f2f2;
+    color: #333;
+  }
+
+  .totals-section {
+    margin-top: 25px;
+    text-align: right;
+    font-size: 16px;
+  }
+
+  .totals-section h4 {
+    margin-bottom: 10px;
+    color: #2c2cd8;
+  }
+
+  .totals-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .totals-section li {
+    margin-bottom: 5px;
+  }
+  </style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+  <h2>INVOICE AND QUOTATION</h2>
+  <a href="#">INVOICE AND QUOTATION</a>
+  <a href="{{ url_for('create_invoice') }}">Add Invoice</a>
+  <a href="{{url_for('all_invoices')}}">View Invoice</a>
+  <a href="/dashboard">Dashboard</a>
+  <a href="/logout">Logout</a>
+</div>
+
+<div class="invoice-container">
+	{% if data %}
+	  {% for group in data %}
+		<!-- BEGIN PRINT AREA -->
+		<div class="print-area">
+		  <div class="invoice-box" data-invoice-id="{{ group.invoice[0]|int }}" style="position: relative; overflow: hidden;">
+  
+			<!-- Header -->
+			<div style="background: linear-gradient(to right, #004e92, #000428); padding: 30px 20px; color: white; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+			  <div style="display: flex; justify-content: space-between; align-items: center;">
+				<h2 style="margin: 0;">INVOICE</h2>
+				<p style="margin: 0;">No: INV-{{ '%05d'|format(group.invoice[0]|int) }}</p>
+			  </div>
+			</div>
+  
+			<!-- Logo -->
+			<div style="text-align: center; margin-top: -70px;">
+			  <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="Logo" style="width: 100px; height: 100px; border-radius: 50%; border: 5px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.2); background-color: white;">
+			</div>
+  
+			<!-- Client & Sender Info -->
+			<div style="padding: 10px 20px;">
+			  <div style="display: flex; justify-content: space-between;">
+				<div>
+				  <strong>Bill To:</strong><br/>
+				  {{ group.invoice[1] }}<br/>
+				  +254-700-000000<br/>
+				  Kibwezi, Kenya
+				</div>
+				<div>
+				  <strong>From:</strong><br/>
+				  BIG-ZA ELITE WORKS<br/>
+				  +254-700-123456<br/>
+				  Nairobi, Kenya
+				</div>
+			  </div>
+			  <p style="margin-top: 10px;"><strong>Date:</strong> {{ group.invoice[3] if group.invoice[3] else "Unknown" }}</p>
+			</div>
+  
+			<!-- Payment Status -->
+			{% set statuses = group["items"] | map(attribute=3) | list %}
+			{% set paid = 'not paid' not in statuses %}
+			<div style="text-align: right; padding: 0 20px;">
+				<p>Statuses: {{ statuses }}</p>
+
+			  {% if paid %}
+				<span style="background-color: #27ae60; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold;">PAID</span>
+			  {% else %}
+				<span style="background-color: #e74c3c; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold;">NOT PAID</span>
+			  {% endif %}
+			</div>
+  
+			<!-- Invoice Table -->
+			<div style="padding: 10px 20px;">
+			  <h3 style="margin-bottom: 10px;">Customer Name: {{ group.invoice[0] }} - {{ group.invoice[1] }}</h3>
+			  <p><strong>Total:</strong> {{ group.invoice[2] }} KES</p>
+  
+			  <table class="sales_summary">
+				<thead>
+				  <tr>
+					<th>Item Name</th>
+					<th>Quantity</th>
+					<th>Selling Price (KES)</th>
+				  </tr>
+				</thead>
+				<tbody>
+				  {% for item in group["items"] %}
+				  <tr>
+					<td>{{ item[0] }}</td>
+					<td>{{ item[1] }}</td>
+					<td>{{ "%.2f" | format(item[2]) }}</td>
+				  </tr>
+				  {% endfor %}
+				</tbody>
+			  </table>
+  
+			  <!-- Total Per Item -->
+			  <div class="totals-section">
+				<h4>Total Per Item</h4>
+				<ul style="list-style: none;">
+				  {% for item in group["items"] %}
+					<li><strong>{{ item[0] }}:</strong> KES {{ "%.2f" | format(item[1] * item[2]) }}</li>
+				  {% endfor %}
+				</ul>
+			  </div>
+  
+			  <p style="text-align: center; margin-top: 20px; font-weight: bold;">Thank you for doing business with us!</p>
+			</div>
+		  </div>
+		</div>
+		<!-- END PRINT AREA -->
+		 <!-- Just one status input above or below the items table -->
+ 
+  
+		<!-- Visible Buttons (Not Printed) -->
+		<div class="button-group">
+		  <a href="{{ url_for('edit_invoice', id=group.invoice[0])}}">
+			<button>Edit Invoice</button>
+		  </a>
+		  <button class="delete-btn" onclick="deleteInvoice('{{ group.invoice[0]|int }}')">Delete Invoice</button>
+		  <button class="print-button" onclick="window.print()">🖨️ Print Invoice</button>
+		</div>
+  
+		{% endfor %}
+		{% else %}
+		  <div class="invoice-box">
+			<p>No invoices found. <a href="{{ url_for('create_invoice') }}">Create a new invoice</a> to get started.</p>
+		  </div>
+		{% endif %}
+	  </div>
+
+  
+<script>
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("active");
+    document.getElementById("content").classList.toggle("shifted");
+  }
+
+  function deleteInvoice(invoiceId) {
+    if (!confirm('Are you sure you want to delete this invoice?')) {
+      return;
+    }
+
+    console.log('Attempting to delete invoice ID:', invoiceId);
+
+    fetch(`/delete_invoice/${invoiceId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => {
+      console.log('Response status:', response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Response data:', data);
+      if (data.success) {
+        const invoiceBox = document.querySelector(`.invoice-box[data-invoice-id="${invoiceId}"]`);
+        if (invoiceBox) {
+          invoiceBox.remove();
+          alert(data.message);
+        } else {
+          console.error('Invoice box not found in DOM for ID:', invoiceId);
+          alert('Invoice deleted, but UI update failed');
+        }
+      } else {
+        alert(`Error deleting invoice: ${data.message}`);
+      }
+    })
+    .catch(error => {
+      console.error('Fetch error:', error);
+      alert(`Error deleting invoice: ${error.message}`);
+    });
+  }
+
+  window.onload = function () {
+    toggleSidebar();
+  };
+</script>
+
+</body>
+</html>

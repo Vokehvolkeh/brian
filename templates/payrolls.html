@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Animated Dashboard</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: -250px;
+      top: 0;
+      width: 250px;
+      height: 100%;
+      background: #2c2cd8;
+      color: white;
+      padding-top: 60px;
+      transition: left 0.5s ease;
+    }
+	.payslip-container {
+            width: 80%;
+            margin: 30px auto;
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+    table {
+            width: 100%;
+
+            animation: slideTable 3s forwards;
+        }
+        @keyframes slideTable {
+            0% {
+                opacity: 0;
+
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 15px 25px;
+            text-align: left;
+            overflow: hidden;
+            position: relative;
+        }
+        td::before, th::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            transform: scaleX(0);
+            transform-origin: center;
+            animation: slideFromSides 3s ease forwards;
+            z-index: -1;
+        }
+        td::before{
+            animation-delay:  0.1s;
+
+        }
+        @keyframes slideFromSides {
+            0% {
+                transform: scaleX(0);
+            }
+            100% {
+                transform: scaleX(1);
+            }
+        }
+        td, th {
+            z-index: 1;
+        }
+
+        th {
+            background-color: #eee;
+        }
+
+
+    form {
+        margin-top: 40px;
+        display:  grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+        align-items: center;
+    }
+
+    input, select {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    button {
+        grid-column: span 2;
+        padding: 10px;
+        background-color: #008CBA;
+        color: white;
+        border: none;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: white;
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 24px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 15px 30px;
+      color: black;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    .sidebar a:hover {
+      background: white;
+      color: black;
+    }
+
+    .content {
+      margin-left: 0;
+      padding: 20px;
+      transition: margin-left 0.5s;
+    }
+
+    .content.shifted {
+      margin-left: 250px;
+    }
+
+    .topbar {
+      height: 60px;
+      background: #0f3460;
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+    }
+
+    .menu-toggle {
+      cursor: pointer;
+      margin-right: 15px;
+      font-size: 24px;
+    }
+
+    .weekly-summary {
+		background-color: #a7802d;
+		font-weight: bold;
+
+	}
+    .status-paid {
+        color: green;
+        font-weight: bold;
+    }
+    .status-unpaid {
+        color: red;
+        font-weight: bold;
+    }
+
+    .main {
+      margin-top: 20px;
+    }
+
+	.label {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 40px 0 10px 0;
+    color: #0e0e70;
+    text-transform: uppercase;
+	}
+
+	.print-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .print-button:hover {
+            background-color: #2980b9;
+        }
+
+  </style>
+</head>
+<body>
+
+  <div class="sidebar" id="sidebar">
+    <h1>Dashboard</h1>
+        <a href="{{url_for('add_salary')}}">Record Salary</a>
+        <a href="{{url_for('view_salary')}}">View Salary</a>
+        <a href="{{url_for('generate_payslip')}}">Generate Payslip</a>
+        <a href="/dashboard">Dashboard</a>
+  </div>
+
+  
+  <div class="content" id="content">
+    {% if salaries %}
+        <h2 style="text-align: center; color: #0e0e70;">MEMBERS PAYROLLS</h2>  <!-- Move heading outside table -->
+
+        <table border="1" class="weekly-summary">
+            <thead>  <!-- Added missing thead -->
+                <tr>
+                    <th>NUMBER</th>
+                    <th>DATE</th>
+                    <th>ID</th>
+                    <th>SALARY</th>
+                    <th>STATUS</th>
+                    <th>ACTION</th>
+                </tr>
+            </thead>
+            <tbody id="salesBody">
+                {% for sale in salaries %}
+                <tr>
+                    <td>{{ sale[0] }}</td> 
+                    <td>{{ sale[1] }}</td> 
+                    <td>{{ sale[2] }}</td> 
+                    <td>{{ sale[3] }}</td>
+                    <td class="{{ 'status-paid' if sale[4]== 'paid' else 'status-unpaid'}}">{{ sale[4] }}</td>
+                    <td><a href="{{ url_for('edit_salary', id=sale[0]) }}">EDIT</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+	<div class="payslip-container">
+
+    <div style="text-align: center; margin-top: 20px;">
+      <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="Logo" style="width: 250px; height: 250px; border-radius: 50%;">
+    </div>
+    <h2 style="text-align: center;">Employee Payslip</h2>
+
+    <p style="margin-left: 110px;"><strong>Name:</strong> {{ name }}</p>
+    <p  style="margin-left: 110px;"><strong>Employee ID:</strong> {{ member_id }}</p>
+    <p  style="margin-left: 110px;"><strong>Payment Date:</strong> {{ payment_date }}</p>
+    <p  style="margin-left: 110px;"><strong>Bank Name:</strong> {{ bank_name }}</p>
+    
+    <table border="1" style="width: 80%; margin: auto; border-collapse: collapse; text-align: left;">
+      <tr>
+          <th colspan="2" style="background-color: #f2f2f2;">Earnings</th>
+          <th colspan="2" style="background-color: #f2f2f2;">Deductions</th>
+      </tr>
+      <tr>
+          <td>Basic Salary</td>
+          <td>{{ basic_salary }}</td>
+          <td>PAYE</td>
+          <td>{{ paye }}</td>
+      </tr>
+      <tr>
+          <td>Allowance</td>
+          <td>{{ allowance }}</td>
+          <td>NHIF</td>
+          <td>{{ nhif }}</td>
+      </tr>
+      <tr>
+          <td>Overtime</td>
+          <td>{{ overtime }}</td>
+          <td>Advance</td>
+          <td>{{ advance }}</td>
+      </tr>
+      <tr>
+          <td>Commission</td>
+          <td>{{ commission }}</td>
+          <td>Other Deductions</td>
+          <td>{{ others }}</td>
+      </tr>
+      <tr>
+          <td>Bonus</td>
+          <td>{{ bonus }}</td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>Leave Pay</td>
+          <td>{{ leave_pay }}</td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <th>Total Earnings</th>
+          <td>{{ total_earnings }}</td>
+          <th>Total Deductions</th>
+          <td>{{ total_deductions }}</td>
+      </tr>
+  </table>
+  
+  <br>
+  
+  <table border="1" style="width: 50%; margin: auto; border-collapse: collapse; text-align: left;">
+      <tr>
+          <th>Salary Element</th>
+          <th>Amount</th>
+      </tr>
+      <tr>
+          <td>Total Earnings</td>
+          <td>{{ total_earnings }}</td>
+      </tr>
+      <tr>
+          <td>Total Deductions</td>
+          <td>{{ total_deductions }}</td>
+      </tr>
+      <tr>
+          <td><strong>Net Pay</strong></td>
+          <td><strong>{{ net_pay }}</strong></td>
+      </tr>
+  </table>
+  <p style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-weight: bold; margin-left: 100px;">Great things happen when great people come together! Your salary is KES {{ net_pay }} has been processed as we 
+	celebrate another month of progress at BIG-ZA ELITE WORKS keep pushing boundaries and chasing excellense</p>
+	<button class="print-button" onclick="window.print()">Print Payslip</button>
+</div>
+  
+    
+</div>
+
+
+		
+
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("active");
+      document.getElementById("content").classList.toggle("shifted");
+    }
+
+
+    // Optional: Animate sidebar in on page load
+    window.onload = function () {
+      toggleSidebar();
+    };
+  </script>
+</body>
+</html>

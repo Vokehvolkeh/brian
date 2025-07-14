@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Quotation</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    html, body {
+        height: 100%;
+        background-color: #000;
+        color: #fff;
+    }
+
+    .container {
+        display: flex;
+        height: 100vh;
+    }
+
+    .left {
+        flex: 1;
+        background-size: cover;
+    }
+
+    .right {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .form-box {
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 40px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+    }
+
+    .form-box h2 {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .form-box label {
+        display: block;
+        margin-top: 10px;
+    }
+
+    .form-box input {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .form-box button {
+        margin-top: 15px;
+        width: 100%;
+        padding: 12px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .form-box button:hover {
+        background-color: #218838;
+    }
+
+    .item-group {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #444;
+        padding-bottom: 10px;
+    }
+
+    .remove-btn {
+        background-color: #dc3545;
+        margin-top: 5px;
+        width: 100%;
+    }
+
+    .remove-btn:hover {
+        background-color: #c82333;
+    }
+  </style>
+
+  <script>
+    function addItem() {
+      const container = document.getElementById("items-container");
+      const div = document.createElement("div");
+      div.classList.add("item-group");
+      div.innerHTML = `
+        <label>Item Type</label>
+        <input type="text" name="item_type[]" required>
+
+        <label>Quantity</label>
+        <input type="number" name="quantity[]" min="1" value="1" required>
+
+        <label>Selling Price (Ksh)</label>
+        <input type="number" name="price[]" step="0.01" required>
+
+        <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Remove Item</button>
+      `;
+      container.appendChild(div);
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="left"></div>
+    <div class="right">
+        <form class="form-box" method="POST" action="{{ url_for('edit_invoice', id=invoice['id']) }}">
+            <label><strong>Customer Name:</strong></label>
+            <input type="text" name="customer_name" value="{{ invoice['customer_name'] }}" required><br><br>
+        
+            <div style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-weight: bold; background: #eee; padding: 10px; border-radius: 5px;">
+                    <div>Item Type</div>
+                    <div>Quantity</div>
+                    <div>Price</div>
+                </div>
+                {% for item in items %}
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <input type="text" name="item_type[]" value="{{ item['item_type'] }}" required>
+                    <input type="number" name="quantity[]" value="{{ item['item_quantity'] }}" required>
+                    <input type="number" step="0.01" name="price[]" value="{{ item['selling_price'] }}" required>
+                </div>
+                {% endfor %}
+            </div>
+        
+            <!-- Status Dropdown -->
+            <label for="status"><strong>Payment Status:</strong></label>
+            <select name="status" id="status" required>
+                <option value="not paid" {% if invoice['status'] == 'not paid' %}selected{% endif %}>Not Paid</option>
+                <option value="paid" {% if invoice['status'] == 'paid' %}selected{% endif %}>Paid</option>
+            </select><br><br>
+        
+            <button type="submit">Update Invoice</button>
+        </form>
+        
+          
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stylish Invoice Form</title>
+  <link rel="stylesheet">
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    body, html {
+        height: 100%;
+    }
+
+    .container {
+        display: flex;
+        height: 100vh;
+    }
+
+    .left {
+        flex: 1;
+        background: url('/static/images/invoice.jpeg') no-repeat center center;
+        background-size: cover;
+    }
+
+    .right {
+        flex: 1;
+        background-color: #111;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .form-box {
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 40px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+    }
+
+    .form-box h2 {
+        margin-bottom: 20px;
+        color: #fff;
+        text-align: center;
+    }
+
+    .form-box label {
+        display: block;
+        margin: 10px 0 5px;
+    }
+
+    .form-box input {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .form-box button {
+        margin-top: 15px;
+        width: 100%;
+        padding: 12px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .form-box button:hover {
+        background-color: #218838;
+    }
+
+    .item-group {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #444;
+        padding-bottom: 10px;
+    }
+
+    .remove-btn {
+        background-color: #dc3545;
+        margin-top: 5px;
+    }
+
+    .remove-btn:hover {
+        background-color: #c82333;
+    }
+  </style>
+  <script>
+    function addItem() {
+      const container = document.getElementById("items-container");
+      const div = document.createElement("div");
+      div.classList.add("item-group");
+      div.innerHTML = `
+        <label>Item Type</label>
+        <input type="text" name="item_type[]" required>
+
+        <label>Quantity</label>
+        <input type="number" name="item_quantity[]" min="1" value="1" required>
+
+        <label>Selling Price (Ksh)</label>
+        <input type="number" name="selling_price[]" step="0.01" required>
+
+        <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Remove Item</button>
+      `;
+      container.appendChild(div);
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="left"></div>
+    <div class="right">
+      <form class="form-box" method="POST" action="/create_invoice">
+        <h2>Create Invoice</h2>
+
+        <label>Customer Name</label>
+        <input type="text" name="customer_name" required>
+
+        <div id="items-container">
+          <div class="item-group">
+            <label>Item Type</label>
+            <input type="text" name="item_type[]" required>
+
+            <label>Quantity</label>
+            <input type="number" name="item_quantity[]" min="1" value="1" required>
+
+            <label>Selling Price (Ksh)</label>
+            <input type="number" name="selling_price[]" step="0.01" required>
+            <div style="margin-top: 20px;">
+              <label for="status"><strong>Payment Status:</strong></label>
+              <select name="status" id="status" required>
+                  <option value="not paid" {% if invoice['status'] == 'not paid' %}selected{% endif %}>Not Paid</option>
+                  <option value="paid" {% if invoice['status'] == 'paid' %}selected{% endif %}>Paid</option>
+              </select>
+          </div>
+
+          </div>
+        </div>
+
+        <button type="button" onclick="addItem()">+ Add Another Item</button>
+        <button type="submit">Create Invoice</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
+

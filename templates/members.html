@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Members</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: rgb(6, 12, 12);
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .sidebar a {
+            color: white;
+            display: block;
+            margin-bottom: 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+            padding: 10px;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            animation: slideTable 3s forwards;
+        }
+        @keyframes slideTable {
+            0% {
+                opacity: 0;
+
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        th, td {
+            border: 1px solid #444;
+            padding: 15px 25px;
+            text-align: left;
+            overflow: hidden;
+            position: relative;
+        }
+        td::before, th::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            transform: scaleX(0);
+            transform-origin: center;
+            animation: slideFromSides 1s ease forwards;
+            z-index: -1;
+        }
+        td::before{
+            animation-delay:  0.1s;
+
+        }
+        @keyframes slideFromSides {
+            0% {
+                transform: scaleX(0);
+            }
+            100% {
+                transform: scaleX(1);
+            }
+        }
+        td, th {
+            z-index: 1;
+        }
+
+        th {
+            background-color: #eee;
+        }
+        .sales_summary {
+		background-color: #a7802d;
+		font-weight: bold;
+	}
+
+        a.dashboard-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: blue;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <a href="{{url_for('add_member')}}">Add Member</a>
+        <a href="/Search & Filter">Search & Filter</a>
+        <a href="/Sorting">Sort Members</a>
+
+        <a href="">Assign Responsibilities</a>
+    </div>
+
+    <div class="main-content">
+        <table class="sales_summary">
+            <tr>
+                <th>ID</th>
+                <th>NAME</th>
+                <th>PHONE</th>
+                <th>ROLE</th>
+                <th>COMPANY'S ID</th>
+                <th>STATUS</th>
+                <th>RESPONSIBILITIES</th>
+                <th>ACTION</th>
+            </tr>
+            {% for member in members %}
+            <tr>
+                <td>{{ member[0] }}</td>
+                <td>{{ member[1] }}</td>
+                <td>{{ member[2] }}</td>
+                <td>{{ member[3] }}</td>
+                <td>{{ member[4] }}</td>
+                <td>{{ member[5] }}</td>
+                <td>{{ member[6] }}</td>
+                <td>
+                    <a href="{{ url_for('edit_member', id=member[0]) }}">✏️ Edit</a>
+					<a href="{{ url_for('delete_member', id=member[0]) }}" onclick="return confirm('Are you sure you want to delete this sale?')">🗑️ Delete</a>
+
+	
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <a href="/dashboard" class="dashboard-link">Back to Dashboard</a>
+    </div>
+
+</body>
+</html>

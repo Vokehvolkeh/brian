@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Daily Cashflow Entry</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body, html {
+      height: 100%;
+      background-color: #111;
+      color: white;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .left {
+      flex: 1;
+      background: url('/static/images/cashflow.jpeg') no-repeat center center;
+      background-size: cover;
+    }
+
+    .right {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .form-box {
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .form-box h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-box label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+
+    .form-box input, .form-box select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      margin-bottom: 10px;
+      background: #222;
+      color: #fff;
+    }
+
+    .group-section {
+      border-bottom: 1px solid #555;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+    }
+
+    .add-btn, .remove-btn, .submit-btn {
+      padding: 10px;
+      width: 100%;
+      border-radius: 5px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .add-btn {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .add-btn:hover {
+      background-color: #0069d9;
+    }
+
+    .remove-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .remove-btn:hover {
+      background-color: #c82333;
+    }
+
+    .submit-btn {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .submit-btn:hover {
+      background-color: #218838;
+    }
+  </style>
+
+  <script>
+    function addInflow() {
+      const container = document.getElementById('inflow-container');
+      const group = document.createElement('div');
+      group.className = 'group-section';
+      group.innerHTML = `
+        <label>Inflow Category</label>
+        <input type="text" name="inflow_category[]" placeholder="e.g. Sales, Loan" required>
+
+        <label>Inflow Amount (Ksh)</label>
+        <input type="number" name="inflow_amount[]" step="0.01" required>
+
+        <label>Notes</label>
+        <input type="text" name="inflow_note[]" placeholder="Optional">
+
+        <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Remove Inflow</button>
+      `;
+      container.appendChild(group);
+    }
+
+    function addOutflow() {
+      const container = document.getElementById('outflow-container');
+      const group = document.createElement('div');
+      group.className = 'group-section';
+      group.innerHTML = `
+        <label>Outflow Category</label>
+        <input type="text" name="outflow_category[]" placeholder="e.g. Transport, Electricity" required>
+
+        <label>Outflow Amount (Ksh)</label>
+        <input type="number" name="outflow_amount[]" step="0.01" required>
+
+        <label>Notes</label>
+        <input type="text" name="outflow_note[]" placeholder="Optional">
+
+        <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Remove Outflow</button>
+      `;
+      container.appendChild(group);
+    }
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="left"></div>
+
+    <div class="right">
+      <form class="form-box" method="POST" action="/create_cashflow">
+        <h2>Daily Cashflow Entry</h2>
+
+        <label>Date</label>
+        <input type="date" name="cashflow_date" required>
+
+        <h3>Inflows</h3>
+        <div id="inflow-container">
+          <div class="group-section">
+            <label>Inflow Category</label>
+            <input type="text" name="inflow_category[]" placeholder="e.g. Sales" required>
+
+            <label>Inflow Amount (Ksh)</label>
+            <input type="number" name="inflow_amount[]" step="0.01" required>
+
+            <label>Notes</label>
+            <input type="text" name="inflow_note[]" placeholder="Optional">
+          </div>
+        </div>
+        <button type="button" class="add-btn" onclick="addInflow()">+ Add Another Inflow</button>
+
+        <h3>Outflows</h3>
+        <div id="outflow-container">
+          <div class="group-section">
+            <label>Outflow Category</label>
+            <input type="text" name="outflow_category[]" placeholder="e.g. Transport" required>
+
+            <label>Outflow Amount (Ksh)</label>
+            <input type="number" name="outflow_amount[]" step="0.01" required>
+
+            <label>Notes</label>
+            <input type="text" name="outflow_note[]" placeholder="Optional">
+          </div>
+        </div>
+        <button type="button" class="add-btn" onclick="addOutflow()">+ Add Another Outflow</button>
+
+        <button type="submit" class="submit-btn">Submit Cashflow</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

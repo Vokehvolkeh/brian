@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stylish Invoice Form</title>
+  <link rel="stylesheet">
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    body, html {
+        height: 100%;
+    }
+
+    .container {
+        display: flex;
+        height: 100vh;
+    }
+
+    .left {
+        flex: 1;
+        background: url('/static/images/invoice.jpeg') no-repeat center center;
+        background-size: cover;
+    }
+
+    .right {
+        flex: 1;
+        background-color: #111;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .form-box {
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 40px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+    }
+
+    .form-box h2 {
+        margin-bottom: 20px;
+        color: #fff;
+        text-align: center;
+    }
+
+    .form-box label {
+        display: block;
+        margin: 10px 0 5px;
+    }
+
+    .form-box input {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .form-box button {
+        margin-top: 15px;
+        width: 100%;
+        padding: 12px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .form-box button:hover {
+        background-color: #218838;
+    }
+
+    .item-group {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #444;
+        padding-bottom: 10px;
+    }
+
+    .remove-btn {
+        background-color: #dc3545;
+        margin-top: 5px;
+    }
+
+    .remove-btn:hover {
+        background-color: #c82333;
+    }
+  </style>
+
+</head>
+<body>
+  <div class="container">
+    <div class="left"></div>
+    <div class="right">
+      <form class="form-box" method="POST" action="{{form_action}}">
+        <h2>Create Cashflow</h2>
+
+        <label>Start Date</label>
+        <input type="date" name="start_date" required>
+
+        <div id="items-container">
+          <div class="item-group">
+            <label>End Date</label>
+            <input type="date" name="end_date" required>
+
+            <label>Investments</label>
+            <input type="number" name="investments" min="1" value="1" required>
+
+            <label>Financial</label>
+            <input type="number" name="financial" step="0.01"value1 required>
+
+            <label>Notes</label>
+            <input type="text" name="notes" required>
+          </div>
+        </div>
+
+        <button type="submit">Create Cashflow</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
+

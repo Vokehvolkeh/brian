@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Animated Dashboard</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: #f4f4f4;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: -250px;
+      top: 0;
+      width: 250px;
+      height: 100%;
+      background: #2c2cd8;
+      color: white;
+      padding-top: 60px;
+      transition: left 0.5s ease;
+      border-top-right-radius: 15px;
+      border-bottom-right-radius: 15px;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 28px;
+      letter-spacing: 1px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 15px 30px;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .sidebar a:hover {
+      background: white;
+      color: #2c2cd8;
+      border-radius: 8px;
+    }
+
+    .content {
+      margin-left: 0;
+      padding: 20px;
+      transition: margin-left 0.5s;
+    }
+
+    .content.shifted {
+      margin-left: 250px;
+    }
+
+    .topbar {
+      height: 60px;
+      background: #0f3460;
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+    }
+
+    .menu-toggle {
+      cursor: pointer;
+      margin-right: 15px;
+      font-size: 24px;
+    }
+
+    .label {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 40px 0 10px 0;
+      color: #0e0e70;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .table-container {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow-x: auto;
+      max-height: 400px;
+      margin-bottom: 40px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 1000px;
+      animation: slideTable 1s forwards;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    th {
+      background: white;
+      color: black;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #e6f7ff;
+    }
+
+    .action-links a {
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-right: 5px;
+      font-weight: bold;
+    }
+
+    .action-links a:first-child {
+      background-color: #ffc107;
+      color: white;
+    }
+
+    .action-links a:last-child {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    @keyframes slideTable {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .weekly-summary {
+      background-color: #fff8e1;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 30px;
+      overflow-x: auto;
+    }
+
+    .weekly-summary table {
+      min-width: 700px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .weekly-summary th {
+      background-color: #fbc02d;
+      color: #333;
+      padding: 10px;
+    }
+
+    .weekly-summary td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .weekly-summary tr:hover {
+      background-color: #fff3e0;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="sidebar" id="sidebar">
+    <h1>📊 SALES HUB</h1>
+    <a href="/record_sales">➕ New Sale</a>
+    <a href="{{url_for('dashboard_sales')}}">📈 Sales Overview</a>
+    <a href="{{url_for('daily_summary')}}">🗓️ Daily Snapshot</a>
+    <a href="{{url_for('weekly_summary')}}">📅 Weekly Insights</a>
+    <a href="{{url_for('monthly_summary')}}">🗓 Monthly Trends</a>
+    <a href="/sales_summary">📊 Full Summary</a>
+    <a href="/dashboard">🏠 Main Dashboard</a>
+    <a href="/logout">🚪 Log Out</a>
+  </div>
+
+  <div class="content" id="content">
+
+    <h2 class="label">Sales Record</h2>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>SALES ID</th>
+            <th>TYPE</th>
+            <th>QUANTITY</th>
+            <th>SELLING PRICE</th>
+            <th>PAYMENT METHOD</th>
+            <th>BUYING PRICE</th>
+            <th>PROFIT/LOSS</th>
+            <th>DATE</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sale in sales %}
+          <tr>
+            <td>{{ sale[0] }}</td>
+            <td>{{ sale[1] }}</td>
+            <td>{{ sale[2] }}</td>
+            <td>{{ sale[3] }}</td>
+            <td>{{ sale[4] }}</td>
+            <td>{{ sale[5] }}</td>
+            <td style="color: {{ 'green' if sale[6] >= 0 else 'red' }};">
+              {{ "%.2f"|format(sale[6]) }}
+            </td>
+            <td>{{ sale[7] }}</td>
+            <td class="action-links">
+              <a href="{{ url_for('edit_sales', id=sale[0]) }}">Edit</a>
+              <a href="{{ url_for('delete_sales', id=sale[0]) }}" onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="label">Daily Summary</h2>
+    <div class="table-container">
+      <table>
+        <tr>
+          <th>DATE</th>
+          <th>TOTAL SALES</th>
+          <th>PROFIT</th>
+          <th>LOSS</th>
+          <th>ITEMS SOLD</th>
+        </tr>
+        {% for row in summary %}
+        <tr>
+          <td>{{ row[0] }}</td>
+          <td>KSH {{ row[1] }}</td>
+          <td style="color: green;">KSH {{ row[2] }}</td>
+          <td style="color: red;">KSH {{ row[3] }}</td>
+          <td>{{ row[4] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <h2 class="label">Weekly Summary</h2>
+    <div class="table-container">
+      <table>
+        <tr>
+          <th>DATE</th>
+          <th>TOTAL SALES</th>
+          <th>PROFIT</th>
+          <th>LOSS</th>
+          <th>ITEMS SOLD</th>
+        </tr>
+        {% for row in weekly_summary %}
+        <tr>
+          <td>{{ row[0] }}</td>
+          <td>KSH {{ row[1] }}</td>
+          <td style="color: green;">KSH {{ row[2] }}</td>
+          <td style="color: red;">KSH {{ row[3] }}</td>
+          <td>{{ row[4] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <h2 class="label">Monthly Summary</h2>
+    <div class="table-container">
+      <table>
+        <tr>
+          <th>DATE</th>
+          <th>TOTAL SALES</th>
+          <th>PROFIT</th>
+          <th>LOSS</th>
+          <th>ITEMS SOLD</th>
+        </tr>
+        {% for row in monthly_summary %}
+        <tr>
+          <td>{{ row[0] }}</td>
+          <td>KSH {{ row[1] }}</td>
+          <td style="color: green;">KSH {{ row[2] }}</td>
+          <td style="color: red;">KSH {{ row[3] }}</td>
+          <td>{{ row[4] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("active");
+      document.getElementById("content").classList.toggle("shifted");
+    }
+
+    window.onload = function () {
+      toggleSidebar();
+    };
+  </script>
+
+</body>
+</html>
