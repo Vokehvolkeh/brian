@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Create Quotation</title>
+  <title>Create a Joyful Quotation!</title>
   <style>
     * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: 'Segoe UI', sans-serif;
+        font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
     }
 
     html, body {
         height: 100%;
-        background-color: #000;
-        color: #fff;
+        background: linear-gradient(135deg, #ffebcd, #ffe4e1);
+        color: #333;
     }
 
     .container {
@@ -24,6 +24,7 @@
 
     .left {
         flex: 1;
+        background: url('https://source.unsplash.com/random/800x600?happy') no-repeat center center;
         background-size: cover;
     }
 
@@ -35,62 +36,81 @@
     }
 
     .form-box {
-        background-color: rgba(0, 0, 0, 0.7);
+        background-color: rgba(255, 255, 255, 0.9);
         padding: 40px;
-        border-radius: 10px;
+        border-radius: 15px;
         width: 90%;
         max-width: 500px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
 
     .form-box h2 {
         margin-bottom: 20px;
         text-align: center;
+        color: #ff4500;
+        font-size: 2em;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
     }
 
     .form-box label {
         display: block;
         margin-top: 10px;
+        color: #ff69b4;
+        font-weight: bold;
     }
 
     .form-box input {
         width: 100%;
         padding: 10px;
-        border: none;
-        border-radius: 5px;
+        border: 2px solid #ffd700;
+        border-radius: 8px;
         margin-bottom: 10px;
+        background-color: #f0fff0;
     }
 
     .form-box button {
         margin-top: 15px;
         width: 100%;
         padding: 12px;
-        background-color: #28a745;
+        background: linear-gradient(to right, #32cd32, #00ff7f);
         color: white;
         border: none;
-        border-radius: 5px;
+        border-radius: 8px;
         font-weight: bold;
         cursor: pointer;
-        transition: background 0.3s;
+        transition: transform 0.2s, background 0.3s;
     }
 
     .form-box button:hover {
-        background-color: #218838;
+        background: linear-gradient(to right, #228b22, #00ff7f);
+        transform: scale(1.05);
     }
 
     .item-group {
         margin-bottom: 15px;
-        border-bottom: 1px solid #444;
+        border-bottom: 2px dashed #ff69b4;
         padding-bottom: 10px;
     }
 
     .remove-btn {
-        background-color: #dc3545;
+        background: linear-gradient(to right, #ff6347, #ff4500);
         margin-top: 5px;
         width: 100%;
+        border-radius: 8px;
     }
 
     .remove-btn:hover {
-        background-color: #c82333;
+        background: linear-gradient(to right, #dc143c, #ff4500);
+        transform: scale(1.05);
+    }
+
+    select {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ffd700;
+        border-radius: 8px;
+        background-color: #f0fff0;
+        color: #333;
     }
   </style>
 
@@ -100,16 +120,16 @@
       const div = document.createElement("div");
       div.classList.add("item-group");
       div.innerHTML = `
-        <label>Item Type</label>
+        <label>🌟 Item Type</label>
         <input type="text" name="item_type[]" required>
 
-        <label>Quantity</label>
+        <label>📦 Quantity</label>
         <input type="number" name="quantity[]" min="1" value="1" required>
 
-        <label>Selling Price (Ksh)</label>
+        <label>💰 Selling Price (Ksh)</label>
         <input type="number" name="price[]" step="0.01" required>
 
-        <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Remove Item</button>
+        <button type="button" class="remove-btn" onclick="this.parentElement.remove()">🗑️ Remove Item</button>
       `;
       container.appendChild(div);
     }
@@ -120,14 +140,15 @@
     <div class="left"></div>
     <div class="right">
         <form class="form-box" method="POST" action="{{ url_for('edit_invoice', id=invoice['id']) }}">
-            <label><strong>Customer Name:</strong></label>
+            <h2>✨ Edit Invoice ✨</h2>
+            <label><strong>😊 Customer Name:</strong></label>
             <input type="text" name="customer_name" value="{{ invoice['customer_name'] }}" required><br><br>
         
             <div style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-weight: bold; background: #eee; padding: 10px; border-radius: 5px;">
-                    <div>Item Type</div>
-                    <div>Quantity</div>
-                    <div>Price</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-weight: bold; background: #fffacd; padding: 10px; border-radius: 8px;">
+                    <div style="color: #ff4500;">🌟 Item Type</div>
+                    <div style="color: #ff4500;">📦 Quantity</div>
+                    <div style="color: #ff4500;">💰 Price</div>
                 </div>
                 {% for item in items %}
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
@@ -138,16 +159,15 @@
                 {% endfor %}
             </div>
         
-            <!-- Status Dropdown -->
-            <label for="status"><strong>Payment Status:</strong></label>
+            <label for="status"><strong>🎉 Payment Status:</strong></label>
             <select name="status" id="status" required>
                 <option value="not paid" {% if invoice['status'] == 'not paid' %}selected{% endif %}>Not Paid</option>
                 <option value="paid" {% if invoice['status'] == 'paid' %}selected{% endif %}>Paid</option>
             </select><br><br>
         
-            <button type="submit">Update Invoice</button>
+            <button type="submit">🚀 Update Invoice</button>
         </form>
-        
-          
+    </div>
+  </div>
 </body>
 </html>

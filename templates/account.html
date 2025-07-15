@@ -244,7 +244,8 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Date</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>Salaries</th>
             <th>Cost of Goods</th>
             <th>Utilities</th>
@@ -274,7 +275,8 @@
             <td>{{ expense[11] }}</td>
             <td>{{ expense[12] }}</td>
             <td>{{ expense[13] }}</td>
-            <td><span class="tag-danger">{{ expense[14] }}</span></td>
+            <td>{{ expense[14] }}</td>
+            <td style="font-weight: bold;"><span>{{ expense[15] }}</span></td>
             <td>
               <a href="{{ url_for('edit_expense', id=expense[0]) }}">✏️ Edit</a> |
               <a href="{{ url_for('delete_expense', id=expense[0]) }}">🗑️ Delete</a>

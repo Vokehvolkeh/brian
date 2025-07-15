@@ -269,6 +269,24 @@
         .info {
             color: #333;
         }
+        .chart-container {
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        margin-top: 30px;
+        width: 100%;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .chart-container canvas {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 500px;
+    }
+
     </style>
 </head>
 <body>
@@ -284,118 +302,91 @@
         <a href="{{ url_for('inventory') }}">📦 Stock & Inventory</a>
         <a href="{{ url_for('view_products') }}">🛒 View Products</a>
         <a href="{{ url_for('view_contracts') }}">📂 View All Contracts</a>
+        <a href="{{ url_for('meetings') }}">📝 Set up an Event/Reminder</a>
         <a href="{{ url_for('change_password') }}">Change Password</a>
         <a href="/logout">🚪 Sign Out</a>
     </div>
 
-    <!-- Logo -->
-    <div style="text-align: center;">
-        <img src="{{ url_for('static', filename='images/final.jpeg') }}" alt="Logo" class="logo">
+<!-- Logo -->
+<div style="text-align: center;">
+    <img src="{{ url_for('static', filename='images/final.jpeg') }}" alt="Logo" class="logo">
+</div>
+
+
+
+<!-- Main Content -->
+<div class="content" id="content">
+    <div class="topbar"></div>
+    <div class="tile" style="
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 6px solid #28a745;
+    text-align: center;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    font-size: 16px;
+">
+    <h4 style="font-size: 18px;">👋 Welcome back!</h4>
+    <p>Hope you’re having a productive day. Let’s make some sales 💰!</p>
+</div>
+
+
+    <!-- Flex Container for Left and Right Sections -->
+    <div class="main" style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; padding: 20px;">
+
+        <!-- LEFT SIDE -->
+<!-- LEFT SIDE -->
+<div style="flex: 1; min-width: 320px; max-width: 600px;">
+    <!-- Clock -->
+    <div class="clock-container" style="text-align: center; margin-bottom: 20px;">
+        <div id="clock" style="font-size: 2em;">00:00:00</div>
+        <div>Nairobi, EAT</div>
     </div>
 
-    <!-- Main Content -->
-    <div class="content" id="content">
-        <div class="topbar"></div>
+    <!-- Calendar Container ONLY -->
+    <div class="calendar-container" style="background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div class="calendar-header" id="calendar-header" style="font-weight: bold; font-size: 1.2em; margin-bottom: 10px;">July 2025</div>
+        <div class="calendar" id="calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;"></div>
+    </div>
 
-        <div class="main" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start;">
-            <!-- LEFT SIDE -->
-            <div style="flex: 1; min-width: 320px; max-width: 600px;">
-                <!-- Clock -->
-                <div class="clock-container">
-                    <div id="clock">00:00:00</div>
-                    <div>Nairobi, EAT</div>
-                </div>
+    <!-- Meetings Table OUTSIDE the calendar box -->
+<!-- Meetings List Style -->
+            <h3 style="color: white;">📝 Upcoming Events & Reminders</h3>
+            {% if meetings %}
+                <ul style="list-style: none; padding-left: 0;">
+                    {% for title, date, time in meetings %}
+                        <li style="margin-bottom: 10px; padding: 10px; background: #f4f4f4; border-radius: 8px;">
+                            <strong>{{ title }}</strong> — {{ date }} at {{ time }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p><em>No meetings scheduled</em></p>
+            {% endif %}
 
-                <!-- Calendar -->
-                <div class="calendar-container">
-                    <div class="calendar-header" id="calendar-header">July 2025</div>
-                    <div class="calendar" id="calendar"></div>
-                </div>
 
-                <!-- Meetings -->
-                <div class="meetings-container">
-                    <h2>Meetings (July 2025)</h2>
-                    <table id="meetings-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Meeting</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="meetings-body"></tbody>
-                    </table>
-                </div>
+    </div>
+
+
+
+            
+            
+
+            <!-- Sales Tiles -->
+            <div id="sales-summary" style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px;"></div>
+
+            <!-- Chart -->
+            <div class="chart-container">
+                <h2 style="color: #2c2cd8; text-align: center; margin-bottom: 10px;">📈 Sales Performance - Last 7 Days</h2>
+                <canvas id="salesChart"></canvas>
             </div>
-
-            <!-- RIGHT SIDE -->
-            <div style="flex: 1; min-width: 320px; max-width: 600px;">
-                <!-- Invoice Reminders -->
-                <div class="tile invoice">
-                    <h3>🧾 Invoice Reminders</h3>
-                    {% if unpaid_invoices %}
-                        <ul>
-                        {% for inv in unpaid_invoices %}
-                            <li>
-                                {{ inv.customer_name }} – 
-                                <strong class="{% if inv.status == 'Unpaid' %}danger{% else %}info{% endif %}">
-                                    {{ inv.status }}
-                                </strong> –
-                                <em>{{ inv.date }}</em>
-                            </li>
-                        {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="success">✅ All invoices are paid.</p>
-                    {% endif %}
-                </div>
-
-                <!-- Low Stock Alerts -->
-                <div class="tile low-stock">
-                    <h3>📦 Low Stock</h3>
-                    {% if low_stock_items %}
-                        <ul>
-                        {% for item in low_stock_items %}
-                            <li>
-                                <strong>ID {{ item[0] }}</strong>: {{ item[1] }} –
-                                <span style="color: red; font-weight: bold;">{{ item[2] }}</span> left
-                            </li>
-                        {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="success">🟢 All stock levels are healthy.</p>
-                    {% endif %}
-                </div>
-
-                <!-- Contracts -->
-                <div class="tile contracts">
-                    <h3>📁 Contract Snapshots</h3>
-                    {% if contracts %}
-                        {% for contract in contracts %}
-                            <div style="margin-bottom: 10px;">
-                                <strong>{{ contract.title }}</strong><br>
-                                <small>{{ contract.client_name }}</small><br>
-                                <span>Status: {{ contract.status }}</span><br>
-                                <a href="/view_contract/{{ contract.id }}">View</a>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p>No contracts yet.</p>
-                    {% endif %}
-                </div>
-
-                <!-- Sales Tiles -->
-                <div id="sales-summary" style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px;"></div>
-
-                <!-- Chart -->
-                <div style="margin-top: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                    <h2 style="color: #2c2cd8;">Sales Performance - Last 7 Days</h2>
-                    <canvas id="salesChart"></canvas>
-                </div>
-            </div>
+            
         </div>
-    </div>
+
+    </div> <!-- End .main -->
+</div> <!-- End .content -->
+
 
     <script>
         // Sidebar Toggle
@@ -425,103 +416,62 @@
         updateClock();
 
         // Calendar
-        const meetings = {};
+    // Live Clock
+    function updateClock() {
+        const now = new Date();
+        const options = {
+            timeZone: 'Africa/Nairobi',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        };
+        const time = now.toLocaleTimeString('en-US', options);
+        document.getElementById('clock').textContent = time;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-        function generateCalendar() {
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = today.getMonth();
-            const currentDate = today.getDate();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const firstDay = new Date(year, month, 1).getDay();
+    // Static Calendar (Visual Only)
+    function generateCalendar() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const currentDate = today.getDate();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDay = new Date(year, month, 1).getDay();
 
-            const calendar = document.getElementById('calendar');
-            const header = document.getElementById('calendar-header');
-            const monthName = today.toLocaleString('default', { month: 'long' });
-            header.textContent = `${monthName} ${year}`;
+        const calendar = document.getElementById('calendar');
+        const header = document.getElementById('calendar-header');
+        const monthName = today.toLocaleString('default', { month: 'long' });
+        header.textContent = `${monthName} ${year}`;
 
-            calendar.innerHTML = '';
+        calendar.innerHTML = '';
 
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            days.forEach(day => {
-                const header = document.createElement('div');
-                header.className = 'header';
-                header.textContent = day;
-                calendar.appendChild(header);
-            });
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        days.forEach(day => {
+            const header = document.createElement('div');
+            header.className = 'header';
+            header.textContent = day;
+            calendar.appendChild(header);
+        });
 
-            for (let i = 0; i < firstDay; i++) {
-                const empty = document.createElement('div');
-                empty.className = 'empty';
-                calendar.appendChild(empty);
-            }
-
-            for (let i = 1; i <= daysInMonth; i++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                const day = document.createElement('div');
-                day.className = 'day';
-                if (i === currentDate) day.classList.add('today');
-                if (meetings[dateStr]) day.style.backgroundColor = '#ffd966';
-
-                day.textContent = i;
-                day.addEventListener('click', () => {
-                    const current = meetings[dateStr];
-                    const newDesc = prompt(current
-                        ? `Edit or clear meeting for ${dateStr}\nCurrent: "${current.description} at ${current.time}"`
-                        : `Add a meeting for ${dateStr}:\nFormat: Title | Time`
-                    );
-
-                    if (newDesc === null) return;
-
-                    const trimmed = newDesc.trim();
-                    if (trimmed === '') {
-                        delete meetings[dateStr];
-                    } else {
-                        const [desc, time] = trimmed.split('|').map(s => s.trim());
-                        if (desc && time) {
-                            meetings[dateStr] = { description: desc, time };
-                        } else {
-                            alert("Invalid format. Use: Title | Time");
-                        }
-                    }
-
-                    generateCalendar();
-                    updateMeetingsTable();
-                });
-
-                calendar.appendChild(day);
-            }
+        for (let i = 0; i < firstDay; i++) {
+            const empty = document.createElement('div');
+            empty.className = 'empty';
+            calendar.appendChild(empty);
         }
 
-        function updateMeetingsTable() {
-            const tbody = document.getElementById('meetings-body');
-            tbody.innerHTML = '';
-
-            const today = new Date();
-            const entries = Object.entries(meetings).sort((a, b) => new Date(a[0]) - new Date(b[0]));
-
-            if (entries.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4"><em>No meetings scheduled</em></td></tr>';
-                return;
-            }
-
-            for (const [date, { time, description }] of entries) {
-                const meetingDate = new Date(date);
-                const isPast = meetingDate < today;
-                const row = document.createElement('tr');
-                row.className = isPast ? 'past' : 'upcoming';
-                row.innerHTML = `
-                    <td>${date}</td>
-                    <td>${time}</td>
-                    <td>${description}</td>
-                    <td>${isPast ? 'Past' : 'Upcoming'}</td>
-                `;
-                tbody.appendChild(row);
-            }
+        for (let i = 1; i <= daysInMonth; i++) {
+            const day = document.createElement('div');
+            day.className = 'day';
+            if (i === currentDate) day.classList.add('today');
+            day.textContent = i;
+            calendar.appendChild(day);
         }
+    }
 
-        generateCalendar();
-        updateMeetingsTable();
+    generateCalendar();
 
         // Sales Data
         fetch("/sales_data")

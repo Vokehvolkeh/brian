@@ -1,74 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Add Member</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌈 Record Your Expenses! 🌈</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            padding: 40px;
-            background-color: #f5f5f5;
+            background: linear-gradient(135deg, #ffebcd, #ffe4e1);
+            padding: 20px;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         h2 {
-            color: #333;
+            color: #ff4500;
+            text-align: center;
+            font-size: 1.8em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         form {
-            background: white;
+            background: rgba(255, 255, 255, 0.9);
             padding: 20px;
-            border-radius: 6px;
+            border-radius: 15px;
+            width: 100%;
             max-width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
         }
 
-        input, button {
+        label {
+            color: #ff69b4;
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        input {
             width: 100%;
             padding: 10px;
-            margin-top: 10px;
-            font-size: 16px;
+            margin: 5px 0 10px;
+            font-size: 1em;
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            background-color: #f0fff0;
+            color: #333;
         }
 
         button {
-            background-color: #007bff;
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: linear-gradient(to right, #32cd32, #00ff7f);
             color: white;
             border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
         }
 
         button:hover {
-            background-color: #0056b3;
+            background: linear-gradient(to right, #228b22, #00ff7f);
+            transform: scale(1.05);
         }
 
         .error {
-            color: red;
+            color: #ff4500;
+            font-size: 0.9em;
+            text-align: center;
+            margin-bottom: 15px;
         }
 
         .success {
-            color: green;
+            color: #32cd32;
+            font-size: 0.9em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #ff69b4;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #ff4500;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            form {
+                padding: 15px;
+            }
+
+            input, button {
+                font-size: 0.9em;
+                padding: 8px;
+            }
+
+            a {
+                font-size: 0.9em;
+            }
         }
     </style>
 </head>
 <body>
-    <h2>Record Expense</h2>
+    <h2>✨ Record Your Expenses! ✨</h2>
 
     {% if message %}
-    <p style="color:red;">{{ message }}</p>
+    <p class="error">🚨 {{ message }}</p>
     {% endif %}
     
-    <form method="POST" action="{{form_action}}">
-        <input type="number" name="electricity" value="{{ expense[4] if expense else '' }}">
-        Water: <input type="number" name="water" value="{{ expense[5] if expense else ''}}"><br><br>
-        Internet : <input type="number" name="internet" value="{{ expense[6] if expense else ''}}"><br><br>
-        Rent: <input type="number" name="rent" value="{{ expense[7] if expense else ''}}"><br><br>
-        Supplies: <input type="number" name="supplies" value="{{ expense[8] if expense else ''}}"><br><br>
-        Ads: <input type="number" name="ads" value="{{ expense[9] if expense else ''}}"><br><br>
-        Insuarance : <input type="number" name="insuarance" value="{{ expense[10] if expense else ''}}"><br><br>
-        Maintanance: <input type="number" name="maintanance" value="{{ expense[11] if expense else ''}}"><br><br>
-        Transport : <input type="number" name="transport" value="{{ expense[12] if expense else ''}}"><br><br>
-        Taxes : <input type="number" name="taxes" value="{{ expense[13] if expense else ''}}"><br><br>
+    <form method="POST" action="{{ form_action }}">
+        <label for="start_date">Start Date:</label>
+        <input type="date" name="start_date" required>
 
-        <button type="submit">Record Expense</button>
+        <label for="end_date">End Date:</label>
+        <input type="date" name="end_date" required>
+
+        <label for="electricity">⚡️ Electricity</label>
+        <input type="number" name="electricity" id="electricity" value="{{ expense[4] if expense else '' }}" >
+
+        <label for="water">💧 Water</label>
+        <input type="number" name="water" id="water" value="{{ expense[5] if expense else '' }}" >
+
+        <label for="internet">🌐 Internet</label>
+        <input type="number" name="internet" id="internet" value="{{ expense[6] if expense else '' }}" >
+
+        <label for="rent">🏠 Rent</label>
+        <input type="number" name="rent" id="rent" value="{{ expense[7] if expense else '' }}" >
+
+        <label for="supplies">📦 Supplies</label>
+        <input type="number" name="supplies" id="supplies" value="{{ expense[8] if expense else '' }}" >
+
+        <label for="ads">📢 Ads</label>
+        <input type="number" name="ads" id="ads" value="{{ expense[9] if expense else '' }}">
+
+        <label for="insuarance">🛡️ Insurance</label>
+        <input type="number" name="insuarance" id="insuarance" value="{{ expense[10] if expense else '' }}" >
+
+        <label for="maintanance">🔧 Maintenance</label>
+        <input type="number" name="maintanance" id="maintanance" value="{{ expense[11] if expense else '' }}" >
+
+        <label for="transport">🚗 Transport</label>
+        <input type="number" name="transport" id="transport" value="{{ expense[12] if expense else '' }}" >
+
+        <label for="taxes">📊 Taxes</label>
+        <input type="number" name="taxes" id="taxes" value="{{ expense[13] if expense else '' }}" >
+
+        <button type="submit">🚀 Record Expense</button>
     </form>
 
-    <br>
     <a href="/accounting">← Back to Dashboard</a>
 </body>
 </html>

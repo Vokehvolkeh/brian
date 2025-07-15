@@ -5,13 +5,92 @@ from werkzeug.utils import secure_filename
 import traceback
 from flask import jsonify
 from datetime import datetime, timedelta
+from werkzeug.security import generate_password_hash, check_password_hash
+import secrets
 
 
 app = Flask(__name__)
 app.secret_key = 'supersecret'
 
 # DB INIT
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
 
+        # Fetch user from database
+        conn = sqlite3.connect('furniture.db')
+        c = conn.cursor()
+        c.execute("SELECT password FROM users WHERE username = ?", (username,))
+        result = c.fetchone()
+        conn.close()
+
+        if result and check_password_hash(result[0], password):
+            session['user'] = username
+            return redirect(url_for('dashboard'))
+        else:
+            flash("❌ Invalid credentials", "danger")
+            return redirect(url_for('login'))
+
+    return render_template('login.html')
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        secret_pin = request.form['pin']
+        if secret_pin == 'anita123':
+            session['allow_reset'] = True
+            return redirect(url_for('reset_password'))
+        else:
+            flash("❌ Invalid reset PIN", "danger")
+            return redirect(url_for('forgot_password'))
+
+    return render_template('forgot_password.html')
+
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    if not session.get('allow_reset'):
+        flash("⛔ Unauthorized access", "danger")
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        username = request.form['username']
+        current_pass = request.form['current_password']
+        new_pass = request.form['new_password']
+        confirm_pass = request.form['confirm_password']
+
+        # Check if new and confirm match
+        if new_pass != confirm_pass:
+            flash("❌ New passwords do not match", "danger")
+            return redirect(url_for('reset_password'))
+
+        conn = sqlite3.connect('furniture.db')
+        c = conn.cursor()
+        c.execute("SELECT password FROM users WHERE username = ?", (username,))
+        row = c.fetchone()
+
+        if not row:
+            flash("❌ User not found", "danger")
+            return redirect(url_for('reset_password'))
+
+        stored_hash = row[0]
+        if not check_password_hash(stored_hash, current_pass):
+            flash("❌ Incorrect current password", "danger")
+            return redirect(url_for('reset_password'))
+
+        # Save new password
+        new_hash = generate_password_hash(new_pass)
+        c.execute("UPDATE users SET password = ? WHERE username = ?", (new_hash, username))
+        conn.commit()
+        conn.close()
+
+        session.pop('allow_reset', None)
+        flash(f"✅ Password successfully updated for {username}", "success")
+        return redirect(url_for('login'))
+
+    return render_template('reset.html')
 
 
 #add damaged info
@@ -211,30 +290,7 @@ def index():
 from flask import Flask, request, redirect, url_for, render_template, session, flash
 from werkzeug.security import check_password_hash
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
 
-        # Fetch user from database
-        conn = sqlite3.connect('furniture.db')
-        c = conn.cursor()
-        c.execute("SELECT password FROM users WHERE username = ?", (username,))
-        result = c.fetchone()
-        conn.close()
-
-        if result and check_password_hash(result[0], password):
-            session['user'] = username
-            return redirect(url_for('dashboard'))
-        else:
-            flash("Invalid credentials")
-            return redirect(url_for('login'))
-
-    return render_template('login.html')
-
-from werkzeug.security import generate_password_hash
-import sqlite3
 
 def create_default_user():
     conn = sqlite3.connect('furniture.db')
@@ -254,7 +310,6 @@ def create_default_user():
 
 
 
-from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route('/change-password', methods=['GET', 'POST'])
 def change_password():
@@ -302,55 +357,14 @@ def get_db_connection():
     cursor = conn.cursor()
     return conn
 
-@app.route('/create_expense', methods=['GET', 'POST'])
-def create_expense():
-    conn = sqlite3.connect('furniture.db')
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    if request.method == 'POST':
-        date = datetime.today().strftime('%Y-%m-%d')
-        electricity = float(request.form['electricity'] or 0)
-        water = float(request.form['water'] or 0)
-        internet = float(request.form['internet'] or 0)
-        rent = float(request.form['rent'] or 0)
-        supplies = float(request.form['supplies'] or 0)
-        ads = float(request.form['ads'] or 0)
-        insuarance = float(request.form['insuarance'] or 0) 
-        maintanance = float(request.form['maintanance'] or 0)
-        transport = float(request.form['transport'] or 0)
-        taxes = float(request.form['taxes'] or 0)
-        c.execute('''SELECT 
-                (SELECT SUM(salary) FROM salaries) AS salary,
-                (SELECT SUM(buying_price * quantity) FROM sales) AS cost_of_goods''')
-        data = c.fetchone()
-        salary, cost_of_goods = data[0] or 0, data[1] or 0
-        if data:
-            total_expenses = electricity + water+ internet + rent+ supplies + ads + insuarance + maintanance + transport + taxes
-            c.execute('''INSERT INTO expenses (date, salaries, cost_of_good, electricity, water, internet, rent, supplies, ads, insuarance, maintanance, transport, taxes, total_expenses) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ''', (date, salary, cost_of_goods, electricity, water, internet, rent, supplies, ads, insuarance, maintanance, transport, taxes, total_expenses))
-        conn.commit()
-        conn.close()
-
-        flash('Expense recorded successfully!', 'success')
-        return redirect(url_for('view_expense'))
-
-    return render_template('record_expense.html')  
-@app.route('/view_expenses')
-def view_expense():
-    conn = sqlite3.connect('furniture.db')
-    c = conn.cursor()
-    c.execute('SELECT * FROM expenses')
-    expenses = c.fetchall()
-    c.close()
-    return render_template('account.html', expenses=expenses)
-
 @app.route('/edit_expense/<int:id>', methods=['POST', 'GET'])
 def edit_expense(id):
     conn = sqlite3.connect('furniture.db')
     c = conn.cursor()
 
     if request.method == 'POST':
-        date = datetime.today().strftime('%Y-%m-%d')
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
         electricity = float(request.form['electricity'])
         water = float(request.form['water'])
         internet = float(request.form['internet'])
@@ -374,12 +388,12 @@ def edit_expense(id):
 
         total_expenses = electricity + water + internet + rent + supplies + ads + insurance + maintenance + transport + taxes
 
-        # ✅ Update the existing expense row
+        # ✅ Update expense with start/end date
         c.execute('''
             UPDATE expenses
-            SET date = ?, salaries = ?, cost_of_good = ?, electricity = ?, water = ?, internet = ?, rent = ?, supplies = ?, ads = ?, insuarance = ?, maintanance = ?, transport = ?, taxes = ?, total_expenses = ?
+            SET start_date = ?, end_date = ?, salaries = ?, cost_of_good = ?, electricity = ?, water = ?, internet = ?, rent = ?, supplies = ?, ads = ?, insuarance = ?, maintanance = ?, transport = ?, taxes = ?, total_expenses = ?
             WHERE id = ?
-        ''', (date, salary, cost_of_goods, electricity, water, internet, rent, supplies, ads, insurance, maintenance, transport, taxes, total_expenses, id))
+        ''', (start_date, end_date, salary, cost_of_goods, electricity, water, internet, rent, supplies, ads, insurance, maintenance, transport, taxes, total_expenses, id))
 
         conn.commit()
         conn.close()
@@ -387,12 +401,66 @@ def edit_expense(id):
         flash('✅ Expense updated successfully!', 'success')
         return redirect(url_for('view_expense'))
 
-    # 👉 GET request: fetch existing expense to prefill the form
+    # 👉 GET request: fetch existing expense
     c.execute('SELECT * FROM expenses WHERE id = ?', (id,))
     expense = c.fetchone()
     conn.close()
 
     return render_template('record_expense.html', expense=expense)
+
+
+@app.route('/view_expenses')
+def view_expense():
+    conn = sqlite3.connect('furniture.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM expenses')
+    expenses = c.fetchall()
+    c.close()
+    return render_template('account.html', expenses=expenses)
+
+@app.route('/create_expense', methods=['GET', 'POST'])
+def create_expense():
+    conn = sqlite3.connect('furniture.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    if request.method == 'POST':
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        electricity = float(request.form['electricity'] or 0)
+        water = float(request.form['water'] or 0)
+        internet = float(request.form['internet'] or 0)
+        rent = float(request.form['rent'] or 0)
+        supplies = float(request.form['supplies'] or 0)
+        ads = float(request.form['ads'] or 0)
+        insuarance = float(request.form['insuarance'] or 0) 
+        maintanance = float(request.form['maintanance'] or 0)
+        transport = float(request.form['transport'] or 0)
+        taxes = float(request.form['taxes'] or 0)
+
+        # Salaries & cost of goods
+        c.execute('''SELECT 
+                (SELECT SUM(salary) FROM salaries) AS salary,
+                (SELECT SUM(buying_price * quantity) FROM sales) AS cost_of_goods''')
+        data = c.fetchone()
+        salary = data[0] or 0
+        cost_of_goods = data[1] or 0
+
+        total_expenses = electricity + water + internet + rent + supplies + ads + insuarance + maintanance + transport + taxes
+
+        c.execute('''
+            INSERT INTO expenses (
+                start_date, end_date, salaries, cost_of_good, electricity, water, internet, rent, supplies, ads, insuarance, maintanance, transport, taxes, total_expenses
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (start_date, end_date, salary, cost_of_goods, electricity, water, internet, rent, supplies, ads, insuarance, maintanance, transport, taxes, total_expenses))
+
+        conn.commit()
+        conn.close()
+
+        flash('✅ Expense recorded successfully!', 'success')
+        return redirect(url_for('view_expense'))
+
+    return render_template('record_expense.html')
 
 @app.route('/delete_expense/<int:id>')
 def delete_expense(id):
@@ -585,7 +653,7 @@ def cashflow_statements():
         c.execute('SELECT SUM(buying_price * quantity) FROM sales WHERE date BETWEEN ? AND ?', (start_date, end_date))
         outflow = c.fetchone()[0] or 0
 
-        c.execute('SELECT SUM(total_expenses) FROM expenses WHERE date BETWEEN ? AND ?', (start_date, end_date))
+        c.execute('SELECT SUM(total_expenses) FROM expenses WHERE start_date >= ? AND end_date <= ?', (start_date, end_date))
         expenses = c.fetchone()[0] or 0
 
         total_outflow = outflow + expenses + investments + financial
@@ -633,8 +701,7 @@ def edit_cashflow(id):
 
         cursor.execute('SELECT SUM(buying_price * quantity) FROM sales WHERE date BETWEEN ? AND ?', (new_start_date, new_end_date))
         outflow = cursor.fetchone()[0] or 0
-
-        cursor.execute('SELECT SUM(total_expenses) FROM expenses WHERE date BETWEEN ? AND ?', (new_start_date, new_end_date))
+        cursor.execute('SELECT SUM(total_expenses) FROM expenses WHERE start_date >= ? AND end_date <= ?', (new_start_date, new_end_date))
         expenses = cursor.fetchone()[0] or 0
 
         total_outflow = outflow + expenses + new_investments + new_financial
@@ -657,8 +724,24 @@ def edit_cashflow(id):
     cursor.execute('SELECT * FROM cashflow WHERE id = ?', (id,))
     report = cursor.fetchone()
     conn.close()
+    if report:
+        cashflow = {
+            'id': report[0],
+            'start_date': report[1],
+            'end_date': report[2],
+            'inflow': report[3],
+            'outflow': report[4],
+            'expenses': report[5],
+            'investments': report[6],
+            'financial': report[7],
+            'total_outflow': report[8],
+            'net_cashflow': report[9],
+            'notes': report[10]
+        }
+    else:
+        cashflow = {}
 
-    return render_template('cashflow.html', report=report)
+    return render_template('cashflow.html', cashflow=cashflow, form_action=url_for('edit_cashflow', id=id))
 
 @app.route('/delete_cashflow/<int:id>')
 def delete_cashflow(id):
@@ -1214,6 +1297,42 @@ def delete_invoice(id):
         print(traceback.format_exc())
         return jsonify({'success': False, 'message': 'An unexpected error occurred'}), 500
     
+# Show meetings dashboard (GET) and handle meeting creation (POST)
+@app.route('/meetings', methods=['GET', 'POST'])
+def meetings():
+    conn = sqlite3.connect('furniture.db')
+    c = conn.cursor()
+
+    if request.method == 'POST':
+        title = request.form['title']
+        date = request.form['date']
+        time = request.form['time']
+        c.execute("INSERT INTO meetings (title, date, time) VALUES (?, ?, ?)", (title, date, time))
+        conn.commit()
+        flash("✅ Meeting added successfully", "success")
+        conn.close()
+        return redirect(url_for('view_meetings'))  # Redirect to dashboard after saving
+
+    # fallback GET — just in case
+    c.execute("SELECT * FROM meetings ORDER BY date, time")
+    all_meetings = c.fetchall()
+    conn.close()
+
+    return render_template('meetings.html', meetings=all_meetings)
+@app.route('/dashboard')
+def view_meetings():
+    if 'user' not in session:
+        flash("❌ Please log in", "danger")
+        return redirect(url_for('login'))
+
+    conn = sqlite3.connect('furniture.db')
+    c = conn.cursor()
+    c.execute("SELECT title, date, time FROM meetings ORDER BY date ASC")
+    rows = c.fetchall()
+    conn.close()
+
+    return render_template('dashboard.html', meetings=rows)
+
 
 
 
@@ -1289,7 +1408,8 @@ def init_db():
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+        pin_hash TEXT
     )
 ''')
     c.execute('''CREATE TABLE IF NOT EXISTS quotations (
@@ -1339,7 +1459,8 @@ def init_db():
     ''')
     c.execute('''CREATE TABLE IF NOT EXISTS expenses (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT,
+            start_date TEXT,
+            end_date TEXT,
             salaries REAL,
             cost_of_good REAL,
             electricity REAL,
@@ -1550,41 +1671,71 @@ def delete_contract(id):
         return "Contract not found", 404
 
 
-    
+from flask import session
+
 @app.route('/dashboard')
 def dashboard():
     conn = sqlite3.connect("furniture.db")
-    conn.row_factory = sqlite3.Row  # 👈 MUST come before cursor
+    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
-    # Unpaid invoice data
-    cur.execute("SELECT DISTINCT invoice_id FROM invoice_items WHERE status = 'not paid'")
-    unpaid_invoice_ids = [row[0] for row in cur.fetchall()]
-    unpaid_count = len(unpaid_invoice_ids)
+    # Unpaid Invoices
+    cur.execute("""
+        SELECT invoices.id, invoices.customer_name, invoices.total_price, invoices.date
+        FROM invoices
+        JOIN invoice_items ON invoices.id = invoice_items.invoice_id
+        WHERE invoice_items.status = 'not paid'
+        GROUP BY invoices.id
+        LIMIT 3
+    """)
+    unpaid_invoices = [{
+        'id': row['id'],
+        'customer_name': row['customer_name'],
+        'total_price': row['total_price'],
+        'date': row['date'].split(' ')[0],
+        'status': 'Unpaid'
+    } for row in cur.fetchall()]
 
-    unpaid_invoices = []
-    for invoice_id in unpaid_invoice_ids[:3]:
-        cur.execute("SELECT id, customer_name, total_price, date FROM invoices WHERE id = ?", (invoice_id,))
-        row = cur.fetchone()
-        if row:
-            unpaid_invoices.append({
-                'id': row['id'],
-                'customer_name': row['customer_name'],
-                'total_price': row['total_price'],
-                'date': row['date'],
-                'status': 'Unpaid'
-            })
+    # Contracts
+    cur.execute("SELECT id, title, client_name, status FROM contracts ORDER BY date_assigned DESC LIMIT 3")
+    contract_snaps = [{
+        "id": row["id"],
+        "title": row["title"],
+        "client_name": row["client_name"],
+        "status": row["status"]
+    } for row in cur.fetchall()]
 
-    # Low stock items (fix here)
-    cur.execute("SELECT id, item_name, quantity FROM stock_info WHERE quantity <= 5 ORDER BY quantity ASC")
-    low_stock_items = cur.fetchall()
+    # Meetings
+    cur.execute("""
+        SELECT title, date, time
+        FROM meetings
+        ORDER BY date ASC, time ASC
+        LIMIT 5
+    """)
+    meetings = cur.fetchall()
+
+    # Top & Least Sellers
+    cur.execute('''
+        SELECT type, SUM(quantity) as total_quantity
+        FROM sales
+        GROUP BY type
+        ORDER BY total_quantity DESC
+    ''')
+    sales_data = cur.fetchall()
+
+    top_sellers = sales_data[:2]
+    least_sellers = sales_data[-2:] if len(sales_data) >= 2 else []
 
     conn.close()
 
-    return render_template('dashboard.html',
-        unpaid_count=unpaid_count,
+    return render_template(
+        'dashboard.html',
+        username=session.get('username', 'Guest'),  # 🧠 Fetch username from session or fallback
         unpaid_invoices=unpaid_invoices,
-        low_stock_items=low_stock_items  # ✅ now this works
+        contract_snaps=contract_snaps,
+        meetings=meetings,
+        top_sellers=top_sellers,
+        least_sellers=least_sellers
     )
 
 

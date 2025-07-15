@@ -2,97 +2,128 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Stylish Invoice Form</title>
-  <link rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌟 Create a Happy Invoice! 🌟</title>
   <style>
     * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: 'Segoe UI', sans-serif;
+        font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
     }
 
     body, html {
         height: 100%;
+        background: linear-gradient(135deg, #ffebcd, #ffe4e1);
+        color: #333;
     }
 
     .container {
         display: flex;
-        height: 100vh;
+        flex-direction: column;
+        min-height: 100vh;
     }
 
     .left {
-        flex: 1;
-        background: url('/static/images/invoice.jpeg') no-repeat center center;
-        background-size: cover;
+        flex: 0;
+        display: none; /* Removed background image section for simplicity */
     }
 
     .right {
         flex: 1;
-        background-color: #111;
-        color: white;
         display: flex;
         justify-content: center;
         align-items: center;
+        padding: 20px;
     }
 
     .form-box {
-        background-color: rgba(0, 0, 0, 0.7);
-        padding: 40px;
-        border-radius: 10px;
-        width: 90%;
-        max-width: 500px;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 15px;
+        width: 100%;
+        max-width: 600px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
 
     .form-box h2 {
         margin-bottom: 20px;
-        color: #fff;
         text-align: center;
+        color: #ff4500;
+        font-size: 1.8em;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
     }
 
     .form-box label {
         display: block;
         margin: 10px 0 5px;
+        color: #ff69b4;
+        font-weight: bold;
     }
 
-    .form-box input {
+    .form-box input, .form-box select {
         width: 100%;
         padding: 10px;
-        border: none;
-        border-radius: 5px;
+        border: 2px solid #ffd700;
+        border-radius: 8px;
         margin-bottom: 10px;
+        background-color: #f0fff0;
+        color: #333;
     }
 
     .form-box button {
         margin-top: 15px;
         width: 100%;
         padding: 12px;
-        background-color: #28a745;
+        background: linear-gradient(to right, #32cd32, #00ff7f);
         color: white;
         border: none;
-        border-radius: 5px;
+        border-radius: 8px;
         font-weight: bold;
         cursor: pointer;
-        transition: background 0.3s;
+        transition: transform 0.2s, background 0.3s;
     }
 
     .form-box button:hover {
-        background-color: #218838;
+        background: linear-gradient(to right, #228b22, #00ff7f);
+        transform: scale(1.05);
     }
 
     .item-group {
         margin-bottom: 15px;
-        border-bottom: 1px solid #444;
+        border-bottom: 2px dashed #ff69b4;
         padding-bottom: 10px;
     }
 
     .remove-btn {
-        background-color: #dc3545;
+        background: linear-gradient(to right, #ff6347, #ff4500);
         margin-top: 5px;
+        border-radius: 8px;
     }
 
     .remove-btn:hover {
-        background-color: #c82333;
+        background: linear-gradient(to right, #dc143c, #ff4500);
+        transform: scale(1.05);
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 600px) {
+        .form-box {
+            padding: 15px;
+        }
+
+        .form-box h2 {
+            font-size: 1.5em;
+        }
+
+        .form-box input, .form-box select {
+            font-size: 0.9em;
+        }
+
+        .form-box button {
+            font-size: 0.9em;
+            padding: 10px;
+        }
     }
   </style>
   <script>
@@ -101,16 +132,16 @@
       const div = document.createElement("div");
       div.classList.add("item-group");
       div.innerHTML = `
-        <label>Item Type</label>
+        <label>🌟 Item Type</label>
         <input type="text" name="item_type[]" required>
 
-        <label>Quantity</label>
+        <label>📦 Quantity</label>
         <input type="number" name="item_quantity[]" min="1" value="1" required>
 
-        <label>Selling Price (Ksh)</label>
+        <label>💰 Selling Price (Ksh)</label>
         <input type="number" name="selling_price[]" step="0.01" required>
 
-        <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Remove Item</button>
+        <button type="button" class="remove-btn" onclick="this.parentElement.remove()">🗑️ Remove Item</button>
       `;
       container.appendChild(div);
     }
@@ -121,37 +152,34 @@
     <div class="left"></div>
     <div class="right">
       <form class="form-box" method="POST" action="/create_invoice">
-        <h2>Create Invoice</h2>
+        <h2>✨Create Your Awesome Invoice! ✨</h2>
 
-        <label>Customer Name</label>
+        <label>😊 Customer Name</label>
         <input type="text" name="customer_name" required>
 
         <div id="items-container">
           <div class="item-group">
-            <label>Item Type</label>
+            <label>🌟 Item Type</label>
             <input type="text" name="item_type[]" required>
 
-            <label>Quantity</label>
+            <label>📦 Quantity</label>
             <input type="number" name="item_quantity[]" min="1" value="1" required>
 
-            <label>Selling Price (Ksh)</label>
+            <label>💰 Selling Price (Ksh)</label>
             <input type="number" name="selling_price[]" step="0.01" required>
-            <div style="margin-top: 20px;">
-              <label for="status"><strong>Payment Status:</strong></label>
-              <select name="status" id="status" required>
-                  <option value="not paid" {% if invoice['status'] == 'not paid' %}selected{% endif %}>Not Paid</option>
-                  <option value="paid" {% if invoice['status'] == 'paid' %}selected{% endif %}>Paid</option>
-              </select>
-          </div>
 
+            <label for="status">🎉 Payment Status</label>
+            <select name="status" id="status" required>
+                <option value="not paid" {% if invoice['status'] == 'not paid' %}selected{% endif %}>Not Paid</option>
+                <option value="paid" {% if invoice['status'] == 'paid' %}selected{% endif %}>Paid</option>
+            </select>
           </div>
         </div>
 
-        <button type="button" onclick="addItem()">+ Add Another Item</button>
-        <button type="submit">Create Invoice</button>
+        <button type="button" onclick="addItem()">➕ Add Another Item</button>
+        <button type="submit">🚀 Create Invoice</button>
       </form>
     </div>
   </div>
 </body>
 </html>
-
