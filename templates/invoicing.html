@@ -277,6 +277,13 @@
       cursor: not-allowed;
     }
   </style>
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('hidden');
+      sidebar.classList.toggle('visible');
+    }
+  </script>
 </head>
 <body>
   <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
@@ -285,7 +292,7 @@
     <h2>INVOICE AND QUOTATION</h2>
     <a href="#">INVOICE AND QUOTATION</a>
     <a href="{{ url_for('create_invoice') }}">Add Invoice</a>
-    <a href="{{url_for('all_invoices')}}">View Invoice</a>
+    <a href="{{ url_for('all_invoices') }}">View Invoice</a>
     <a href="/dashboard">Dashboard</a>
     <a href="/logout">Logout</a>
   </div>
