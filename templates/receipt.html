@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invoice and Quotation Dashboard</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+      }
+
+      /* Sidebar Styles */
+
+      /* Content Styles */
+      .content {
+        margin-left: 250px;
+        padding: 20px;
+        transition: margin-left 0.3s ease;
+      }
+      
+
+      /* Menu Toggle Button */
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+
+        .sidebar.visible {
+          transform: translateX(0);
+        }
+
+        .content {
+          margin-left: 0;
+        }
+
+        .menu-toggle {
+          display: block;
+        }
+
+        .invoice-container {
+          width: 100%;
+          padding: 20px;
+        }
+
+        .sales_summary {
+          min-width: 100%;
+        }
+      }
+
+      .topbar {
+        height: 60px;
+        background: #0f3460;
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      .main-content {
+        margin-top: 30px;
+      }
+
+      .invoice-box {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .invoice-box h3 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .invoice-box .button-group {
+        margin-bottom: 15px;
+      }
+
+      .invoice-box .button-group button {
+        margin-right: 10px;
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+
+      .invoice-box .button-group .delete-btn {
+        background-color: red;
+        color: white;
+        border: none;
+        border-radius: 5px;
+      }
+
+      .invoice-box p {
+        color: #333;
+        font-size: 16px;
+        text-align: center;
+      }
+
+      .invoice-container {
+        width: 794px;
+        min-height: 1123px;
+        margin: 20px auto;
+        padding: 40px;
+        background: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+        border-radius: 8px;
+      }
+
+      .print-button {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .print-button:hover {
+        background-color: #2980b9;
+      }
+
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+
+        .print-area,
+        .print-area * {
+          visibility: visible;
+        }
+
+        .print-area {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
+
+        .print-button,
+        .button-group,
+        .pagination {
+          display: none !important;
+        }
+      }
+
+      .totals-section {
+        margin-top: 25px;
+        text-align: right;
+        font-size: 16px;
+      }
+
+      .totals-section h4 {
+        margin-bottom: 10px;
+        color: #2c2cd8;
+      }
+
+      .totals-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .totals-section li {
+        margin-bottom: 5px;
+      }
+
+      .sales_summary {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 16px;
+        table-layout: auto;
+      }
+
+      .sales_summary th,
+      .sales_summary td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+        overflow-wrap: break-word;
+      }
+
+      .sales_summary th {
+        background-color: #f2f2f2;
+        color: #333;
+      }
+
+      /* Pagination Styles */
+    </style>
+  </head>
+  <body>
+    <div class="content" id="content">
+      <div class="topbar">
+        <h1>BIG-ZA ELITE WORKS RECEIPT</h1>
+      </div>
+
+      <div class="invoice-container">
+        <!-- BEGIN PRINT AREA -->
+        <div class="print-area">
+          <div class="invoice-box" >
+            <!-- Header -->
+            <div
+              style="
+                background: linear-gradient(to right, #004e92, #000428);
+                padding: 30px 20px;
+                color: white;
+                border-top-left-radius: 10px;
+                border-top-right-radius: 10px;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+
+              </div>
+            </div>
+
+            <!-- Logo -->
+            <div style="text-align: center; margin-top: -70px">
+              <img
+                src="{{ url_for('static', filename='images/final.jpeg') }}"
+                alt="Logo"
+                style="
+                  width: 100px;
+                  height: 100px;
+                  border-radius: 50%;
+                  border: 5px solid white;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                  background-color: white;
+                "
+              />
+            </div>
+            <h2 style="text-align: center; margin-top: 50px;">BIG-ZA ELITE WORKS RECEIPT</h2>
+            <div style="display: flex; justify-content: space-between; margin-top: 50px;">
+                <!-- Left Column -->
+                <div>
+                  <p style="margin: 0;">123 Main Street</p>
+                  <p style="margin: 0;">Hamilton OH 44416</p>
+                  <p style="margin: 0;">Email: bigzaeliteworks@gmail.com</p>
+                </div>
+              {% for s in sale %}
+                <!-- Right Column -->
+                <div style="text-align: right;">
+                  <p style="margin: 0;">Date: {{ date }}</p>
+                  <p style="margin: 0;">Receipt No: {{ receipt_no }}</p>
+                  <p style="margin: 0;">Customer No: {{ customer_no }}</p>
+                </div>
+              </div>
+              
+            <table border="2" cellspacing="4" cellpadding="8" style="border-collapse: collapse; width: 60%; margin-top: 20px;">
+                <tbody>
+                  <tr>
+                    <th style="text-align: left; width: 40%;">SALESPERSON</th>
+                    <td style="width: 60%; background-color: #f9f9f9;">&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <th style="text-align: left;">CREDIT CARD ID</th>
+                    <td style="background-color: #f9f9f9;">&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <th style="text-align: left;">CHECK NO</th>
+                    <td style="background-color: #f9f9f9;">&nbsp;</td>
+                  </tr>
+                </tbody>
+              </table>
+<!-- MAIN 5-COLUMN TABLE -->
+<!-- MAIN TABLE WITH EMBEDDED SUMMARY -->
+            <table border="1" cellspacing="0" cellpadding="6" style="width: 100%; border-collapse: collapse; 
+           margin-top: 20px; margin-bottom: 20px;">
+                <thead>
+                <tr>
+                    <th>Item No</th>
+                    <th>Description</th>
+                    <th>Qty</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for s in sale %}
+                <tr>
+                    <td>{{ s['sale_id'] }}</td>
+                    <td>{{ s['item_name'] }}</td>
+                    <td>{{ s['quantity'] }}</td>
+                    <td>{{ s['selling_price'] }}</td>
+                    <td>{{ s['quantity'] * s['selling_price'] }}</td>
+                </tr>
+                {% endfor %}
+
+                <!-- Add more rows as needed -->
+            
+                <!-- SUMMARY ROW (spans last 3 columns) -->
+                <tr>
+                    <td colspan="2" style="border: none;"></td>
+                    <td colspan="3" style="padding: 0;">
+                    <table border="1" cellspacing="0" cellpadding="6" style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <th style="text-align: left; width: 50%;">Subtotal</th>
+                            <td>{{ subtotal }}</td>
+                            </tr>
+                            <tr>
+                            <th style="text-align: left;">Tax (16%)</th>
+                            <td>{{ tax }}</td>
+                            </tr>
+                            <tr>
+                            <th style="text-align: left;">Grand Total</th>
+                            <td>{{ grand_total }}</td>
+                            </tr>
+
+                    </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <p style="text-align: right; margin-top: 40px;">Payment Method: {{ sale[0]['payment'] }}</p>
+            <p style="text-align: right;">Date: {{ sale[0]['date'] }}</p>
+
+            <p style="text-align: right;"> Amount Paid: ______________</p>
+            <p style="text-align: right;">Date: ______________</p>
+            <p style="text-align: left;">For questions concerning the recipt please contact  ______________. Email Address: </p>
+            {% endfor %}
+  
+              
+
+            </div>
+
+          </div>
+        </div>
+        <!-- END PRINT AREA -->
+
+        <!-- Visible Buttons (Not Printed) -->
+
+          <button class="print-button" onclick="window.print()">
+            🖨️ Print Receipt
+          </button>
+        </div>
+       
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Staff Members</title>
+    <style>
+      :root {
+        --primary-color: #1e40af; /* Softer primary blue */
+        --secondary-color: #f8fafc; /* Light gray background */
+        --accent-color: #3b82f6; /* Vibrant blue for actions */
+        --text-color: #080a0e; /* Dark gray for text */
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --card-bg: #ffffff;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        display: flex;
+        min-height: 100vh;
+        background-color: var(--secondary-color);
+        color: var(--text-color);
+        line-height: 1.6;
+      }
+
+      .sidebar {
+        width: 260px;
+        background: linear-gradient(
+          180deg,
+          var(--primary-color) 0%,
+          #1e3a8a 100%
+        );
+        color: white;
+        padding: 32px 16px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        box-shadow: var(--shadow-md);
+      }
+
+      .sidebar a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: white;
+        text-decoration: none;
+        padding: 12px 16px;
+        margin: 8px 0;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+
+      .sidebar a:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        transform: translateX(5px);
+      }
+
+      .main-content {
+        flex-grow: 1;
+        padding: 40px;
+        max-width: 1440px;
+        margin: 0 auto;
+      }
+
+      h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 32px;
+        text-align: center;
+        color: var(--text-color);
+      }
+
+      .card-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+      }
+
+      .staff-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: var(--shadow-md);
+        padding: 24px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        animation: fadeIn 0.5s ease forwards;
+        color: var(--text-color);
+        background: linear-gradient(145deg, #ffffff, #f1f5f9);
+      }
+
+      .staff-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .profile-photo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin: 0 auto 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--primary-color);
+        overflow: hidden;
+        border: 2px solid var(--accent-color);
+      }
+
+      .profile-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .staff-info p {
+        margin: 8px 0;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        text-align: center;
+      }
+
+      .staff-info p strong {
+        color: var(--text-color);
+        font-weight: 600;
+      }
+
+      .actions {
+        margin-top: 16px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .actions a {
+        text-decoration: none;
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+      }
+
+      .actions a:first-child {
+        background-color: var(--accent-color);
+        color: white;
+      }
+
+      .actions a:last-child {
+        background-color: var(--danger-color);
+        color: white;
+      }
+
+      .actions a:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .empty-state {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 24px;
+        opacity: 0.5;
+        margin-bottom: 32px;
+      }
+
+      .empty-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 24px;
+        height: 300px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .dashboard-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--accent-color);
+        text-decoration: none;
+        font-weight: 500;
+        margin-top: 32px;
+        transition: color 0.3s ease;
+        font-size: 0.95rem;
+      }
+
+      .dashboard-link:hover {
+        color: #2563eb;
+      }
+
+      .attendance-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: var(--card-bg);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        margin-top: 40px;
+      }
+
+      .attendance-table th,
+      .attendance-table td {
+        padding: 16px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .attendance-table th {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: bold;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .attendance-table td {
+        font-size: 0.95rem;
+        color: var(--text-color);
+      }
+
+      .attendance-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .attendance-table select {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        background-color: #f9fafb;
+        width: 120px;
+        font-size: 0.9rem;
+      }
+
+      .attendance-table select:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      .attendance-table tr:hover {
+        background-color: #f1f5f9;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+      }
+
+      .modal.active {
+        display: flex;
+        opacity: 1;
+      }
+
+      .modal-content {
+        background: var(--card-bg);
+        padding: 32px;
+        border-radius: 16px;
+        width: 600px;
+        max-width: 95%;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        position: relative;
+        animation: slideIn 0.3s ease-out;
+        max-height: 85vh;
+        overflow-y: auto;
+        background: linear-gradient(145deg, #ffffff, #f1f5f9);
+      }
+
+      .modal-content h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 24px;
+        text-align: center;
+      }
+
+      .modal-content ul {
+        list-style: none;
+        margin-bottom: 24px;
+      }
+
+      .modal-content ul li {
+        padding: 12px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .modal-content ul li:last-child {
+        border-bottom: none;
+      }
+
+      .modal-content input[type="checkbox"] {
+        accent-color: var(--accent-color);
+        width: 18px;
+        height: 18px;
+      }
+
+      .modal-content input[type="time"] {
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        width: 100%;
+        font-size: 0.95rem;
+        margin-top: 8px;
+      }
+
+      .modal-content input[type="time"]:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #6b7280;
+        cursor: pointer;
+        transition: color 0.3s ease;
+      }
+
+      .close-btn:hover {
+        color: var(--text-color);
+      }
+
+      .modal-action-btn {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 16px;
+      }
+
+      .modal-action-btn:hover {
+        background-color: #2563eb;
+        transform: translateY(-2px);
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateY(-30px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .blur-background {
+        filter: blur(6px);
+        transition: filter 0.3s ease;
+      }
+
+      .task-block {
+        border: 1px solid #e5e7eb;
+        padding: 24px;
+        margin-bottom: 32px;
+        border-radius: 12px;
+        background: var(--card-bg);
+        color: var(--text-color);
+        box-shadow: var(--shadow-sm);
+        background: linear-gradient(145deg, #ffffff, #f1f5f9);
+      }
+
+      .meta-info {
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+      }
+
+      .task-block table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+        border: 1px solid #e5e7eb;
+      }
+
+      .task-block th,
+      .task-block td {
+        padding: 12px;
+        text-align: left;
+        border: 1px solid #e5e7eb;
+      }
+
+      .task-block th {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 600;
+      }
+
+      .action-menu {
+        position: relative;
+        display: inline-block;
+      }
+
+      .menu-trigger {
+        font-size: 1.5rem;
+        cursor: pointer;
+        user-select: none;
+        color: var(--text-color);
+        padding: 8px;
+        border-radius: 6px;
+        transition: background-color 0.3s ease;
+      }
+
+      .menu-trigger:hover {
+        background-color: #e5e7eb;
+      }
+
+      .menu-options {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background-color: var(--card-bg);
+        border: 1px solid #e5e7eb;
+        box-shadow: var(--shadow-md);
+        z-index: 1000;
+        min-width: 160px;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .menu-options.active {
+        display: block;
+      }
+
+      .menu-options a {
+        display: block;
+        padding: 12px 16px;
+        text-decoration: none;
+        color: var(--text-color);
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease;
+      }
+
+      .menu-options a:hover {
+        background-color: #f1f5f9;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        body {
+          flex-direction: column;
+        }
+        .sidebar {
+          width: 100%;
+          height: auto;
+          position: static;
+          padding: 16px;
+        }
+        .main-content {
+          padding: 16px;
+        }
+        .card-container {
+          grid-template-columns: 1fr;
+        }
+        .modal-content {
+          width: 90%;
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <a href="{{url_for('add_member')}}">Add Staff</a>
+      <a href="{{url_for('view_members')}}">View Staff</a>
+
+      <a href="{{url_for('attendance_view')}}">Attendance View</a>
+      <a href="{{url_for('assign_tasks')}}"
+        >Assign Responsibilities and Tasks</a
+      >
+      <a href="{{url_for('view_tasks')}}">View Assigned Tasks</a>
+      <a href="{{url_for('view_employee_details')}}">View Employee Details</a>
+      <a href="/dashboard" class="dashboard-link">← Back to Dashboard</a>
+    </div>
+
+    <div class="main-content" id="main-content">
+      <h2>Staff Members</h2>
+
+      {% if members %}
+      <div class="card-container">
+        {% for member in members %}
+        <div class="staff-card">
+          <div class="profile-photo">
+            {% if member[7] %}
+            <img
+              src="{{ url_for('static', filename='uploads/' + member[7]) }}"
+              alt="Profile Photo"
+            />
+            {% else %}
+            <span style="font-size: 2rem">👤</span>
+            {% endif %}
+          </div>
+          <div class="staff-info">
+            <p><strong>Name:</strong> {{ member[1] }}</p>
+            <p><strong>Phone:</strong> {{ member[2] }}</p>
+            <p><strong>Role:</strong> {{ member[3] }}</p>
+            <p><strong>ID:</strong> {{ member[4] }}</p>
+            <p><strong>Status:</strong> {{ member[5] }}</p>
+            <p><strong>Email:</strong>{{ member[6] }}</p>
+            <div class="actions">
+              <a href="{{ url_for('edit_member', id=member[0]) }}">✏️ Edit</a>
+              <a
+                href="{{ url_for('delete_member', id=member[0]) }}"
+                onclick="return confirm('Are you sure you want to delete this member?')"
+                >🗑️ Delete</a
+              >
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-card"></div>
+        <div class="empty-card"></div>
+        <div class="empty-card"></div>
+      </div>
+      <p style="text-align: center">No staff members registered yet.</p>
+      {% endif %}
+
+      <h2>📋 Assigned Tasks Overview</h2>
+
+      {% if grouped_tasks %} {% for (name, company_id), tasks in
+      grouped_tasks.items() %} {% set first = tasks[0] %}
+      <div class="task-block">
+        <div style="display: flex; flex-wrap: wrap; gap: 24px">
+          <!-- Left -->
+          <div style="flex: 1; min-width: 280px">
+            <h3>🧾 Assigned Info</h3>
+            <p><strong>Name:</strong> {{ name }}</p>
+            <p><strong>Company ID:</strong> {{ company_id }}</p>
+            <p><strong>Date Assigned:</strong> {{ first[5] }}</p>
+            <p><strong>Description:</strong> {{ first[8] }}</p>
+          </div>
+
+          <!-- Right -->
+          <div style="flex: 1; min-width: 280px">
+            <h3>✅ Check Status</h3>
+            <p>
+              <strong>Date Checked:</strong> {{ first[6] if first[6] else "❌
+              Not yet checked" }}
+            </p>
+            <p>
+              <strong>Remarks:</strong> {{ first[7] if first[7] else "❌ No
+              remarks yet" }}
+            </p>
+            <div class="action-menu">
+              <div class="menu-trigger">⋮</div>
+              <div class="menu-options">
+                <a href="{{ url_for('edit_task', id=first[0]) }}">✏️ Edit</a>
+                <a
+                  href="{{ url_for('delete_task', id=first[0]) }}"
+                  onclick="return confirm('Delete this task?')"
+                  >🗑️ Delete</a
+                >
+                <a href="#">✔️ Mark as Checked</a>
+              </div>
+            </div>
+            <p>
+              <a
+                href="{{ url_for('check_tasks', id=first[0]) }}"
+                style="color: var(--accent-color); text-decoration: none"
+              >
+                📝 Check Task
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <table>
+          <tr>
+            <th>Responsibility</th>
+            <th>Task</th>
+          </tr>
+          {% for task in tasks %}
+          <tr>
+            <td>{{ task[3] }}</td>
+            <td>{{ task[4] }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% endfor %} {% else %}
+      <p style="text-align: center">
+        Click
+        <a href="{{ url_for('view_tasks') }}" style="color: var(--accent-color)"
+          >View Tasks</a
+        >
+        to see Assigned Tasks.
+      </p>
+      {% endif %}
+
+      <h4>Attendance for {{ today }}</h4>
+
+      <table class="attendance-table">
+        <thead>
+          <tr>
+            <th>Staff ID</th>
+            <th>Name</th>
+            <th>Check In</th>
+            <th>Check Out</th>
+            <th>Worked Hours</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in today_attendance %}
+          <tr>
+            <td>{{ row.staff_id }}</td>
+            <td>{{ row.member }}</td>
+            <td id="checkin-{{ row.staff_id }}">
+              {{ row.check_in_time or '—' }}
+            </td>
+            <td id="checkout-{{ row.staff_id }}">
+              {{ row.check_out_time or '—' }}
+            </td>
+            <td id="hours-{{ row.staff_id }}">{{ row.worked_hours or '—' }}</td>
+            <td id="status-{{ row.staff_id }}">{{ row.status or '—' }}</td>
+
+            <td>
+              <!-- 3 dots dropdown -->
+              <div class="dropdown">
+                <button
+                  class="btn btn-light dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                >
+                  ⋮
+                </button>
+                <ul class="dropdown-menu">
+                  {% if row.check_in_time == '—' %}
+                  <li>
+                    <button
+                      type="button"
+                      class="dropdown-item checkin-btn"
+                      data-id="{{ row.staff_id }}"
+                    >
+                      ✅ Check In
+                    </button>
+                  </li>
+                  {% endif %} {% if row.check_out_time == '—' %}
+                  <li>
+                    <button
+                      type="button"
+                      class="dropdown-item checkout-btn"
+                      data-id="{{ row.staff_id }}"
+                    >
+                      🔚 Check Out
+                    </button>
+                  </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="checkInModal">
+      <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()">✕</button>
+        <h3>Select Members to Check In</h3>
+        <form id="checkInForm" action="{{ url_for('check_in') }}" method="POST">
+          <ul id="memberList">
+            {% for member in members %}
+            <li>
+              <label>
+                <input
+                  type="checkbox"
+                  name="staff_ids"
+                  value="{{ member[4] }}"
+                  data-name="{{ member[1] }}"
+                />
+                {{ member[1] }} (ID: {{ member[4] }})
+              </label>
+            </li>
+            {% endfor %}
+          </ul>
+          <div>
+            <label for="time_in">Check-In Time</label>
+            <input
+              type="time"
+              name="time_in"
+              id="time_in"
+              value="{{ current_time }}"
+              required
+            />
+          </div>
+          <button type="submit" class="modal-action-btn">
+            Check In Selected
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      function showModal() {
+        const modal = document.getElementById("checkInModal");
+        const mainContent = document.getElementById("main-content");
+        modal.classList.add("active");
+        mainContent.classList.add("blur-background");
+      }
+
+      function closeModal() {
+        const modal = document.getElementById("checkInModal");
+        const mainContent = document.getElementById("main-content");
+        modal.classList.remove("active");
+        mainContent.classList.remove("blur-background");
+      }
+
+      document
+        .getElementById("markCheckInBtn")
+        .addEventListener("click", (e) => {
+          e.preventDefault();
+          showModal();
+        });
+
+      document.getElementById("checkInForm").addEventListener("submit", (e) => {
+        closeModal();
+      });
+
+      // Toggle menu visibility
+      document.addEventListener("click", function (e) {
+        const menus = document.querySelectorAll(".menu-options");
+        menus.forEach((menu) => menu.classList.remove("active"));
+
+        if (e.target.classList.contains("menu-trigger")) {
+          const menu = e.target.nextElementSibling;
+          menu.classList.toggle("active");
+          e.stopPropagation();
+        }
+      });
+
+      // Close menus when clicking outside
+      document.addEventListener("click", function (e) {
+        if (!e.target.closest(".action-menu")) {
+          document.querySelectorAll(".menu-options").forEach((menu) => {
+            menu.classList.remove("active");
+          });
+        }
+      });
+      document.querySelectorAll(".checkin-btn").forEach((button) => {
+        button.addEventListener("click", function () {
+          const staffId = this.dataset.id;
+          const timeCell = document.getElementById(`checkin-time-${staffId}`);
+          const btn = this;
+
+          btn.disabled = true;
+          btn.textContent = "⏳ Checking...";
+
+          fetch("/check_in", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({ id: staffId }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.status === "success") {
+                timeCell.textContent = data.time_in;
+                btn.textContent = "✔️ Checked In";
+                btn.style.backgroundColor = "#28a745";
+              } else {
+                timeCell.textContent = "❌ Error";
+                btn.disabled = false;
+                btn.textContent = "Retry Check In";
+              }
+            })
+            .catch((error) => {
+              console.error(error);
+              timeCell.textContent = "❌ Failed";
+              btn.disabled = false;
+              btn.textContent = "Retry";
+            });
+        });
+      });
+      document.querySelectorAll(".checkin-btn").forEach((button) => {
+        button.addEventListener("click", function () {
+          const staffId = this.dataset.id;
+          const timeCell = document.getElementById(`checkin-${staffId}`);
+          const btn = this;
+
+          btn.disabled = true;
+          btn.textContent = "⏳ Checking...";
+
+          fetch("/check_in", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({ id: staffId }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.status === "success") {
+                timeCell.textContent = data.time_in;
+                btn.textContent = "✔️ Checked In";
+                btn.disabled = true;
+              } else {
+                timeCell.textContent = "❌ Error";
+                btn.textContent = "Retry Check In";
+                btn.disabled = false;
+              }
+            })
+            .catch((error) => {
+              console.error(error);
+              timeCell.textContent = "❌ Failed";
+              btn.textContent = "Retry";
+              btn.disabled = false;
+            });
+        });
+      });
+      document.querySelectorAll(".checkout-btn").forEach((button) => {
+        button.addEventListener("click", function () {
+          const staffId = this.dataset.id;
+          const outCell = document.getElementById(`checkout-${staffId}`);
+          const hoursCell = document.getElementById(`hours-${staffId}`);
+          const statusCell = document.getElementById(`status-${staffId}`);
+          const btn = this;
+
+          btn.disabled = true;
+          btn.textContent = "⏳ Checking Out...";
+
+          fetch("/check_out", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({ id: staffId }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.status === "success") {
+                outCell.textContent = data.check_out_time;
+                hoursCell.textContent = data.worked_hours;
+                statusCell.textContent = data.status_text;
+                btn.textContent = "✔️ Checked Out";
+                btn.disabled = true;
+              } else {
+                outCell.textContent = "❌ Error";
+                btn.textContent = "Retry Check Out";
+                btn.disabled = false;
+              }
+            })
+            .catch((error) => {
+              console.error(error);
+              outCell.textContent = "❌ Failed";
+              btn.textContent = "Retry";
+              btn.disabled = false;
+            });
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animated Dashboard</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Poppins", Arial, sans-serif;
+        background: #f4f4f4;
+      }
+
+      /* Sidebar Styles */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 250px;
+        height: 100%;
+        background: #2c2cd8;
+        color: white;
+        padding-top: 60px;
+        transition: transform 0.3s ease;
+        border-top-right-radius: 15px;
+        border-bottom-right-radius: 15px;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+
+      .sidebar.hidden {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.visible {
+        transform: translateX(0);
+      }
+
+      .sidebar h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 28px;
+        letter-spacing: 1px;
+      }
+
+      .sidebar a {
+        display: block;
+        padding: 15px 30px;
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background 0.3s, color 0.3s;
+      }
+
+      .sidebar a:hover {
+        background: white;
+        color: #2c2cd8;
+        border-radius: 8px;
+      }
+
+      /* Content Styles */
+      .content {
+        margin-left: 250px;
+        padding: 20px;
+        transition: margin-left 0.3s ease;
+      }
+
+      /* Menu Toggle Button */
+      .menu-toggle {
+        display: none;
+        background-color: #0f3460;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        font-size: 20px;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+
+        .sidebar.visible {
+          transform: translateX(0);
+        }
+
+        .content {
+          margin-left: 0;
+        }
+
+        .menu-toggle {
+          display: block;
+        }
+      }
+
+      .topbar {
+        height: 60px;
+        background: #0f3460;
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      .label {
+        font-size: 28px;
+        font-weight: bold;
+        margin: 40px 0 10px 0;
+        color: #0e0e70;
+        text-transform: uppercase;
+        text-align: center;
+      }
+      .table-container {
+        background: rgb(252, 250, 250);
+
+        position: relative;
+        /* ⛔ Remove any top padding that could cause the gap */
+        margin-left: 0px;
+        margin-top: 10px;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 1000px;
+        animation: slideTable 1s forwards;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 12px 15px;
+        border-bottom: 1px solid #696363;
+        white-space: nowrap;
+        position: relative;
+        background: black;
+        color: white;
+      }
+
+      th {
+        background: blue;
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        font-size: 18px; /* Bigger text */
+        padding: 12px 15px; /* More height */
+        text-transform: uppercase;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Optional but nice */
+      }
+
+      tr:nth-child(even) {
+        background-color: black;
+        color: white;
+      }
+
+      tr:hover,
+      tr:hover td {
+        background-color: #8b5bac;
+        color: white; /* Optional: ensure text remains visible */
+      }
+
+      .action-links a {
+        text-decoration: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        margin-right: 5px;
+        font-weight: bold;
+      }
+
+      .action-links a:first-child {
+        background-color: #ffc107;
+        color: white;
+      }
+
+      .action-links a:last-child {
+        background-color: #e74c3c;
+        color: white;
+      }
+
+      @keyframes slideTable {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .weekly-summary {
+        background-color: #fff8e1;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 30px;
+        overflow-x: auto;
+      }
+
+      .weekly-summary table {
+        min-width: 700px;
+        width: 100%;
+        border-collapse: collapse;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+
+    <div class="sidebar hidden" id="sidebar">
+      <h1>📊 SALES HUB</h1>
+      <a href="/record_sales">➕ New Sale</a>
+      <a href="{{url_for('dashboard_sales')}}">📈 Sales Overview</a>
+      <a href="{{url_for('daily_summary')}}">🗓️ Daily Snapshot</a>
+      <a href="{{url_for('weekly_summary')}}">📅 Weekly Insights</a>
+      <a href="{{url_for('monthly_summary')}}">🗓 Monthly Trends</a>
+      <a href="/sales_summary">📊 Full Summary</a>
+      <a href="/dashboard">🏠 Main Dashboard</a>
+      <a href="/logout">🚪 Log Out</a>
+    </div>
+
+    <div class="content" id="content">
+      <div class="topbar"></div>
+      <h2 class="label">Sales Record</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>SALES ID</th>
+              <th>TYPE</th>
+              <th>QUANTITY</th>
+              <th>SELLING PRICE</th>
+              <th>BUYING PRICE</th>
+              <th>PAYMENT METHOD</th>
+
+              <th>PROFIT/LOSS</th>
+              <th>DATE</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sale in sales %}
+            <tr>
+              <td>{{ sale[1] }}</td>
+              <td>{{ sale[2] }}</td>
+              <td>{{ sale[3] }}</td>
+              <td>{{ sale[4] }}</td>
+              <td>{{ sale[5] }}</td>
+              <td>{{ sale[6] }}</td>
+              <td style="font-weight: bold">{{ sale[7] }}</td>
+              <td>{{ sale[8] }}</td>
+              <td class="action-links">
+                <a
+                  href="{{ url_for('render_receipt', receipt_no=sale[0]) }}"
+                  target="_blank"
+                >
+                  🖨️ Print Receipt
+                </a>
+
+                <a href="{{ url_for('edit_sales', id=sale[0]) }}">Edit</a>
+                <a
+                  href="{{ url_for('delete_sales', id=sale[0]) }}"
+                  onclick="return confirm('Are you sure?')"
+                  >Delete</a
+                >
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="label">Daily Summary</h2>
+      <div class="table-container">
+        <table>
+          <tr>
+            <th>DATE</th>
+            <th>TOTAL SALES</th>
+            <th>PROFIT</th>
+            <th>LOSS</th>
+            <th>ITEMS SOLD</th>
+          </tr>
+          {% for row in summary %}
+          <tr>
+            <td>{{ row[0] }}</td>
+            <td>KSH {{ row[1] }}</td>
+            <td style="color: green; font-weight: bold">KSH {{ row[2] }}</td>
+            <td style="color: red; font-weight: bold">KSH {{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <h2 class="label">Weekly Summary</h2>
+      <div class="table-container">
+        <table>
+          <tr>
+            <th>DATE</th>
+            <th>TOTAL SALES</th>
+            <th>PROFIT</th>
+            <th>LOSS</th>
+            <th>ITEMS SOLD</th>
+          </tr>
+          {% for row in weekly_summary %}
+          <tr>
+            <td>{{ row[0] }}</td>
+            <td>KSH {{ row[1] }}</td>
+            <td style="color: green; font-weight: bold">KSH {{ row[2] }}</td>
+            <td style="color: red; font-weight: bold">KSH {{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <h2 class="label">Monthly Summary</h2>
+      <div class="table-container">
+        <table>
+          <tr>
+            <th>DATE</th>
+            <th>TOTAL SALES</th>
+            <th>PROFIT</th>
+            <th>LOSS</th>
+            <th>ITEMS SOLD</th>
+          </tr>
+          {% for row in monthly_summary %}
+          <tr>
+            <td>{{ row[0] }}</td>
+            <td>KSH {{ row[1] }}</td>
+            <td style="color: green; font-weight: bold">KSH {{ row[2] }}</td>
+            <td style="color: red; font-weight: bold">KSH {{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+
+    <script>
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("hidden");
+        sidebar.classList.toggle("visible");
+        const content = document.getElementById("content");
+        content.classList.toggle("shifted");
+      }
+
+      // Set initial sidebar state based on screen size
+      document.addEventListener("DOMContentLoaded", () => {
+        const sidebar = document.getElementById("sidebar");
+        const content = document.getElementById("content");
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove("hidden");
+          sidebar.classList.add("visible");
+          content.classList.add("shifted");
+        }
+      });
+    </script>
+  </body>
+</html>

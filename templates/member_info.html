@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendance Tracker - Student Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #4f46e5; /* Soft indigo */
+        --accent-color: #7c3aed; /* Vibrant purple */
+        --success-color: #34d399; /* Green */
+        --warning-color: #facc15; /* Yellow */
+        --danger-color: #f87171; /* Red */
+        --info-color: #60a5fa; /* Blue */
+        --bg-color: #f5f3ff; /* Light purple background */
+        --card-bg: #ffffff;
+        --text-color: #2d3748;
+        --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.12);
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(180deg, var(--bg-color), #e0e7ff);
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      .container {
+        max-width: 80rem;
+        margin: 0 auto;
+        background: var(--card-bg);
+        border-radius: 1.5rem;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        position: relative;
+        animation: fadeIn 0.6s ease-in-out;
+      }
+
+      .container::before {
+        content: "🌟";
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 2rem;
+        opacity: 0.2;
+      }
+
+      h2,
+      h3,
+      h4 {
+        position: relative;
+        padding-bottom: 0.5rem;
+      }
+
+      h2::after,
+      h3::after,
+      h4::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4rem;
+        height: 0.25rem;
+        background: var(--accent-color);
+        border-radius: 0.125rem;
+      }
+
+      .profile-img {
+        border: 3px solid var(--accent-color);
+        transition: transform 0.3s ease;
+      }
+
+      .profile-img:hover {
+        transform: scale(1.1);
+      }
+
+      .stat-card {
+        transition: all 0.3s ease;
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-0.5rem);
+        box-shadow: var(--shadow-md);
+      }
+
+      .attendance-rate {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .attendance-rate::before {
+        content: "🎯";
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 2rem;
+        opacity: 0.2;
+      }
+
+      .table-container {
+        position: relative;
+      }
+
+      .table-container::before {
+        content: "🏅";
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 2rem;
+        opacity: 0.2;
+      }
+
+      table tr:hover {
+        background-color: #f3e8ff;
+        transition: background-color 0.3s ease;
+      }
+
+      .graph-container {
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 2rem;
+        position: relative;
+      }
+
+      .graph-container::before {
+        content: "📈";
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 2rem;
+        opacity: 0.2;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 1rem;
+        }
+        .container {
+          margin: 0 0.5rem;
+        }
+        .grid-cols-4 {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="p-8 border-b border-gray-200">
+        <h2 class="text-3xl font-bold text-gray-800 text-center">
+          📊 Attendance Tracker
+        </h2>
+      </div>
+
+      <div class="p-8 text-center">
+        <img
+          src="https://via.placeholder.com/80"
+          alt="Student"
+          class="profile-img rounded-full mx-auto mb-4"
+        />
+        <h3 class="text-2xl font-semibold text-gray-700">Caleb White</h3>
+        <p class="text-sm text-gray-500 mt-2">
+          ID: 2021-0001 | (555) 123-4567 | caleb.white@gmail.com | 123 Elm
+          Street
+        </p>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="flex justify-end p-8">
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full"
+        >
+          <div class="stat-card bg-green-100 p-6 rounded-xl shadow text-center">
+            <div class="text-4xl font-bold text-green-700">13 Days</div>
+            <p class="mt-2 text-sm font-medium text-green-900">
+              Total Attendance
+            </p>
+          </div>
+          <div
+            class="stat-card bg-yellow-100 p-6 rounded-xl shadow text-center"
+          >
+            <div class="text-4xl font-bold text-yellow-700">7 Days</div>
+            <p class="mt-2 text-sm font-medium text-yellow-900">
+              Late Attendance
+            </p>
+          </div>
+          <div class="stat-card bg-blue-100 p-6 rounded-xl shadow text-center">
+            <div class="text-4xl font-bold text-blue-700">1 Day</div>
+            <p class="mt-2 text-sm font-medium text-blue-900">
+              Under-time Attendance
+            </p>
+          </div>
+          <div class="stat-card bg-red-100 p-6 rounded-xl shadow text-center">
+            <div class="text-4xl font-bold text-red-700">2 Days</div>
+            <p class="mt-2 text-sm font-medium text-red-900">Total Absent</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bar Graph -->
+      <div class="graph-container px-8 pb-8">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800 text-center">
+          Attendance Overview (Bar Chart)
+        </h3>
+        <canvas id="attendanceChart" height="100"></canvas>
+      </div>
+
+      <!-- Pie Chart -->
+      <div class="graph-container px-8 pb-8">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800 text-center">
+          Monthly Attendance Breakdown (Pie Chart)
+        </h3>
+        <canvas id="monthlyChart" height="100"></canvas>
+      </div>
+
+      <!-- Attendance Rate -->
+      <div class="attendance-rate text-center p-8 border-t border-gray-200">
+        <div class="text-5xl font-bold text-indigo-600">56%</div>
+        <p class="text-gray-600 font-semibold mt-2">Overall Attendance Rate</p>
+        <div class="flex justify-center gap-12 mt-6 text-sm text-gray-700">
+          <div>
+            January
+            <div class="text-indigo-800 font-bold">57%</div>
+          </div>
+          <div>
+            February
+            <div class="text-indigo-800 font-bold">55%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Students -->
+      <div class="table-container p-8 border-t border-gray-200">
+        <h4 class="text-xl font-semibold text-gray-800 mb-4 text-center">
+          🏅 Top Attendance Students
+        </h4>
+        <table class="w-full text-left table-auto border-collapse">
+          <thead>
+            <tr class="bg-gray-100 text-gray-700">
+              <th class="p-4">Number</th>
+              <th class="p-4">Name</th>
+              <th class="p-4">ID</th>
+              <th class="p-4">Progress</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t hover:bg-gray-50">
+              <td class="p-4">1</td>
+              <td class="p-4">John Doe</td>
+              <td class="p-4">2021-0002</td>
+              <td class="p-4 font-semibold">95%</td>
+            </tr>
+            <!-- Add more rows as needed -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Chart Script -->
+    <script>
+      // Bar Chart
+      const attendanceCtx = document
+        .getElementById("attendanceChart")
+        .getContext("2d");
+      new Chart(attendanceCtx, {
+        type: "bar",
+        data: {
+          labels: ["Total", "Late", "Under-time", "Absent"],
+          datasets: [
+            {
+              label: "Attendance Stats",
+              data: [13, 7, 1, 2],
+              backgroundColor: [
+                "rgba(79, 70, 229, 0.6)",
+                "rgba(250, 204, 21, 0.6)",
+                "rgba(96, 165, 250, 0.6)",
+                "rgba(248, 113, 113, 0.6)",
+              ],
+              borderColor: [
+                "rgba(79, 70, 229, 1)",
+                "rgba(250, 204, 21, 1)",
+                "rgba(96, 165, 250, 1)",
+                "rgba(248, 113, 113, 1)",
+              ],
+              borderWidth: 2,
+              borderRadius: 8,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: "Attendance Breakdown",
+              font: { size: 18, family: "Poppins", weight: 600 },
+              color: "#2d3748",
+            },
+            tooltip: {
+              backgroundColor: "#ffffff",
+              titleColor: "#2d3748",
+              bodyColor: "#2d3748",
+              borderColor: "#e5e7eb",
+              borderWidth: 1,
+              callbacks: {
+                label: function (context) {
+                  return ` ${context.parsed.y} Days`;
+                },
+              },
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1 },
+              title: {
+                display: true,
+                text: "Days",
+                font: { size: 14, family: "Poppins" },
+              },
+              grid: { color: "#e5e7eb" },
+            },
+            x: {
+              grid: { display: false },
+            },
+          },
+        },
+      });
+
+      // Pie Chart
+      const monthlyCtx = document
+        .getElementById("monthlyChart")
+        .getContext("2d");
+      new Chart(monthlyCtx, {
+        type: "pie",
+        data: {
+          labels: ["January", "February"],
+          datasets: [
+            {
+              label: "Monthly Attendance",
+              data: [57, 55],
+              backgroundColor: [
+                "rgba(79, 70, 229, 0.6)",
+                "rgba(168, 85, 247, 0.6)",
+              ],
+              borderColor: ["rgba(79, 70, 229, 1)", "rgba(168, 85, 247, 1)"],
+              borderWidth: 2,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                font: { family: "Poppins", size: 14 },
+                padding: 20,
+              },
+            },
+            title: {
+              display: true,
+              text: "Monthly Attendance Rates",
+              font: { size: 18, family: "Poppins", weight: 600 },
+              color: "#2d3748",
+            },
+            tooltip: {
+              backgroundColor: "#ffffff",
+              titleColor: "#2d3748",
+              bodyColor: "#2d3748",
+              borderColor: "#e5e7eb",
+              borderWidth: 1,
+              callbacks: {
+                label: function (context) {
+                  return ` ${context.parsed}%`;
+                },
+              },
+            },
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animated Furniture Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #ffe4e1, #add8e6);
+      margin: 0;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #ff69b4;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      text-shadow: 1px 1px 2px #fff;
+    }
+
+    .grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);  /* exactly 3 per row */
+    gap: 20px;
+    padding: 10px;
+  }
+
+
+    .card {
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      overflow: hidden;
+      text-align: center;
+      padding: 15px;
+      opacity: 0;
+      transform: translateY(40px);
+      animation: slideIn 0.8s ease-out forwards;
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.03);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    .card img {
+      width: 100%;
+      height: fit-content;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .card h3 {
+      color: #e75480;
+      margin: 10px 0 5px;
+    }
+
+    .card p {
+      margin: 5px 0;
+      color: #555;
+      font-size: 14px;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.2s; }
+    .card:nth-child(2) { animation-delay: 0.4s; }
+    .card:nth-child(3) { animation-delay: 0.6s; }
+    .card:nth-child(4) { animation-delay: 0.8s; }
+    .card:nth-child(5) { animation-delay: 1.0s; }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <h2>Furniture Collection</h2>
+
+  <div class="grid-container">
+	{% for item in items %}
+	  <div class="card">
+		<img src="{{ url_for('static', filename=item[5]) }}" alt="Furniture Image">
+		<h3>{{ item[1] }}</h3>
+		<p>Buying: Ksh {{ item[4] }}</p>
+		<p>Selling: Ksh {{ item[3] }}</p>
+		<p>Quantity: {{ item[2] }}</p>
+    <form action="{{ url_for('edit_product', product_id=item[0]) }}" method="GET" style="display:inline;">
+      <button type="submit" style="background-color: #ffa500; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
+        Edit
+      </button>
+    </form>
+    
+    <form action="{{ url_for('delete_product', product_id=item[0]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this product?');">
+      <button type="submit" style="background-color: red; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
+        Delete
+      </button>
+    </form>
+    
+	  </div>
+	{% endfor %}
+  </div>
+  
+
+
+
+  </div>
+
+</body>
+</html>

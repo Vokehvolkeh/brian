@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contract Expenses</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffecd2, #fceabb); /* Cheerful gradient background */
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .contract-box {
+            background: #fff5e6; /* Warm, cheerful background */
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            max-width: 1200px; /* Limit max width for larger screens */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .info-split {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            flex-wrap: wrap; /* Allow wrapping for smaller screens */
+        }
+        .info-split > div {
+            flex: 1;
+            min-width: 300px; /* Ensure readability on smaller screens */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background: linear-gradient(90deg, #ff9a9e, #fad0c4); /* Cheerful table header gradient */
+            color: #333;
+        }
+        .profit {
+            color: #28a745; /* Brighter green for profit */
+            font-weight: bold;
+        }
+        .loss {
+            color: #dc3545; /* Vibrant red for loss */
+            font-weight: bold;
+        }
+        .actions a {
+            margin: 0 5px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: 500;
+        }
+        .actions a:hover {
+            color: #0056b3;
+        }
+        .add-expense {
+            text-decoration: none;
+            background: #ff6f61; /* Cheerful coral color */
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        .add-expense:hover {
+            background: #e65b50;
+        }
+        h2 {
+            color: #ff6f61; /* Matching coral color for headings */
+            font-weight: 600;
+        }
+        .print-button {
+            background: #28a745;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 10px;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+        .print-button:hover {
+            background: #218838;
+        }
+        @media print {
+            body {
+                background: white;
+                padding: 10px;
+            }
+            .contract-box {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+            .print-button, .actions, .add-expense, .no-print {
+                display: none; /* Hide buttons during printing */
+            }
+            .info-split {
+                flex-direction: column; /* Stack info for better print layout */
+            }
+        }
+        @media (max-width: 768px) {
+            .contract-box {
+                padding: 15px;
+            }
+            .info-split {
+                flex-direction: column;
+                gap: 20px;
+            }
+            table {
+                font-size: 14px; /* Smaller font for tables on mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    {% if not contracts %}
+        <p>No contracts found.</p>
+    {% else %}
+        {% for contract in contracts %}
+            <div class="contract-box">
+                <h2>{{ contract.title | e }}</h2>
+
+                <!-- Contract Details -->
+                <div class="info-split">
+                    <div>
+                        <p><strong>Contract ID:</strong> {{ contract.id | e }}</p>
+                        <p><strong>Title:</strong> {{ contract.title | e }}</p>
+                        <p><strong>Description:</strong> {{ contract.description | e }}</p>
+                        <p><strong>Status:</strong> {{ contract.status | e }}</p>
+                    </div>
+                    <div>
+                        <p><strong>Client/Company Name:</strong> {{ contract.client_name | e }}</p>
+                        <p><strong>Client Contact:</strong> {{ contract.client_contact | e }}</p>
+                        <p><strong>Contract Amount:</strong> {{ (contract.contract_amount | default(0) | float) | round(2) }}</p>
+                        <p><strong>Date Assigned:</strong> {{ contract.date_assigned | e }}</p>
+                        <!-- Button Group -->
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;" class="no-print">
+                            <!-- Edit Button -->
+                            <a href="{{ url_for('edit_contract', id=contract.id) }}"
+                               class="btn btn-sm"
+                               style="background-color: #ffc107; color: black; text-decoration: none; padding: 6px 12px; border-radius: 5px;">
+                               ✏️ Edit
+                            </a>
+                            <!-- Delete Button -->
+                            <a href="{{ url_for('delete_contract', id=contract.id) }}"
+                               class="btn btn-sm"
+                               style="background-color: #dc3545; color: white; text-decoration: none; padding: 6px 12px; border-radius: 5px;"
+                               onclick="return confirm('Delete this contract?')">
+                               🗑️ Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Print Button -->
+                <div style="margin-top: 10px;" class="no-print">
+                    <a href="javascript:void(0);" class="print-button" onclick="window.print()">🖨️ Print Contract & Expenses</a>
+                </div>
+
+                <!-- Add Expense Button -->
+                <div style="margin-top: 10px;" class="no-print">
+                    <a href="/add_expense/{{ contract.id | e }}" class="add-expense">➕ Add Expense</a>
+                </div>
+
+                <!-- Calculate total_outflow and collect rows -->
+                {% set ns = namespace(total_outflow=0, rows=[]) %}
+                {% for row in expenses %}
+                    {% if row.contract_id == contract.id %}
+                        {% set daily_outflow = (row.workers | default(0) | float) + (row.materials | default(0) | float) + (row.others | default(0) | float) %}
+                        {% set ns.total_outflow = ns.total_outflow + daily_outflow %}
+                        {% set _ = ns.rows.append({'row': row, 'daily_outflow': daily_outflow}) %}
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Expenses Table -->
+                <table style="margin-top: 10px;">
+                    <tr>
+                        <th>Date</th>
+                        <th>Workers</th>
+                        <th>Materials</th>
+                        <th>Others</th>
+                        <th>Outflow</th>
+                        <th class="no-print">Actions</th>
+                    </tr>
+                    {% if not ns.rows %}
+                        <tr>
+                            <td colspan="6">No expenses found for this contract.</td>
+                        </tr>
+                    {% else %}
+                        {% for item in ns.rows %}
+                            <tr>
+                                <td>{{ item.row.date | e }}</td>
+                                <td>{{ item.row.workers | default(0) | e }}</td>
+                                <td>{{ item.row.materials | default(0) | e }}</td>
+                                <td>{{ item.row.others | default(0) | e }}</td>
+                                <td>{{ item.daily_outflow | round(2) }}</td>
+                                <td class="actions no-print">
+                                    <a href="/edit_contract_expense/{{ item.row.id | e }}">Edit</a>
+                                    <a href="/delete_contract_expense/{{ item.row.id | e }}" onclick="return confirm('Delete contract-related expense?')">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </table>
+
+                <!-- Summary -->
+                <div style="margin-top: 10px; font-weight: bold;">
+                    Total Outflow: {{ ns.total_outflow | round(2) }} |
+                    <span class="{% if (contract.contract_amount | default(0) | float - ns.total_outflow) >= 0 %}profit{% else %}loss{% endif %}">
+                        Remaining: {{ (contract.contract_amount | default(0) | float - ns.total_outflow) | round(2) }}
+                    </span>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div style="text-align: right; margin-bottom: 20px;" class="no-print">
+        <a href="{{ url_for('add_contract') }}"
+           style="
+               background-color: #007bff;
+               color: white;
+               padding: 8px 16px;
+               border-radius: 6px;
+               text-decoration: none;
+               font-weight: 500;
+               box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+               transition: background-color 0.3s ease;
+           "
+           onmouseover="this.style.backgroundColor='#0056b3'"
+           onmouseout="this.style.backgroundColor='#007bff'">
+            ➕ Add Contract
+        </a>
+    </div>
+    <div style="text-align: right; margin-bottom: 20px;" class="no-print">
+        <a href="/dashboard"
+           style="
+               background-color: #007bff;
+               color: white;
+               padding: 8px 16px;
+               border-radius: 6px;
+               text-decoration: none;
+               font-weight: 500;
+               box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+               transition: background-color 0.3s ease;
+           "
+           onmouseover="this.style.backgroundColor='#0056b3'"
+           onmouseout="this.style.backgroundColor='#007bff'">
+            Dashboard
+        </a>
+    </div>
+</body>
+</html>

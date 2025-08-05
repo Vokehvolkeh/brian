@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <title>Business Hub</title>
+    <style>
+      :root {
+        --primary-color: #1e3a8a;
+        --secondary-color: #f3f4f6;
+        --accent-color: #3b82f6;
+        --purple-color: #a855f7;
+        --text-color: #202a36;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --tile-bg: #ffffff;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(
+          135deg,
+          var(--accent-color),
+          var(--purple-color)
+        );
+        color: var(--text-color);
+        padding: 32px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .main-content {
+        flex: 1;
+        max-width: calc(100% - 320px);
+        margin-right: 32px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: white;
+        text-align: center;
+        margin-bottom: 40px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+      }
+
+      .tile-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* always 4 tiles per row */
+        gap: 24px;
+        margin-bottom: 48px;
+      }
+
+      .tile {
+        background: var(--tile-bg);
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .tile:hover {
+        background: linear-gradient(
+          135deg,
+          var(--accent-color),
+          var(--purple-color)
+        );
+        color: white;
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+      }
+
+      .tile span {
+        font-size: 2rem;
+      }
+
+      .tile p {
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin: 0;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateY(-20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .blur-background {
+        filter: blur(4px);
+        transition: filter 0.3s ease;
+      }
+
+      .logo {
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        margin: 20px auto;
+        display: block;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 32px;
+        right: 32px;
+        width: 280px;
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        animation: slideIn 0.5s ease-out;
+        z-index: 1000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-content">
+      <div class="text-center">
+        <img
+          src="{{ url_for('static', filename='images/final.jpeg') }}"
+          alt="Logo"
+          class="logo"
+        />
+            {% if user %}
+            <div class="sidebar p-6 m-4 bg-emerald-100 rounded-2xl shadow-lg max-w-md">
+            <div class="flex items-center gap-6">
+                <img
+                src="{{ url_for('static', filename='uploads/' + user['profile_photo']) }}"
+                alt="Profile Photo"
+                class="w-20 h-20 rounded-full border-4 border-emerald-500 object-cover shadow-md"
+                />
+                <div>
+                <h2 class="text-xl font-bold text-emerald-900">
+                    Username: {{ user['username'] }}
+                </h2>
+                <p class="text-base text-emerald-800">Email: {{ user['email'] }}</p>
+                <p class="text-base text-emerald-800">Phone: {{ user['phone'] }}</p>
+                </div>
+            </div>
+            </div>
+            {% endif %}
+
+      <h1>Business Hub</h1>
+
+      <div class="tile-container">
+        <a href="{{ url_for('dashboard') }}" class="tile">
+          <span>🏠</span>
+          <p>Home Dashboard</p>
+        </a>
+        <a href="/members" class="tile">
+          <span>👥</span>
+          <p>Team & Clients</p>
+        </a>
+        <a href="{{ url_for('sales') }}" class="tile">
+          <span>💰</span>
+          <p>Sales & Orders</p>
+        </a>
+        <a href="{{ url_for('accounting') }}" class="tile">
+          <span>📊</span>
+          <p>Financials & Ledgers</p>
+        </a>
+        <a href="{{ url_for('invoicing') }}" class="tile">
+          <span>🧾</span>
+          <p>Invoices & Quotes</p>
+        </a>
+        <a href="{{ url_for('payrolls') }}" class="tile">
+          <span>💼</span>
+          <p>Payroll Center</p>
+        </a>
+        <a href="{{ url_for('inventory') }}" class="tile">
+          <span>📦</span>
+          <p>Stock & Inventory</p>
+        </a>
+        <a href="{{ url_for('view_products') }}" class="tile">
+          <span>🛒</span>
+          <p>View Products</p>
+        </a>
+        <a href="{{ url_for('view_contracts') }}" class="tile">
+          <span>📄</span>
+          <p>View All Contracts</p>
+        </a>
+        <a href="{{ url_for('meetings') }}" class="tile">
+          <span>📝</span>
+          <p>Set up Event/Reminder</p>
+        </a>
+        <a href="{{ url_for('business_summary') }}" class="tile">
+          <span>📈</span>
+          <p>Business Summary</p>
+        </a>
+        <a href="{{url_for('print_contract')}}" class="tile">
+          <span>📄</span>
+          <p>Print Contract</p>
+        </a>
+        <a href="#" class="tile">
+          <span>🧾</span>
+          <p>Print Receipt</p>
+        </a>
+        <a href="#" class="tile">
+          <span>⚙️</span>
+          <p>Settings</p>
+        </a>
+        <a href="/logout" class="tile">
+          <span>🚪</span>
+          <p>Sign Out</p>
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Member</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background-color: #f5f5f5;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            max-width: 400px;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h2>Generate Payslip</h2>
+
+    {% if message %}
+    <p style="color:red;">{{ message }}</p>
+    {% endif %}
+    
+    <form method="POST">
+        Member ID: <input type="number" name="member_id" required><br><br>
+        Bank Name: <input type="text" name="bank_name" required><br><br>
+        Allowance: <input type="number" name="allowance" ><br><br>
+        Overtime : <input type="number" name="overtime" ><br><br>
+        Commission : <input type="number" name="commission"><br><br>
+        Bonus : <input type="number" name="bonus" value="0"><br><br>
+        Leave Pay: <input type="number" name="leave_pay" value="0"><br><br>
+        PAYE: <input type="number" name="paye" ><br><br>
+        NHIF : <input type="number" name="nhif" value="0"><br><br>
+        Advance Loan : <input type="number" name="advance_loan" value="0"><br><br>
+        Other Deductions: <input type="number" name="others"><br><br>
+        <button type="submit">Generate Payslip</button>
+    </form>
+
+    <br>
+    <a href="/accounting">← Back to Dashboard</a>
+</body>
+</html>
