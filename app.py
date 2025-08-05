@@ -199,7 +199,10 @@ def init_db():
         c.execute('''CREATE TABLE IF NOT EXISTS policy (
                   id  INTEGER PRIMARY KEY AUTOINCREMENT,
                 time_in TEXT,
-                time_out TEXT
+                time_out TEXT,
+                email TEXT,
+                address TEXT,
+                  phone TEXT
                   )''')
         c.execute('''CREATE TABLE IF NOT EXISTS respo (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -239,37 +242,81 @@ from typing import Any
 
 sms: Any = africastalking.SMS
 
-@app.route('/phone_number', methods=['GET', 'POST'])
-def phone_number():
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
     conn = sqlite3.connect('furniture.db')
     c = conn.cursor()
 
+    current_data = {
+        'time_in': '',
+        'time_out': '',
+        'email': '',
+        'address': '',
+        'phone': ''
+    }
+
     if request.method == 'POST':
-        phone_number = request.form['phone_number'].strip()
+        time_in = request.form['time_in'].strip()
+        time_out = request.form['time_out'].strip()
+        email = request.form['email'].strip()
+        address = request.form['address'].strip()
+        phone = request.form['phone'].strip()
+        c.execute("SELECT id, username, email, phone, profile_photo FROM users")
+        users = c.fetchall()
 
-        # Check if 'admin_phone' already exists
-        c.execute("SELECT id FROM settings WHERE key = 'admin_phone'")
-        existing = c.fetchone()
+                # Convert to list of dicts for easier use in Jinja
+        user_list = [
+                    {
+                        'id': user[0],
+                        'username': user[1],
+                        'email': user[2],
+                        'phone': user[3],
+                        'profile_photo': user[4]
+                    }
+        for user in users
+                ]
 
-        if existing:
-            # Update the existing phone number
-            c.execute("UPDATE settings SET value = ? WHERE key = 'admin_phone'", (phone_number,))
-        else:
-            # Insert a new phone number
-            c.execute("INSERT INTO settings (key, value) VALUES (?, ?)", ('admin_phone', phone_number))
+        try:
+            # Check if there's an existing record (you can change logic if needed)
+            c.execute('SELECT id FROM policy LIMIT 1')
+            existing = c.fetchone()
 
-        conn.commit()
-        conn.close()
-        flash("✅ Admin phone number updated successfully.", "success")
-        return redirect(url_for('phone_number'))
+            if existing:
+                c.execute('''
+                    UPDATE policy
+                    SET time_in = ?, time_out = ?, email = ?, address = ?, phone = ?
+                    WHERE id = ?
+                ''', (time_in, time_out, email, address, phone, existing[0]))
+            else:
+                c.execute('''
+                    INSERT INTO policy (time_in, time_out, email, address, phone)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (time_in, time_out, email, address, phone))
 
-    # If GET request, fetch existing phone number
-    c.execute("SELECT value FROM settings WHERE key = 'admin_phone'")
+
+
+            conn.commit()
+
+            flash('✅ Settings updated successfully!', 'success')
+        except Exception as e:
+            conn.rollback()
+            flash(f'❌ Error: {str(e)}', 'danger')
+
+    # For GET or after POST to fetch current data
+    c.execute('SELECT time_in, time_out, email, address, phone FROM policy LIMIT 1')
     row = c.fetchone()
-    conn.close()
+    if row:
+        current_data = {
+            'time_in': row[0],
+            'time_out': row[1],
+            'email': row[2],
+            'address': row[3],
+            'phone': row[4]
+        }
 
-    current_number = row[0] if row else ''
-    return render_template('phone_number.html', current_number=current_number)
+    conn.close()
+    return render_template('settings.html', data=current_data, users=user_list)
+
 
 
 
@@ -293,6 +340,7 @@ def send_sms(message):
             print("SMS failed:", str(e))
     else:
         print("No phone number found for admin.")
+
 
 
 @app.route('/reset_password', methods=['GET', 'POST'])
@@ -924,21 +972,6 @@ from werkzeug.security import check_password_hash
 
 
 
-def create_default_user():
-    conn = sqlite3.connect('furniture.db')
-    c = conn.cursor()
-
-    # Check if user already exists
-    c.execute("SELECT id FROM users WHERE username = ?", ("secretary",))
-    if not c.fetchone():
-        hashed_pw = generate_password_hash("1234")
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", ("secretary", hashed_pw))
-        conn.commit()
-        print("✅ Default user 'secretary' created.")
-    else:
-        print("ℹ️ User 'secretary' already exists.")
-
-    conn.close()
 
 
 
