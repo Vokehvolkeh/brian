@@ -255,29 +255,28 @@ def settings():
         'phone': ''
     }
 
+    # Fetch users (always needed for rendering the page)
+    c.execute("SELECT id, username, email, phone, profile_photo FROM users")
+    users = c.fetchall()
+    user_list = [
+        {
+            'id': user[0],
+            'username': user[1],
+            'email': user[2],
+            'phone': user[3],
+            'profile_photo': user[4]
+        }
+        for user in users
+    ]
+
     if request.method == 'POST':
         time_in = request.form['time_in'].strip()
         time_out = request.form['time_out'].strip()
         email = request.form['email'].strip()
         address = request.form['address'].strip()
         phone = request.form['phone'].strip()
-        c.execute("SELECT id, username, email, phone, profile_photo FROM users")
-        users = c.fetchall()
-
-                # Convert to list of dicts for easier use in Jinja
-        user_list = [
-                    {
-                        'id': user[0],
-                        'username': user[1],
-                        'email': user[2],
-                        'phone': user[3],
-                        'profile_photo': user[4]
-                    }
-        for user in users
-                ]
 
         try:
-            # Check if there's an existing record (you can change logic if needed)
             c.execute('SELECT id FROM policy LIMIT 1')
             existing = c.fetchone()
 
@@ -293,16 +292,14 @@ def settings():
                     VALUES (?, ?, ?, ?, ?)
                 ''', (time_in, time_out, email, address, phone))
 
-
-
             conn.commit()
-
             flash('✅ Settings updated successfully!', 'success')
+
         except Exception as e:
             conn.rollback()
             flash(f'❌ Error: {str(e)}', 'danger')
 
-    # For GET or after POST to fetch current data
+    # Always fetch current data
     c.execute('SELECT time_in, time_out, email, address, phone FROM policy LIMIT 1')
     row = c.fetchone()
     if row:
@@ -316,6 +313,7 @@ def settings():
 
     conn.close()
     return render_template('settings.html', data=current_data, users=user_list)
+
 
 
 
