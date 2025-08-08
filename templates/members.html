@@ -2,12 +2,13 @@
 <html>
   <head>
     <title>Staff Members</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       :root {
-        --primary-color: #1e40af; /* Softer primary blue */
-        --secondary-color: #f8fafc; /* Light gray background */
-        --accent-color: #3b82f6; /* Vibrant blue for actions */
-        --text-color: #080a0e; /* Dark gray for text */
+        --primary-color: #1e40af;
+        --secondary-color: #f8fafc;
+        --accent-color: #3b82f6;
+        --text-color: #080a0e;
         --success-color: #10b981;
         --danger-color: #ef4444;
         --card-bg: #ffffff;
@@ -28,69 +29,67 @@
         background-color: var(--secondary-color);
         color: var(--text-color);
         line-height: 1.6;
+        flex-direction: column;
       }
 
       .sidebar {
-        width: 260px;
+        width: 100%;
         background: linear-gradient(
           180deg,
           var(--primary-color) 0%,
           #1e3a8a 100%
         );
         color: white;
-        padding: 32px 16px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
+        padding: 16px;
         box-shadow: var(--shadow-md);
       }
 
       .sidebar a {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
         color: white;
         text-decoration: none;
-        padding: 12px 16px;
-        margin: 8px 0;
-        border-radius: 8px;
+        padding: 10px;
+        margin: 4px 0;
+        border-radius: 6px;
         transition: all 0.3s ease;
         font-weight: 500;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
       }
 
       .sidebar a:hover {
         background-color: rgba(255, 255, 255, 0.15);
-        transform: translateX(5px);
+        transform: translateX(3px);
       }
 
       .main-content {
         flex-grow: 1;
-        padding: 40px;
-        max-width: 1440px;
+        padding: 16px;
+        max-width: 100%;
         margin: 0 auto;
       }
 
       h2 {
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-weight: 700;
-        margin-bottom: 32px;
+        margin-bottom: 24px;
         text-align: center;
         color: var(--text-color);
       }
 
       .card-container {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 24px;
-        margin-bottom: 40px;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
       }
 
       .staff-card {
         background: var(--card-bg);
-        border-radius: 12px;
+        border-radius: 8px;
         box-shadow: var(--shadow-md);
-        padding: 24px;
+        padding: 16px;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         animation: fadeIn 0.5s ease forwards;
         color: var(--text-color);
@@ -98,15 +97,15 @@
       }
 
       .staff-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
       }
 
       .profile-photo {
-        width: 80px;
-        height: 80px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
-        margin: 0 auto 16px;
+        margin: 0 auto 12px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -122,9 +121,9 @@
       }
 
       .staff-info p {
-        margin: 8px 0;
-        font-size: 0.95rem;
-        line-height: 1.6;
+        margin: 6px 0;
+        font-size: 0.9rem;
+        line-height: 1.5;
         text-align: center;
       }
 
@@ -134,19 +133,19 @@
       }
 
       .actions {
-        margin-top: 16px;
+        margin-top: 12px;
         display: flex;
         justify-content: center;
-        gap: 12px;
+        gap: 8px;
       }
 
       .actions a {
         text-decoration: none;
         font-weight: 500;
-        padding: 10px 20px;
-        border-radius: 8px;
+        padding: 8px 16px;
+        border-radius: 6px;
         transition: all 0.3s ease;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
       }
 
       .actions a:first-child {
@@ -161,13 +160,13 @@
 
       .actions a:hover {
         opacity: 0.9;
-        transform: translateY(-2px);
+        transform: translateY(-1px);
       }
 
       @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateY(12px);
+          transform: translateY(8px);
         }
         to {
           opacity: 1;
@@ -177,30 +176,30 @@
 
       .empty-state {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 24px;
+        grid-template-columns: 1fr;
+        gap: 16px;
         opacity: 0.5;
-        margin-bottom: 32px;
+        margin-bottom: 24px;
       }
 
       .empty-card {
         background: var(--card-bg);
-        border-radius: 12px;
-        padding: 24px;
-        height: 300px;
+        border-radius: 8px;
+        padding: 16px;
+        height: 200px;
         box-shadow: var(--shadow-sm);
       }
 
       .dashboard-link {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         color: var(--accent-color);
         text-decoration: none;
         font-weight: 500;
-        margin-top: 32px;
+        margin-top: 24px;
         transition: color 0.3s ease;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
       }
 
       .dashboard-link:hover {
@@ -212,30 +211,31 @@
         border-collapse: separate;
         border-spacing: 0;
         background: var(--card-bg);
-        border-radius: 12px;
+        border-radius: 8px;
         overflow: hidden;
         box-shadow: var(--shadow-md);
-        margin-top: 40px;
+        margin-top: 24px;
       }
 
       .attendance-table th,
       .attendance-table td {
-        padding: 16px;
+        padding: 12px;
         text-align: left;
         border-bottom: 1px solid #e5e7eb;
+        font-size: 0.85rem;
       }
 
       .attendance-table th {
         background-color: var(--primary-color);
         color: white;
         font-weight: bold;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
       }
 
       .attendance-table td {
-        font-size: 0.95rem;
+        font-size: 0.85rem;
         color: var(--text-color);
       }
 
@@ -244,18 +244,18 @@
       }
 
       .attendance-table select {
-        padding: 8px;
-        border-radius: 6px;
+        padding: 6px;
+        border-radius: 4px;
         border: 1px solid #d1d5db;
         background-color: #f9fafb;
-        width: 120px;
-        font-size: 0.9rem;
+        width: 100px;
+        font-size: 0.85rem;
       }
 
       .attendance-table select:focus {
         outline: none;
         border-color: var(--accent-color);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
       }
 
       .attendance-table tr:hover {
@@ -267,7 +267,7 @@
         position: fixed;
         inset: 0;
         background: rgba(0, 0, 0, 0.7);
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(8px);
         justify-content: center;
         align-items: center;
         z-index: 1000;
@@ -282,37 +282,37 @@
 
       .modal-content {
         background: var(--card-bg);
-        padding: 32px;
-        border-radius: 16px;
-        width: 600px;
-        max-width: 95%;
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        border-radius: 12px;
+        width: 95%;
+        max-width: 500px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         position: relative;
         animation: slideIn 0.3s ease-out;
-        max-height: 85vh;
+        max-height: 80vh;
         overflow-y: auto;
         background: linear-gradient(145deg, #ffffff, #f1f5f9);
       }
 
       .modal-content h3 {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         font-weight: 600;
         color: var(--text-color);
-        margin-bottom: 24px;
+        margin-bottom: 16px;
         text-align: center;
       }
 
       .modal-content ul {
         list-style: none;
-        margin-bottom: 24px;
+        margin-bottom: 16px;
       }
 
       .modal-content ul li {
-        padding: 12px 0;
+        padding: 8px 0;
         display: flex;
         align-items: center;
-        gap: 12px;
-        font-size: 0.95rem;
+        gap: 8px;
+        font-size: 0.9rem;
         border-bottom: 1px solid #e5e7eb;
       }
 
@@ -322,32 +322,32 @@
 
       .modal-content input[type="checkbox"] {
         accent-color: var(--accent-color);
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
       }
 
       .modal-content input[type="time"] {
-        padding: 10px;
-        border-radius: 6px;
+        padding: 8px;
+        border-radius: 4px;
         border: 1px solid #d1d5db;
         width: 100%;
-        font-size: 0.95rem;
-        margin-top: 8px;
+        font-size: 0.9rem;
+        margin-top: 6px;
       }
 
       .modal-content input[type="time"]:focus {
         outline: none;
         border-color: var(--accent-color);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
       }
 
       .close-btn {
         position: absolute;
-        top: 16px;
-        right: 16px;
+        top: 12px;
+        right: 12px;
         background: none;
         border: none;
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         color: #6b7280;
         cursor: pointer;
         transition: color 0.3s ease;
@@ -360,24 +360,24 @@
       .modal-action-btn {
         background-color: var(--accent-color);
         color: white;
-        padding: 12px 24px;
+        padding: 10px 20px;
         border: none;
-        border-radius: 8px;
+        border-radius: 6px;
         font-weight: 500;
         cursor: pointer;
         transition: all 0.3s ease;
         width: 100%;
-        margin-top: 16px;
+        margin-top: 12px;
       }
 
       .modal-action-btn:hover {
         background-color: #2563eb;
-        transform: translateY(-2px);
+        transform: translateY(-1px);
       }
 
       @keyframes slideIn {
         from {
-          transform: translateY(-30px);
+          transform: translateY(-20px);
           opacity: 0;
         }
         to {
@@ -387,15 +387,15 @@
       }
 
       .blur-background {
-        filter: blur(6px);
+        filter: blur(4px);
         transition: filter 0.3s ease;
       }
 
       .task-block {
         border: 1px solid #e5e7eb;
-        padding: 24px;
-        margin-bottom: 32px;
-        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 24px;
+        border-radius: 8px;
         background: var(--card-bg);
         color: var(--text-color);
         box-shadow: var(--shadow-sm);
@@ -403,22 +403,23 @@
       }
 
       .meta-info {
-        margin-bottom: 12px;
-        font-size: 0.95rem;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
       }
 
       .task-block table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 16px;
+        margin-top: 12px;
         border: 1px solid #e5e7eb;
       }
 
       .task-block th,
       .task-block td {
-        padding: 12px;
+        padding: 8px;
         text-align: left;
         border: 1px solid #e5e7eb;
+        font-size: 0.85rem;
       }
 
       .task-block th {
@@ -433,12 +434,12 @@
       }
 
       .menu-trigger {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         cursor: pointer;
         user-select: none;
         color: var(--text-color);
-        padding: 8px;
-        border-radius: 6px;
+        padding: 6px;
+        border-radius: 4px;
         transition: background-color 0.3s ease;
       }
 
@@ -455,8 +456,8 @@
         border: 1px solid #e5e7eb;
         box-shadow: var(--shadow-md);
         z-index: 1000;
-        min-width: 160px;
-        border-radius: 8px;
+        min-width: 140px;
+        border-radius: 6px;
         overflow: hidden;
       }
 
@@ -466,10 +467,10 @@
 
       .menu-options a {
         display: block;
-        padding: 12px 16px;
+        padding: 10px 12px;
         text-decoration: none;
         color: var(--text-color);
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         transition: background-color 0.3s ease;
       }
 
@@ -477,26 +478,26 @@
         background-color: #f1f5f9;
       }
 
-      /* Responsive Design */
-      @media (max-width: 768px) {
+      @media (min-width: 768px) {
         body {
-          flex-direction: column;
+          flex-direction: row;
         }
         .sidebar {
-          width: 100%;
-          height: auto;
-          position: static;
-          padding: 16px;
+          width: 220px;
+          height: 100vh;
+          position: sticky;
+          top: 0;
+          padding: 24px 12px;
         }
         .main-content {
-          padding: 16px;
+          padding: 24px;
         }
         .card-container {
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         }
         .modal-content {
-          width: 90%;
-          padding: 20px;
+          width: 600px;
+          padding: 24px;
         }
       }
     </style>
@@ -505,7 +506,6 @@
     <div class="sidebar">
       <a href="{{url_for('add_member')}}">Add Staff</a>
       <a href="{{url_for('view_members')}}">View Staff</a>
-
       <a href="{{url_for('attendance_view')}}">Attendance View</a>
       <a href="{{url_for('assign_tasks')}}"
         >Assign Responsibilities and Tasks</a
@@ -529,7 +529,7 @@
               alt="Profile Photo"
             />
             {% else %}
-            <span style="font-size: 2rem">👤</span>
+            <span style="font-size: 1.5rem">👤</span>
             {% endif %}
           </div>
           <div class="staff-info">
@@ -567,9 +567,8 @@
       {% if grouped_tasks %} {% for (name, company_id), tasks in
       grouped_tasks.items() %} {% set first = tasks[0] %}
       <div class="task-block">
-        <div style="display: flex; flex-wrap: wrap; gap: 24px">
-          <!-- Left -->
-          <div style="flex: 1; min-width: 280px">
+        <div style="display: flex; flex-wrap: wrap; gap: 16px">
+          <div style="flex: 1; min-width: 100%">
             <h3>🧾 Assigned Info</h3>
             <p><strong>Name:</strong> {{ name }}</p>
             <p><strong>Company ID:</strong> {{ company_id }}</p>
@@ -577,8 +576,7 @@
             <p><strong>Description:</strong> {{ first['description'] }}</p>
           </div>
 
-          <!-- Right -->
-          <div style="flex: 1; min-width: 280px">
+          <div style="flex: 1; min-width: 100%">
             <h3>✅ Check Status</h3>
             <p>
               <strong>Date Checked:</strong> {{ first['date_checked'] if
@@ -611,7 +609,6 @@
           </div>
         </div>
 
-        <!-- Table -->
         <table>
           <tr>
             <th>Responsibility</th>
@@ -662,40 +659,20 @@
             </td>
             <td id="hours-{{ row.staff_id }}">{{ row.worked_hours or '—' }}</td>
             <td id="status-{{ row.staff_id }}">{{ row.status or '—' }}</td>
-
             <td>
-              <!-- 3 dots dropdown -->
-              <div class="dropdown">
-                <button
-                  class="btn btn-light dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                >
-                  ⋮
-                </button>
-                <ul class="dropdown-menu">
+              <div class="action-menu">
+                <div class="menu-trigger">⋮</div>
+                <div class="menu-options">
                   {% if row.check_in_time == '—' %}
-                  <li>
-                    <button
-                      type="button"
-                      class="dropdown-item checkin-btn"
-                      data-id="{{ row.staff_id }}"
-                    >
-                      ✅ Check In
-                    </button>
-                  </li>
+                  <a href="#" class="checkin-btn" data-id="{{ row.staff_id }}"
+                    >✅ Check In</a
+                  >
                   {% endif %} {% if row.check_out_time == '—' %}
-                  <li>
-                    <button
-                      type="button"
-                      class="dropdown-item checkout-btn"
-                      data-id="{{ row.staff_id }}"
-                    >
-                      🔚 Check Out
-                    </button>
-                  </li>
+                  <a href="#" class="checkout-btn" data-id="{{ row.staff_id }}"
+                    >🔚 Check Out</a
+                  >
                   {% endif %}
-                </ul>
+                </div>
               </div>
             </td>
           </tr>
@@ -704,7 +681,6 @@
       </table>
     </div>
 
-    <!-- Modal -->
     <div class="modal" id="checkInModal">
       <div class="modal-content">
         <button class="close-btn" onclick="closeModal()">✕</button>
@@ -757,18 +733,6 @@
         mainContent.classList.remove("blur-background");
       }
 
-      document
-        .getElementById("markCheckInBtn")
-        .addEventListener("click", (e) => {
-          e.preventDefault();
-          showModal();
-        });
-
-      document.getElementById("checkInForm").addEventListener("submit", (e) => {
-        closeModal();
-      });
-
-      // Toggle menu visibility
       document.addEventListener("click", function (e) {
         const menus = document.querySelectorAll(".menu-options");
         menus.forEach((menu) => menu.classList.remove("active"));
@@ -780,7 +744,6 @@
         }
       });
 
-      // Close menus when clicking outside
       document.addEventListener("click", function (e) {
         if (!e.target.closest(".action-menu")) {
           document.querySelectorAll(".menu-options").forEach((menu) => {
@@ -788,50 +751,15 @@
           });
         }
       });
-      document.querySelectorAll(".checkin-btn").forEach((button) => {
-        button.addEventListener("click", function () {
-          const staffId = this.dataset.id;
-          const timeCell = document.getElementById(`checkin-time-${staffId}`);
-          const btn = this;
 
-          btn.disabled = true;
-          btn.textContent = "⏳ Checking...";
-
-          fetch("/check_in", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: new URLSearchParams({ id: staffId }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.status === "success") {
-                timeCell.textContent = data.time_in;
-                btn.textContent = "✔️ Checked In";
-                btn.style.backgroundColor = "#28a745";
-              } else {
-                timeCell.textContent = "❌ Error";
-                btn.disabled = false;
-                btn.textContent = "Retry Check In";
-              }
-            })
-            .catch((error) => {
-              console.error(error);
-              timeCell.textContent = "❌ Failed";
-              btn.disabled = false;
-              btn.textContent = "Retry";
-            });
-        });
-      });
       document.querySelectorAll(".checkin-btn").forEach((button) => {
         button.addEventListener("click", function () {
           const staffId = this.dataset.id;
           const timeCell = document.getElementById(`checkin-${staffId}`);
           const btn = this;
 
-          btn.disabled = true;
           btn.textContent = "⏳ Checking...";
+          btn.style.pointerEvents = "none";
 
           fetch("/check_in", {
             method: "POST",
@@ -845,21 +773,22 @@
               if (data.status === "success") {
                 timeCell.textContent = data.time_in;
                 btn.textContent = "✔️ Checked In";
-                btn.disabled = true;
+                btn.style.pointerEvents = "none";
               } else {
                 timeCell.textContent = "❌ Error";
                 btn.textContent = "Retry Check In";
-                btn.disabled = false;
+                btn.style.pointerEvents = "auto";
               }
             })
             .catch((error) => {
               console.error(error);
               timeCell.textContent = "❌ Failed";
               btn.textContent = "Retry";
-              btn.disabled = false;
+              btn.style.pointerEvents = "auto";
             });
         });
       });
+
       document.querySelectorAll(".checkout-btn").forEach((button) => {
         button.addEventListener("click", function () {
           const staffId = this.dataset.id;
@@ -868,8 +797,8 @@
           const statusCell = document.getElementById(`status-${staffId}`);
           const btn = this;
 
-          btn.disabled = true;
           btn.textContent = "⏳ Checking Out...";
+          btn.style.pointerEvents = "none";
 
           fetch("/check_out", {
             method: "POST",
@@ -885,18 +814,18 @@
                 hoursCell.textContent = data.worked_hours;
                 statusCell.textContent = data.status_text;
                 btn.textContent = "✔️ Checked Out";
-                btn.disabled = true;
+                btn.style.pointerEvents = "none";
               } else {
                 outCell.textContent = "❌ Error";
                 btn.textContent = "Retry Check Out";
-                btn.disabled = false;
+                btn.style.pointerEvents = "auto";
               }
             })
             .catch((error) => {
               console.error(error);
               outCell.textContent = "❌ Failed";
               btn.textContent = "Retry";
-              btn.disabled = false;
+              btn.style.pointerEvents = "auto";
             });
         });
       });

@@ -18,8 +18,8 @@
       body {
         font-family: "Poppins", sans-serif;
         background: linear-gradient(135deg, #e0e7ff, #f4f4f4);
-        padding-bottom: 100px;
         color: #1e293b;
+        min-height: 100vh;
       }
 
       /* Sidebar Styles */
@@ -27,15 +27,15 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 280px;
+        width: 260px;
         height: 100vh;
         background: linear-gradient(180deg, #3b82f6, #2563eb);
         color: white;
-        padding: 20px;
+        padding: 16px;
         transition: transform 0.3s ease;
         overflow-y: auto;
         z-index: 1000;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
       }
 
       .sidebar.hidden {
@@ -47,59 +47,56 @@
       }
 
       .sidebar h1 {
-        text-align: center;
-        font-size: 26px;
+        font-size: 22px;
         font-weight: 600;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
         color: #fff;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        text-align: center;
       }
 
       .sidebar a {
         display: block;
-        padding: 15px;
+        padding: 12px;
         color: white;
         text-decoration: none;
-        margin: 10px 0;
+        margin: 8px 0;
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
+        border-radius: 6px;
         transition: all 0.3s ease;
         font-weight: 400;
+        font-size: 0.9rem;
         border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       }
 
       .sidebar a:hover {
         background: #ffffff;
         color: #2563eb;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transform: translateY(-1px);
       }
 
       /* Content Styles */
       .content {
-        margin-left: 280px;
-        padding: 30px;
-        transition: margin-left 0.3s ease;
+        margin-left: 0;
+        padding: 16px;
         background: #ffffff;
         min-height: 100vh;
-        border-radius: 0 12px 12px 0;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        transition: margin-left 0.3s ease;
       }
 
       /* Menu Toggle Button */
       .menu-toggle {
-        display: none;
+        display: block;
         background-color: #2563eb;
         color: white;
         border: none;
-        padding: 12px 16px;
-        font-size: 22px;
+        padding: 10px 14px;
+        font-size: 18px;
         position: fixed;
-        top: 15px;
-        left: 15px;
+        top: 10px;
+        left: 10px;
         z-index: 1001;
-        border-radius: 8px;
+        border-radius: 6px;
         cursor: pointer;
         transition: background 0.3s ease;
       }
@@ -108,51 +105,42 @@
         background-color: #1e40af;
       }
 
-      /* Responsive Design */
-      @media (max-width: 768px) {
-        .sidebar {
-          transform: translateX(-100%);
-          width: 260px;
-        }
-
-        .sidebar.visible {
-          transform: translateX(0);
-        }
-
-        .content {
-          margin-left: 0;
-          border-radius: 12px;
-        }
-
-        .menu-toggle {
-          display: block;
-        }
+      /* Topbar Styles */
+      .topbar {
+        height: 60px;
+        background: linear-gradient(90deg, #2563eb, #3b82f6);
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        font-size: 18px;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
 
       .label {
-        font-size: 30px;
+        font-size: 24px;
         font-weight: 600;
-        margin: 40px 0 20px;
+        margin: 24px 0 16px;
         color: #1e40af;
-        text-transform: uppercase;
         text-align: center;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
       }
 
       .table-wrapper,
       .table-wrapper-2 {
         background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        padding: 25px;
-        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 16px;
+        margin: 16px 0;
         overflow-x: auto;
       }
 
       .table-modern {
         width: 100%;
         border-collapse: collapse;
-        font-size: 15px;
+        font-size: 14px;
       }
 
       .table-modern thead {
@@ -162,7 +150,7 @@
 
       .table-modern th,
       .table-modern td {
-        padding: 15px 20px;
+        padding: 12px;
         text-align: center;
       }
 
@@ -189,8 +177,8 @@
         background: #dc2626;
         color: white;
         font-weight: 600;
-        padding: 6px 12px;
-        border-radius: 8px;
+        padding: 4px 8px;
+        border-radius: 6px;
       }
 
       .th {
@@ -204,27 +192,13 @@
         color: #1e293b;
       }
 
-      .topbar {
-        height: 70px;
-        background: linear-gradient(90deg, #2563eb, #3b82f6);
-        color: white;
-        display: flex;
-        align-items: center;
-        padding: 0 30px;
-        font-size: 20px;
-        font-weight: 500;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      }
-
-      /* Expense Table Specific Styles */
       .table-wrapper h2 {
         text-align: center;
-        font-size: 24px;
+        font-size: 20px;
         color: #1e40af;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
       }
 
-      /* Action Links */
       .table-modern a {
         color: #2563eb;
         text-decoration: none;
@@ -234,6 +208,63 @@
       .table-modern a:hover {
         color: #1e40af;
         text-decoration: underline;
+      }
+
+      /* Responsive Design */
+      @media (min-width: 768px) {
+        .sidebar {
+          width: 220px;
+          padding: 20px;
+        }
+
+        .sidebar.visible {
+          transform: translateX(0);
+        }
+
+        .content {
+          margin-left: 220px;
+          padding: 24px;
+        }
+
+        .menu-toggle {
+          display: none;
+        }
+
+        .table-modern {
+          font-size: 15px;
+        }
+
+        .table-modern th,
+        .table-modern td {
+          padding: 14px 16px;
+        }
+
+        .label {
+          font-size: 28px;
+          margin: 32px 0 20px;
+        }
+
+        .table-wrapper,
+        .table-wrapper-2 {
+          padding: 20px;
+          margin: 20px 0;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .table-modern th,
+        .table-modern td {
+          padding: 8px;
+          font-size: 12px;
+        }
+
+        .table-wrapper h2 {
+          font-size: 18px;
+        }
+
+        .label {
+          font-size: 20px;
+        }
       }
     </style>
   </head>
