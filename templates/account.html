@@ -1,89 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Finance Dashboard</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finance Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #f4f4f4;
-      padding-bottom: 100px;
-    }
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #e0e7ff, #f4f4f4);
+        padding-bottom: 100px;
+        color: #1e293b;
+      }
 
-    /* Sidebar Styles */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 250px;
-      height: 100%;
-      background: #2c2cd8;
-      color: white;
-      padding-top: 60px;
-      transition: transform 0.3s ease;
-      z-index: 1000;
-    }
-
-    .sidebar.hidden {
-      transform: translateX(-100%);
-    }
-
-    .sidebar.visible {
-      transform: translateX(0);
-    }
-
-    .sidebar h1 {
-      text-align: center;
-      font-size: 24px;
-      margin-bottom: 30px;
-    }
-
-    .sidebar a {
-      display: block;
-      padding: 15px 30px;
-      color: white;
-      text-decoration: none;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .sidebar a:hover {
-      background: white;
-      color: #2c2cd8;
-    }
-
-    /* Content Styles */
-    .content {
-      margin-left: 250px;
-      padding: 20px;
-      transition: margin-left 0.3s ease;
-    }
-
-    /* Menu Toggle Button */
-    .menu-toggle {
-      display: none;
-      background-color: #0f3460;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      font-size: 20px;
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 1001;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
+      /* Sidebar Styles */
       .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 100vh;
+        background: linear-gradient(180deg, #3b82f6, #2563eb);
+        color: white;
+        padding: 20px;
+        transition: transform 0.3s ease;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .sidebar.hidden {
         transform: translateX(-100%);
       }
 
@@ -91,265 +46,385 @@
         transform: translateX(0);
       }
 
-      .content {
-        margin-left: 0;
+      .sidebar h1 {
+        text-align: center;
+        font-size: 26px;
+        font-weight: 600;
+        margin-bottom: 30px;
+        color: #fff;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       }
 
-      .menu-toggle {
+      .sidebar a {
         display: block;
+        padding: 15px;
+        color: white;
+        text-decoration: none;
+        margin: 10px 0;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 400;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       }
-    }
 
-    .label {
-      font-size: 28px;
-      font-weight: bold;
-      margin: 40px 0 10px 0;
-      color: #0e0e70;
-      text-transform: uppercase;
-      text-align: center;
-    }
-
-    .table-wrapper {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      padding: 20px;
-      margin: 20px 0;
-      overflow-x: auto;
-    }
-
-    .table-modern {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    .table-modern thead {
-      background: #0e0e70;
-      color: #fff;
-    }
-
-    .table-modern th,
-    .table-modern td {
-      padding: 12px 20px;
-      text-align: center;
-    }
-
-    .table-modern tbody tr:nth-child(even) {
-      background: #f4f6f9;
-    }
-
-    .table-modern tbody tr:hover {
-      background: #d1ecf1;
-      transition: background 0.3s;
-    }
-
-    .profit-cell {
-      color: green;
-      font-weight: bold;
-    }
-
-    .loss-cell {
-      color: red;
-      font-weight: bold;
-    }
-
-    .tag-danger {
-      background: #e74c3c;
-      color: white;
-      font-weight: bold;
-      padding: 5px 10px;
-      border-radius: 8px;
-    }
-
-    .topbar {
-      height: 60px;
-      background: #0f3460;
-      color: white;
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-    }
-  </style>
-</head>
-<body>
-  <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-
-  <div class="sidebar hidden" id="sidebar">
-    <h1>📊 Finance Hub</h1>
-    <a href="{{ url_for('accounting') }}">📚 Ledger & Records</a>
-    <a href="{{ url_for('daily_income_expenses') }}">💰 Daily Inflow</a>
-    <a href="{{ url_for('profit_loss') }}">📈 Profit Tracker</a>
-    <a href="{{ url_for('create_expense') }}">➕ New Expense</a>
-    <a href="{{ url_for('view_expense') }}">📋 Expense History</a>
-    <a href="{{ url_for('cashflow_statements') }}">🔄 Cashflow Insights</a>
-    <a href="{{ url_for('view_cashflow') }}">👁️ Cashflow Overview</a>
-    <a href="{{ url_for('generate_financial_report') }}">📑 Financial Snapshot</a>
-    <a href="/dashboard">🏠 Home</a>
-  </div>
-
-  <div class="content" id="content">
-    <div class="topbar"></div>
-
-    <h2 class="label">DAILY INCOME AND EXPENSES</h2>
-    <div class="table-wrapper">
-      <table class="table-modern">
-        <thead>
-          <tr>
-            <th>DATE</th>
-            <th>QUANTITY OF GOODS SOLD</th>
-            <th>TOTAL INCOME SALES</th>
-            <th>EXPENSES</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for sale in daily_data %}
-          <tr>
-            <td>{{ sale[0] }}</td>
-            <td>{{ sale[3] }}</td>
-            <td>{{ sale[1] }}</td>
-            <td>{{ sale[2] }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <h2>PROFIT AND LOSS</h2>
-    <div class="table-wrapper">
-      <table class="table-modern">
-        <thead>
-          <tr>
-            <th>DATE</th>
-            <th>PROFIT</th>
-            <th>LOSS</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for sale in profit_loss %}
-          <tr>
-            <td>{{ sale[0] }}</td>
-            <td class="profit-cell">{{ sale[1] }}</td>
-            <td class="loss-cell">{{ sale[2] }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <h2>OPERATIONAL EXPENSES</h2>
-    <p><strong>Payment Date:</strong> {{ date }}</p>
-    <div class="table-wrapper">
-      <table class="table-modern">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Salaries</th>
-            <th>Cost of Goods</th>
-            <th>Utilities</th>
-            <th>Rent</th>
-            <th>Supplies</th>
-            <th>Ads</th>
-            <th>Insurance</th>
-            <th>Maintenance</th>
-            <th>Transport</th>
-            <th>Taxes</th>
-            <th>Total Expenses</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for expense in expenses %}
-          <tr>
-            <td>{{ expense[0] }}</td>
-            <td>{{ expense[1] }}</td>
-            <td>{{ expense[2] }}</td>
-            <td>{{ expense[3] }}</td>
-            <td>{{ (expense[4] or 0) + (expense[5] or 0) + (expense[6] or 0) }}</td>
-            <td>{{ expense[7] }}</td>
-            <td>{{ expense[8] }}</td>
-            <td>{{ expense[9] }}</td>
-            <td>{{ expense[10] }}</td>
-            <td>{{ expense[11] }}</td>
-            <td>{{ expense[12] }}</td>
-            <td>{{ expense[13] }}</td>
-            <td>{{ expense[14] }}</td>
-            <td style="font-weight: bold;"><span>{{ expense[15] }}</span></td>
-            <td>
-              <a href="{{ url_for('edit_expense', id=expense[0]) }}">✏️ Edit</a> |
-              <a href="{{ url_for('delete_expense', id=expense[0]) }}">🗑️ Delete</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <h2>All Cashflow Reports</h2>
-    <div class="table-wrapper">
-      <table class="table-modern">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Inflow</th>
-            <th>Outflow</th>
-            <th>Expenses</th>
-            <th>Investments</th>
-            <th>Financial</th>
-            <th>Total Outflow</th>
-            <th>Net Cashflow</th>
-            <th>Notes</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for report in reports %}
-          <tr>
-            <td>{{ report[0] }}</td>
-            <td>{{ report[1] }}</td>
-            <td>{{ report[2] }}</td>
-            <td>{{ report[3] }}</td>
-            <td>{{ report[4] }}</td>
-            <td>{{ report[5] }}</td>
-            <td>{{ report[6] }}</td>
-            <td>{{ report[7] }}</td>
-            <td>{{ report[8] }}</td>
-            <td>{{ report[9] }}</td>
-            <td>{{ report[10] }}</td>
-            <td>
-              <a href="{{ url_for('edit_cashflow', id=report[0]) }}">✏️ Edit</a> |
-              <a href="{{ url_for('delete_cashflow', id=report[0]) }}" onclick="return confirm('Are you sure you want to delete this report?')">🗑️ Delete</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <script>
-    function toggleSidebar() {
-      const sidebar = document.getElementById("sidebar");
-      sidebar.classList.toggle("hidden");
-      sidebar.classList.toggle("visible");
-      const content = document.getElementById("content");
-      content.classList.toggle("shifted");
-    }
-
-    // Set initial sidebar state based on screen size
-    document.addEventListener("DOMContentLoaded", () => {
-      const sidebar = document.getElementById("sidebar");
-      const content = document.getElementById("content");
-      if (window.innerWidth > 768) {
-        sidebar.classList.remove("hidden");
-        sidebar.classList.add("visible");
-        content.classList.add("shifted");
+      .sidebar a:hover {
+        background: #ffffff;
+        color: #2563eb;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       }
-    });
-  </script>
-</body>
+
+      /* Content Styles */
+      .content {
+        margin-left: 280px;
+        padding: 30px;
+        transition: margin-left 0.3s ease;
+        background: #ffffff;
+        min-height: 100vh;
+        border-radius: 0 12px 12px 0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Menu Toggle Button */
+      .menu-toggle {
+        display: none;
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        padding: 12px 16px;
+        font-size: 22px;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1001;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .menu-toggle:hover {
+        background-color: #1e40af;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+          width: 260px;
+        }
+
+        .sidebar.visible {
+          transform: translateX(0);
+        }
+
+        .content {
+          margin-left: 0;
+          border-radius: 12px;
+        }
+
+        .menu-toggle {
+          display: block;
+        }
+      }
+
+      .label {
+        font-size: 30px;
+        font-weight: 600;
+        margin: 40px 0 20px;
+        color: #1e40af;
+        text-transform: uppercase;
+        text-align: center;
+        letter-spacing: 1px;
+      }
+
+      .table-wrapper,
+      .table-wrapper-2 {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 25px;
+        margin: 20px 0;
+        overflow-x: auto;
+      }
+
+      .table-modern {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 15px;
+      }
+
+      .table-modern thead {
+        background: #2563eb;
+        color: #fff;
+      }
+
+      .table-modern th,
+      .table-modern td {
+        padding: 15px 20px;
+        text-align: center;
+      }
+
+      .table-modern tbody tr:nth-child(even) {
+        background: #f8fafc;
+      }
+
+      .table-modern tbody tr:hover {
+        background: #e0f2fe;
+        transition: background 0.3s;
+      }
+
+      .profit-cell {
+        color: #16a34a;
+        font-weight: 600;
+      }
+
+      .loss-cell {
+        color: #dc2626;
+        font-weight: 600;
+      }
+
+      .tag-danger {
+        background: #dc2626;
+        color: white;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 8px;
+      }
+
+      .th {
+        background-color: #1e293b;
+        color: white;
+        font-weight: 500;
+      }
+
+      td:hover {
+        background-color: #f1f5f9;
+        color: #1e293b;
+      }
+
+      .topbar {
+        height: 70px;
+        background: linear-gradient(90deg, #2563eb, #3b82f6);
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 0 30px;
+        font-size: 20px;
+        font-weight: 500;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Expense Table Specific Styles */
+      .table-wrapper h2 {
+        text-align: center;
+        font-size: 24px;
+        color: #1e40af;
+        margin-bottom: 20px;
+      }
+
+      /* Action Links */
+      .table-modern a {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .table-modern a:hover {
+        color: #1e40af;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+
+    <div class="sidebar hidden" id="sidebar">
+      <h1>📊 Finance Hub</h1>
+      <a href="{{ url_for('accounting') }}">📚 Ledger & Records</a>
+      <a href="{{ url_for('daily_income_expenses') }}">💰 Daily Inflow</a>
+      <a href="#">Filter Sales</a>
+      <a href="{{ url_for('profit_loss') }}">📈 Profit Tracker</a>
+      <a href="{{ url_for('create_expense') }}">➕ New Expense</a>
+      <a href="{{ url_for('view_expense') }}">📋 Expense History</a>
+      <a href="#">Filter Expense</a>
+      <a href="{{ url_for('cashflow_statements') }}">🔄 Cashflow Insights</a>
+      <a href="{{ url_for('view_cashflow') }}">👁️ Cashflow Overview</a>
+      <a href="#">Filter Cashflow</a>
+      <a href="{{ url_for('generate_financial_report') }}"
+        >📑 Financial Snapshot</a
+      >
+      <a href="/dashboard">🏠 Home</a>
+    </div>
+
+    <div class="content" id="content">
+      <div class="topbar">Finance Dashboard</div>
+
+      <h2 class="label">Daily Income and Expenses</h2>
+      <div class="table-wrapper">
+        <table class="table-modern">
+          <thead>
+            <tr>
+              <th>DATE</th>
+              <th>QUANTITY OF GOODS SOLD</th>
+              <th>TOTAL INCOME SALES</th>
+              <th>EXPENSES</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sale in daily_data %}
+            <tr>
+              <td>{{ sale[0] }}</td>
+              <td>{{ sale[3] }}</td>
+              <td>{{ sale[1] }}</td>
+              <td>{{ sale[2] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="label">Profit and Loss</h2>
+      <div class="table-wrapper">
+        <table class="table-modern">
+          <thead>
+            <tr>
+              <th>DATE</th>
+              <th>PROFIT</th>
+              <th>LOSS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sale in profit_loss %}
+            <tr>
+              <td>{{ sale[0] }}</td>
+              <td class="profit-cell">{{ sale[1] }}</td>
+              <td class="loss-cell">{{ sale[2] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="label">Recorded Operational Expenses</h2>
+      {% for date, daily_expenses in grouped_expenses.items() %}
+      <div class="table-wrapper">
+        <h2>📅 Expenses for {{ date }}</h2>
+        <table class="table-modern">
+          <thead>
+            <tr>
+              <th>Salaries</th>
+              <th>Cost of Goods</th>
+              <th>Utilities</th>
+              <th>Rent</th>
+              <th>Supplies</th>
+              <th>Ads</th>
+              <th>Insurance</th>
+              <th>Maintenance</th>
+              <th>Transport</th>
+              <th>Taxes</th>
+              <th>Total Expenses</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for expense in daily_expenses %}
+            <tr>
+              <td class="th">{{ expense['salaries'] }}</td>
+              <td class="th">{{ expense['cost_of_good'] }}</td>
+              <td class="th">
+                {{ (expense['internet'] or 0) + (expense['water'] or 0) +
+                (expense['electricity'] or 0) }}
+              </td>
+              <td class="th">{{ expense['rent'] }}</td>
+              <td class="th">{{ expense['supplies'] }}</td>
+              <td class="th">{{ expense['ads'] }}</td>
+              <td class="th">{{ expense['insuarance'] }}</td>
+              <td class="th">{{ expense['maintanance'] }}</td>
+              <td class="th">{{ expense['transport'] }}</td>
+              <td class="th">{{ expense['taxes'] }}</td>
+              <td class="th" style="font-weight: bold">
+                {{ expense['total_expenses'] }}
+              </td>
+              <td class="th">
+                <a href="{{ url_for('edit_expense', id=expense['id']) }}"
+                  >✏️ Edit</a
+                >
+                |
+                <a href="{{ url_for('delete_expense', id=expense['id']) }}"
+                  >🗑️ Delete</a
+                >
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+
+      <h2 class="label">All Cashflow Reports</h2>
+      {% for report in reports %}
+      <div class="table-wrapper-2">
+        <p><strong>Cashflow ID:</strong> {{ report['id'] }}</p>
+        <p><strong>Start Date:</strong> {{ report['start_date'] }}</p>
+        <p><strong>End Date:</strong> {{ report['end_date'] }}</p>
+        <table class="table-modern">
+          <thead>
+            <tr>
+              <th>Inflow</th>
+              <th>Outflow</th>
+              <th>Expenses</th>
+              <th>Investments</th>
+              <th>Financial</th>
+              <th>Total Outflow</th>
+              <th>Net Cashflow</th>
+              <th>Notes</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="th">{{ report['inflow'] }}</td>
+              <td class="th">{{ report['outflow'] }}</td>
+              <td class="th">{{ report['expenses'] }}</td>
+              <td class="th">{{ report['investments'] }}</td>
+              <td class="th">{{ report['financial'] }}</td>
+              <td class="th">{{ report['total_outflow'] }}</td>
+              <td class="th">{{ report['net_cashflow'] }}</td>
+              <td class="th">{{ report['notes'] }}</td>
+              <td class="th">
+                <a href="{{ url_for('edit_cashflow', id=report['id']) }}"
+                  >✏️ Edit</a
+                >
+                |
+                <a
+                  href="{{ url_for('delete_cashflow', id=report['id']) }}"
+                  onclick="return confirm('Are you sure you want to delete this report?')"
+                  >🗑️ Delete</a
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+    </div>
+
+    <script>
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("hidden");
+        sidebar.classList.toggle("visible");
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const sidebar = document.getElementById("sidebar");
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove("hidden");
+          sidebar.classList.add("visible");
+        }
+      });
+    </script>
+  </body>
 </html>

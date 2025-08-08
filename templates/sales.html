@@ -222,7 +222,7 @@
 
     <div class="sidebar hidden" id="sidebar">
       <h1>📊 SALES HUB</h1>
-      <a href="/record_sales">➕ New Sale</a>
+      <a href="{{url_for('record_sales')}}">➕ New Sale</a>
       <a href="{{url_for('dashboard_sales')}}">📈 Sales Overview</a>
       <a href="{{url_for('daily_summary')}}">🗓️ Daily Snapshot</a>
       <a href="{{url_for('weekly_summary')}}">📅 Weekly Insights</a>
@@ -254,25 +254,27 @@
           <tbody>
             {% for sale in sales %}
             <tr>
-              <td>{{ sale[1] }}</td>
-              <td>{{ sale[2] }}</td>
-              <td>{{ sale[3] }}</td>
-              <td>{{ sale[4] }}</td>
-              <td>{{ sale[5] }}</td>
-              <td>{{ sale[6] }}</td>
-              <td style="font-weight: bold">{{ sale[7] }}</td>
-              <td>{{ sale[8] }}</td>
+              <td>{{ sale['item_id'] }}</td>
+              <td>{{ sale['item_name'] }}</td>
+              <td>{{ sale['quantity'] }}</td>
+              <td>{{ sale['selling_price'] }}</td>
+              <td>{{ sale['buying_price'] }}</td>
+              <td>{{ sale['payment'] }}</td>
+              <td style="font-weight: bold">{{ sale['profit_or_loss'] }}</td>
+              <td>{{ sale['date'] }}</td>
               <td class="action-links">
                 <a
-                  href="{{ url_for('render_receipt', receipt_no=sale[0]) }}"
+                  href="{{ url_for('render_receipt', receipt_no=sale['sale_id']) }}"
                   target="_blank"
                 >
                   🖨️ Print Receipt
                 </a>
 
-                <a href="{{ url_for('edit_sales', id=sale[0]) }}">Edit</a>
+                <a href="{{ url_for('edit_sales', id=sale['sale_id']) }}"
+                  >Edit</a
+                >
                 <a
-                  href="{{ url_for('delete_sales', id=sale[0]) }}"
+                  href="{{ url_for('delete_sales', id=sale['sale_id']) }}"
                   onclick="return confirm('Are you sure?')"
                   >Delete</a
                 >
@@ -295,11 +297,13 @@
           </tr>
           {% for row in summary %}
           <tr>
-            <td>{{ row[0] }}</td>
-            <td>KSH {{ row[1] }}</td>
-            <td style="color: green; font-weight: bold">KSH {{ row[2] }}</td>
-            <td style="color: red; font-weight: bold">KSH {{ row[3] }}</td>
-            <td>{{ row[4] }}</td>
+            <td>{{ row['day'] }}</td>
+            <td>KSH {{ row['total_sales'] }}</td>
+            <td style="color: green; font-weight: bold">
+              KSH {{ row['profit'] }}
+            </td>
+            <td style="color: red; font-weight: bold">KSH {{ row['loss'] }}</td>
+            <td>{{ row['items_sold'] }}</td>
           </tr>
           {% endfor %}
         </table>
@@ -317,11 +321,13 @@
           </tr>
           {% for row in weekly_summary %}
           <tr>
-            <td>{{ row[0] }}</td>
-            <td>KSH {{ row[1] }}</td>
-            <td style="color: green; font-weight: bold">KSH {{ row[2] }}</td>
-            <td style="color: red; font-weight: bold">KSH {{ row[3] }}</td>
-            <td>{{ row[4] }}</td>
+            <td>{{ row['week'] }}</td>
+            <td>KSH {{ row['total_sales'] }}</td>
+            <td style="color: green; font-weight: bold">
+              KSH {{ row['profit'] }}
+            </td>
+            <td style="color: red; font-weight: bold">KSH {{ row['loss'] }}</td>
+            <td>{{ row['items_sold'] }}</td>
           </tr>
           {% endfor %}
         </table>
@@ -339,11 +345,13 @@
           </tr>
           {% for row in monthly_summary %}
           <tr>
-            <td>{{ row[0] }}</td>
-            <td>KSH {{ row[1] }}</td>
-            <td style="color: green; font-weight: bold">KSH {{ row[2] }}</td>
-            <td style="color: red; font-weight: bold">KSH {{ row[3] }}</td>
-            <td>{{ row[4] }}</td>
+            <td>{{ row['month'] }}</td>
+            <td>KSH {{ row['total_sales'] }}</td>
+            <td style="color: green; font-weight: bold">
+              KSH {{ row['profit'] }}
+            </td>
+            <td style="color: red; font-weight: bold">KSH {{ row['loss'] }}</td>
+            <td>{{ row['items_sold'] }}</td>
           </tr>
           {% endfor %}
         </table>

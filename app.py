@@ -7,22 +7,42 @@ from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 import africastalking
 
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+
+
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+def get_connection():
+    conn = psycopg2.connect(
+        host='ep-patient-block-abdjeaq8-pooler.eu-west-2.aws.neon.tech',
+        port=5432,  # Neon default port
+        database='neondb',
+        user='neondb_owner',
+        password='npg_jBNm9luTR4Pi',
+        sslmode='require',
+        target_session_attrs='read-write',
+        cursor_factory=RealDictCursor
+    )
+    return conn
+
 
 def init_db():
-    with sqlite3.connect('furniture.db') as conn:
-        c = conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS furniture (
-            item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS furniture (
+            item_id SERIAL PRIMARY KEY ,
             name TEXT,
-            quantity INTEGER,
+            quantity SERIAL,
             selling_price REAL,
             buying_price REAL,
             image_path TEXT
         );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS damaged_info (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS damaged_info (
+            id SERIAL PRIMARY KEY ,
             date TEXT,
             name TEXT,
             quantity REAL,
@@ -32,8 +52,8 @@ def init_db():
             reason TEXT
         );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS stock_info (
-            item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS stock_info (
+            item_id SERIAL PRIMARY KEY ,
             date TEXT,
             supplier_name TEXT,
             supplier_contact TEXT,
@@ -44,39 +64,41 @@ def init_db():
             status REAL
         );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS members (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS members (
+            id SERIAL PRIMARY KEY ,
             name TEXT,
             phone TEXT,
             role TEXT,
-            company_id INTEGER,
+            company_id SERIAL,
             status TEXT,
             email TEXT,
             profile_photo TEXT
         );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS sales (
-            sale_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            item_id INTEGER,
-            item_name TEXT,
-            quantity INTEGER,
-            selling_price REAL,
-            buying_price REAL,
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS sales (
+            sale_id SERIAL PRIMARY KEY,        -- Auto-increment unique ID for each sale
+            item_id INTEGER NOT NULL,          -- References item from stock_info
+            item_name TEXT NOT NULL,
+            quantity INTEGER NOT NULL,         -- Quantity sold
+            selling_price NUMERIC(10, 2) NOT NULL,  -- More precise than REAL for money
+            buying_price NUMERIC(10, 2) NOT NULL,
             payment TEXT,
-            profit_or_loss REAL,
-            date TEXT
-        );''')
+            profit_or_loss NUMERIC(10, 2),
+            date DATE NOT NULL
+        );
+    """)
 
-        c.execute('''CREATE TABLE IF NOT EXISTS meetings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS meetings (
+            id SERIAL PRIMARY KEY ,
             title TEXT,
             date TEXT,
             time TEXT
         );''')
 
-        c.execute('''
+    c.execute('''
             CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY ,
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
                 profile_photo TEXT,
@@ -86,42 +108,45 @@ def init_db():
         ''')
 
 
-        c.execute('''CREATE TABLE IF NOT EXISTS quotations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS quotations (
+            id SERIAL PRIMARY KEY ,
             customer_name TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             status TEXT DEFAULT 'pending'
         );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS invoices (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS invoices (
+            id SERIAL PRIMARY KEY ,
             customer_name TEXT,
-            total_price INTEGER,
+            total_price SERIAL,
             date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS invoice_items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            item_type TEXT NOT NULL,
-            invoice_id INTEGER,
-            item_quantity INTEGER NOT NULL,
-            selling_price INTEGER,
-            is_paid INTEGER DEFAULT 0,
-            status TEXT DEFAULT 'not paid',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );''')
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS invoice_items (
+        id SERIAL PRIMARY KEY,
+        item_type TEXT NOT NULL,
+        invoice_id INT,
+        item_quantity INT NOT NULL,
+        selling_price NUMERIC(10,2),
+        is_paid BOOLEAN DEFAULT FALSE,
+        status TEXT DEFAULT 'not paid',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    ''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS quotations_items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            quotation_id INTEGER,
+
+    c.execute('''CREATE TABLE IF NOT EXISTS quotations_items (
+            id SERIAL PRIMARY KEY ,
+            quotation_id SERIAL,
             item_type TEXT,
-            quantity INTEGER,
+            quantity SERIAL,
             price REAL,
             total REAL
         );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS cashflow (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS cashflow (
+            id SERIAL PRIMARY KEY ,
             start_date TEXT,
             end_date TEXT,
             inflow TEXT,
@@ -134,10 +159,10 @@ def init_db():
             notes TEXT
         );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS expenses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            start_date TEXT,
-            end_date TEXT,
+    c.execute('''CREATE TABLE IF NOT EXISTS expenses (
+            id SERIAL PRIMARY KEY ,
+            start_date DATE ,
+            end_date DATE,
             salaries REAL,
             cost_of_good REAL,
             electricity REAL,
@@ -153,16 +178,16 @@ def init_db():
             total_expenses REAL
         );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS salaries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS salaries (
+            id SERIAL PRIMARY KEY ,
             date TEXT,
-            employee_id INTEGER,
+            employee_id SERIAL,
             salary REAL,
             status TEXT
         );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS contracts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS contracts (
+            id SERIAL PRIMARY KEY ,
             title TEXT,
             description TEXT,
             status TEXT,
@@ -172,9 +197,9 @@ def init_db():
             date_assigned TEXT
         );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS contract_expenses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            contract_id INTEGER,
+    c.execute('''CREATE TABLE IF NOT EXISTS contract_expenses (
+            id SERIAL PRIMARY KEY ,
+            contract_id SERIAL,
             date TEXT,
             workers REAL,
             materials REAL,
@@ -183,8 +208,8 @@ def init_db():
             profit_or_loss REAL,
             daily_outflow REAL
         );''')
-        c.execute('''CREATE TABLE IF NOT EXISTS attendance (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS attendance (
+    id SERIAL PRIMARY KEY ,
                 staff_id TEXT,
                 member TEXT, date TEXT,
                 check_in_time TEXT,
@@ -196,16 +221,16 @@ def init_db():
                 attendance_rate TEXT
     );
 ''')
-        c.execute('''CREATE TABLE IF NOT EXISTS policy (
-                  id  INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS policy (
+                  id  SERIAL PRIMARY KEY ,
                 time_in TEXT,
                 time_out TEXT,
                 email TEXT,
                 address TEXT,
                   phone TEXT
                   )''')
-        c.execute('''CREATE TABLE IF NOT EXISTS respo (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS respo (
+                id SERIAL PRIMARY KEY ,
                 name TEXT,
                 company_id TEXT,
                 respo TEXT,
@@ -216,8 +241,8 @@ def init_db():
                   date_checked TEXT
             );
             ''')
-        c.execute('''CREATE TABLE IF NOT EXISTS settings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+    c.execute('''CREATE TABLE IF NOT EXISTS settings (
+            id SERIAL PRIMARY KEY ,
             key TEXT,
             value TEXT
         );
@@ -244,7 +269,20 @@ sms: Any = africastalking.SMS
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
-    conn = sqlite3.connect('furniture.db')
+    import re
+
+    def normalize_kenyan_number(number):
+        number = re.sub(r'\D', '', number.strip())  # Remove non-digit chars
+        if number.startswith('0') and len(number) == 10:
+            return '+254' + number[1:]
+        elif number.startswith('254') and len(number) == 12:
+            return '+' + number
+        elif number.startswith('+254') and len(number) == 13:
+            return number
+        else:
+            return None
+
+    conn = get_connection()
     c = conn.cursor()
 
     current_data = {
@@ -260,11 +298,11 @@ def settings():
     users = c.fetchall()
     user_list = [
         {
-            'id': user[0],
-            'username': user[1],
-            'email': user[2],
-            'phone': user[3],
-            'profile_photo': user[4]
+            'id': user['id'], # type: ignore
+            'username': user['username'], # type: ignore
+            'email': user['email'], # type: ignore
+            'phone': user['phone'], # type: ignore
+            'profile_photo': user['profile_photo'] # type: ignore
         }
         for user in users
     ]
@@ -274,7 +312,14 @@ def settings():
         time_out = request.form['time_out'].strip()
         email = request.form['email'].strip()
         address = request.form['address'].strip()
-        phone = request.form['phone'].strip()
+        phone_raw = request.form['phone'].strip()
+
+        # Normalize phone number
+        phone = normalize_kenyan_number(phone_raw)
+
+        if not phone:
+            flash('❌ Invalid phone number format. Use 0712345678 or +254...', 'danger')
+            return render_template('settings.html', data=current_data, users=user_list)
 
         try:
             c.execute('SELECT id FROM policy LIMIT 1')
@@ -283,13 +328,13 @@ def settings():
             if existing:
                 c.execute('''
                     UPDATE policy
-                    SET time_in = ?, time_out = ?, email = ?, address = ?, phone = ?
-                    WHERE id = ?
+                    SET time_in = %s, time_out = %s, email = %s, address = %s, phone = %s
+                    WHERE id = %s
                 ''', (time_in, time_out, email, address, phone, existing[0]))
             else:
                 c.execute('''
                     INSERT INTO policy (time_in, time_out, email, address, phone)
-                    VALUES (?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s)
                 ''', (time_in, time_out, email, address, phone))
 
             conn.commit()
@@ -318,8 +363,9 @@ def settings():
 
 
 
-def get_admin_phone():
-    conn = sqlite3.connect('furniture.db')
+
+def  normalize_kenyan_number():
+    conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT value FROM settings WHERE key = 'admin_phone'")
     row = c.fetchone()
@@ -329,7 +375,7 @@ def get_admin_phone():
     return None
 
 def send_sms(message):
-    phone = get_admin_phone()
+    phone =  normalize_kenyan_number()
     if phone:
         try:
             response = sms.send(message, [phone])
@@ -358,9 +404,9 @@ def reset_password():
             flash("❌ New passwords do not match", "danger")
             return redirect(url_for('reset_password'))
 
-        conn = sqlite3.connect('furniture.db')
+        conn = get_connection()
         c = conn.cursor()
-        c.execute("SELECT password FROM users WHERE username = ?", (username,))
+        c.execute("SELECT password FROM users WHERE username = %s", (username,))
         row = c.fetchone()
 
         if not row:
@@ -374,7 +420,7 @@ def reset_password():
 
         # Save new password
         new_hash = generate_password_hash(new_pass)
-        c.execute("UPDATE users SET password = ? WHERE username = ?", (new_hash, username))
+        c.execute("UPDATE users SET password = %s WHERE username = %s", (new_hash, username))
         conn.commit()
         conn.close()
 
@@ -389,47 +435,59 @@ def reset_password():
 
 from flask import jsonify
 
-@app.route('/check_in', methods=['POST'])
+from flask import request, jsonify
+import sqlite3
+from datetime import datetime
+from africastalking import SMS, initialize
+
+# Initialize Africa's Talking
+initialize("sandbox", "your_api_key")
+sms = SMS
+
 @app.route('/check_in', methods=['POST'])
 def check_in():
     staff_id = request.form['id']
     date = datetime.today().strftime('%d-%m-%Y')
     time_in = datetime.today().strftime('%H:%M:%S')
 
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     # Check if already checked in today
-    c.execute('SELECT * FROM attendance WHERE staff_id = ? AND date = ?', (staff_id, date))
-    member = c.fetchone()
-    if member:
+    c.execute('SELECT * FROM attendance WHERE staff_id = %s AND date = %s', (staff_id, date))
+    already_checked = c.fetchone()
+    if already_checked:
         conn.close()
         return jsonify({"status": "error", "message": "Already checked in today"}), 400
-    member_name = member[0] if member else 'Unknown'
 
-    # Continue to insert
-    ...
-
+    # Get the staff name from users table
+    c.execute('SELECT username FROM users WHERE id = %s', (staff_id,))
+    user_row = c.fetchone()
+    member_name = user_row['name'] if user_row else 'Unknown' # type: ignore
 
     # Insert check-in
     c.execute('''
         INSERT INTO attendance (staff_id, member, date, check_in_time, status)
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s)
     ''', (staff_id, member_name, date, time_in, 'Checked In'))
     conn.commit()
+
+    # Fetch phone number from policy table
+    c.execute('SELECT phone FROM policy LIMIT 1')
+    phone_row = c.fetchone()
     conn.close()
 
-    # Optional: SMS Notification
-    number = get_admin_phone()
+    number = normalize_kenyan_number()
     message = f"{member_name} was checked in at {time_in}"
+
     if number:
         try:
             sms.send(message, [number])
         except Exception as e:
-            print("SMS failed:", e)
+            print("❌ SMS failed:", e)
 
-    # Return check-in time to frontend
     return jsonify({"status": "success", "time_in": time_in})
+
 
 from flask import jsonify
 
@@ -438,16 +496,16 @@ def check_out():
     staff_id = request.form['id']
     date = datetime.today().strftime('%d-%m-%Y')
     time_out = datetime.today().strftime('%H:%M:%S')
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
-    c.execute('SELECT check_in_time FROM attendance WHERE staff_id = ? AND date = ?', (staff_id, date))
+    c.execute('SELECT check_in_time FROM attendance WHERE staff_id = %s AND date = %s', (staff_id, date))
     row = c.fetchone()
     if not row:
         conn.close()
         return jsonify({"status": "error", "message": "Check-in not found for today."}), 400
 
-    time_in = row[0]
+    time_in = row['check_in_time'] # type: ignore
 
     # Get policy
     c.execute('SELECT time_in, time_out FROM policy')
@@ -470,17 +528,22 @@ def check_out():
     if worked_hours == 0:
         status = 'Absent'
 
-    c.execute('SELECT COUNT(*) FROM attendance WHERE staff_id = ?', (staff_id,))
-    total_days = c.fetchone()[0]
-    c.execute('SELECT COUNT(*) FROM attendance WHERE staff_id = ? AND status IN ("Present", "Late")', (staff_id,))
-    present_days = c.fetchone()[0]
+    c.execute('SELECT COUNT(*) FROM attendance WHERE staff_id = %s', (staff_id,))
+    row = c.fetchone()
+    if row:
+        total_days = row['id'] # type: ignore
+
+    c.execute('SELECT COUNT(*) FROM attendance WHERE staff_id = %s AND status IN ("Present", "Late")', (staff_id,))
+    days = c.fetchone()
+    if days:
+        present_days = days['id'] # type: ignore
     attendance_rate = round((present_days / total_days) * 100, 2) if total_days else 0.0
 
     c.execute('''
         UPDATE attendance
-        SET check_out_time = ?, lateness_minutes = ?, early_leave_minutes = ?, 
-            worked_hours = ?, status = ?, attendance_rate = ?
-        WHERE staff_id = ? AND date = ?
+        SET check_out_time = %s, lateness_minutes = %s, early_leave_minutes = %s, 
+            worked_hours = %s, status = %s, attendance_rate = %s
+        WHERE staff_id = %s AND date = %s
     ''', (time_out, lateness, early_leave, worked_hours, status, attendance_rate, staff_id, date))
 
     conn.commit()
@@ -488,7 +551,7 @@ def check_out():
 
     # SMS (optional)
     try:
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         if number:
             sms.send(f"{staff_id} checked out at {time_out}", [number])
     except:
@@ -502,10 +565,12 @@ def check_out():
         "attendance_rate": attendance_rate
     })
 
+from flask import render_template
+from datetime import datetime
+
 @app.route('/attendance_view')
 def attendance_view():
-    conn = sqlite3.connect('furniture.db')
-    conn.row_factory = sqlite3.Row
+    conn = get_connection()
     c = conn.cursor()
 
     today = datetime.today().strftime('%d-%m-%Y')
@@ -515,18 +580,29 @@ def attendance_view():
     all_members = c.fetchall()
 
     # Fetch today’s attendance
-    c.execute('SELECT * FROM attendance WHERE date = ?', (today,))
-    attendance_data = {row['staff_id']: row for row in c.fetchall()}
+    c.execute('SELECT * FROM attendance WHERE date = %s', (today,))
+    attendance_raw = c.fetchall()
+
+    # Convert attendance rows to a dictionary by staff_id
+    attendance_data = {}
+    for row in attendance_raw:
+        # Map the columns by index (adjust depending on your schema)
+        attendance_data[row['id']] = { # type: ignore
+            'check_in_time': row['check_in_time'], # type: ignore
+            'check_out_time': row['check_out_time'], # type: ignore
+            'worked_hours': row['worked_hours'], # type: ignore
+            'status': row['status'] # type: ignore
+        }
 
     # Merge members and today's attendance
     table_data = []
-    for member in all_members:
-        staff_id = member['company_id']
+    for member in all_members: 
+        staff_id = member['name']  # type: ignore # company_id
         attendance_row = attendance_data.get(staff_id)
 
         row = {
             'staff_id': staff_id,
-            'member': member['name'],
+            'member': member['name'],  # name # type: ignore
             'check_in_time': attendance_row['check_in_time'] if attendance_row else '—',
             'check_out_time': attendance_row['check_out_time'] if attendance_row else '—',
             'worked_hours': attendance_row['worked_hours'] if attendance_row else '—',
@@ -538,6 +614,7 @@ def attendance_view():
     return render_template('members.html', today=today, today_attendance=table_data)
 
 
+
  
 
 # Attendance route (GET only with staff_id from URL)
@@ -545,14 +622,14 @@ import json
 @app.route('/available_members')
 def available_members():
     today = datetime.today().strftime('%Y-%m-%d')
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     # Get members who have NOT checked in today
     c.execute('''
         SELECT name, company_id FROM members
         WHERE company_id NOT IN (
-            SELECT staff_id FROM attendance WHERE date = ?
+            SELECT staff_id FROM attendance WHERE date = %s
         )
     ''', (today,))
     members = c.fetchall()
@@ -574,7 +651,7 @@ def check_in_member():
     time_in = datetime.now().strftime('%H:%M:%S')
     date = datetime.today().strftime('%Y-%m-%d')
 
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     # Fetch expected time from policy
@@ -590,7 +667,7 @@ def check_in_member():
     # Insert into attendance table
     c.execute('''
         INSERT INTO attendance (member, staff_id, date, check_in_time, lateness_minutes, status)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s)
     ''', (name, staff_id, date, time_in, late_minutes, "present"))
 
     conn.commit()
@@ -614,12 +691,14 @@ import sqlite3
 
 @app.route('/create_user', methods=['GET', 'POST'])
 def register():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     # Count existing users
     c.execute('SELECT COUNT(*) FROM users')
-    user_count = c.fetchone()[0]
+    count = c.fetchone()
+    # Handle different database adapter return types
+    user_count = list(count.values())[0] if isinstance(count, dict) else (count[0] if count else 0)
 
     if user_count >= 2:
         conn.close()
@@ -641,11 +720,12 @@ def register():
         hashed_password = generate_password_hash(password)
 
         try:
-            c.execute('INSERT INTO users (username, password, profile_photo, email, phone) VALUES (?, ?, ?, ?, ?)', (username, hashed_password, profile_photo_path, email, phone))
+            c.execute('INSERT INTO users (username, password, profile_photo, email, phone) VALUES (%s, %s, %s, %s, %s)', 
+                      (username, hashed_password, profile_photo_path, email, phone))
             conn.commit()
             conn.close()
             return redirect(url_for('normal_user'))  # or home/dashboard
-        except sqlite3.IntegrityError:
+        except psycopg2.IntegrityError:
             conn.close()
             return "Username already taken."
 
@@ -658,98 +738,147 @@ from werkzeug.security import check_password_hash
 
 @app.route('/', methods=['GET', 'POST'])  # Login
 def normal_user():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
 
-        c.execute('SELECT * FROM users WHERE username = ?', (username,))
+        c.execute('SELECT * FROM users WHERE username = %s', (username,))
         user = c.fetchone()
 
         if user:
-            stored_hash = user[2]  # assuming password is column 3 (index 2)
+            try:
+                # Try dictionary access first (for DB adapters that return dicts)
+                if hasattr(user, 'keys'):  # Check if it's dict-like
+                    stored_hash = user['password'] # type: ignore
+                    user_id = user['id'] # type: ignore
+                else:  # Assume it's a tuple/sequence
+                    stored_hash = user[2]  # password at index 2
+                    user_id = user[0]     # id at index 0
+            except (KeyError, IndexError, TypeError) as e:
+                conn.close()
+                app.logger.error(f"Database access error: {str(e)}")
+                return "Login system error", 500
 
             if check_password_hash(stored_hash, password):
-                session['user'] = username
+                session['user_id'] = user_id
+                session['username'] = username
                 conn.close()
-                return redirect(url_for('dashboard'))  # or homepage
+                return redirect(url_for('dashboard'))
             else:
                 conn.close()
-                return "Wrong password"
+                flash('Invalid password', 'error')
+                return redirect(url_for('normal_user'))
         else:
             conn.close()
-            return "User does not exist"
+            flash('User not found', 'error')
+            return redirect(url_for('normal_user'))
 
+    conn.close()
     return render_template('login.html')
-
-
 @app.route('/add_damagedinfo', methods=['GET', 'POST'])
 def add_damagedinfo():
-    conn = sqlite3.connect('furniture.db')
-    c = conn.cursor()
+    conn = None
+    try:
+        conn = get_connection()
+        c = conn.cursor()
 
-    if request.method == 'POST':
-        date = datetime.today().strftime('%Y-%m-%d')
-        product_id = int(request.form['product_id'])
-        quantity = int(request.form['quantity'] or 1)
-        selling_price = float(request.form['selling_price'] or 0)
-        reason = request.form['reason']
-
-        # Fetch product info
-        c.execute('SELECT quantity, buying_price,  name FROM stock_info WHERE id = ?', (product_id,))
-        result = c.fetchone()
-
-        if not result:
-            conn.close()
-            return "Product not found."
-
-        stock_quantity, buying_price, product_name = result
-
-        if stock_quantity < quantity:
-            conn.close()
-            return f"Only {stock_quantity} items available in stock."
-
-        # Calculate loss
- 
-        # Record damaged stock
-        c.execute('''INSERT INTO damaged_info
-                     ( product_id, date, name, quantity, buying_price, selling_price, loss, reason)
-                     VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                  ( product_id, date, product_name, quantity, buying_price, selling_price,  reason))
-
-        # Update stock
-        c.execute('UPDATE stock_info SET quantity = quantity - ? WHERE id = ?', (quantity, product_id))
-
-        conn.commit()
-        conn.close()
-
-        # SMS Notification
-        number = get_admin_phone()
-        message = f"Damaged stock recorded: {product_name}, Quantity: {quantity}, Date: {date}"
-        if number:
+        if request.method == 'POST':
+            date = datetime.today().strftime('%Y-%m-%d')
+            
+            # Handle product_id with error checking
             try:
-                sms.send(message, [number])
+                product_id = int(request.form['product_id'])
+            except (ValueError, KeyError):
+                flash("Invalid product selection", "error")
+                return redirect(url_for('add_damagedinfo'))
+
+            # Handle quantity with better error checking
+            try:
+                quantity = int(request.form.get('quantity', '1'))
+                if quantity <= 0:
+                    flash("Quantity must be a positive number", "error")
+                    return redirect(url_for('add_damagedinfo'))
+            except ValueError:
+                flash("Invalid quantity value", "error")
+                return redirect(url_for('add_damagedinfo'))
+
+            # Handle selling price
+            try:
+                selling_price = float(request.form.get('selling_price', 0))
+            except ValueError:
+                selling_price = 0.0
+
+            reason = request.form.get('reason', '')
+
+            # Fetch product info with explicit column selection
+            c.execute('SELECT quantity, buying_price, item_name FROM stock_info WHERE item_id = %s', (product_id,))
+            result = c.fetchone()
+
+            if not result:
+                flash("Product not found.", "error")
+                return redirect(url_for('add_damagedinfo'))
+
+            # Convert all numeric values safely
+            try:
+                stock_quantity = int(result['quantity']) # type: ignore
+                buying_price = float(result['buying_price']) # type: ignore
+                product_name = str(result['item_name']) # type: ignore
+            except (ValueError, TypeError, IndexError) as e:
+                flash("Invalid product data in database", "error")
+                return redirect(url_for('add_damagedinfo'))
+
+            if stock_quantity < quantity:
+                flash(f"Only {stock_quantity} items available in stock.", "error")
+                return redirect(url_for('add_damagedinfo'))
+
+            # Calculate loss
+            loss = (buying_price - selling_price) * quantity
+
+            # Record damaged stock
+            c.execute('''INSERT INTO damaged_info
+                         (id, date, name, quantity, buying_price, selling_price, loss, reason)
+                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)''',
+                      (product_id, date, product_name, quantity, buying_price, selling_price, loss, reason))
+
+            # Update stock
+            c.execute('UPDATE stock_info SET quantity = quantity - %s WHERE item_id = %s', (quantity, product_id))
+
+            conn.commit()
+            flash("Damaged stock recorded successfully!", "success")
+            
+            # SMS Notification (optional)
+            try:
+                number = normalize_kenyan_number()  # Make sure this exists
+                if number:
+                    message = f"Damaged: {product_name}, Qty: {quantity}, Loss: {loss:.2f}"
+                    sms.send(message, [number])
             except Exception as e:
-                print("SMS failed:", e)
-        else:
-            print("No admin number found")
+                print(f"SMS failed: {e}")
 
-        return redirect(url_for('view_damagedinfo'))
+            return redirect(url_for('view_damagedinfo'))
 
-    # On GET, fetch products for the dropdown
-    c.execute('SELECT id, name FROM stock_info')
-    products = c.fetchall()
-    conn.close()
+        # GET request - show form
+        c.execute('SELECT item_id, item_name FROM stock_info ORDER BY item_name')
+        products = c.fetchall()
+        return render_template('add_damagedinfo.html', products=products, button_text='Record Damaged Info')
 
-    return render_template('add_damagedinfo.html', products=products)
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        flash(f"An error occurred: {str(e)}", "error")
+        return redirect(url_for('add_damagedinfo'))
+    finally:
+        if conn:
+            conn.close()
 
 
 #view damaged_info
 @app.route('/view_damagedinfo')
 def view_damagedinfo():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
     c.execute('SELECT * FROM damaged_info')
     damagedinfo = c.fetchall()
@@ -759,47 +888,69 @@ def view_damagedinfo():
 
 @app.route('/edit_damagedinfo/<int:id>', methods=['GET', 'POST'])
 def edit_damagedinfo(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
-        name = request.form['name']
-        quantity = int(request.form['quantity'] or 1)
+        product_id = int(request.form['product_id'])
+        quantity = int(float(request.form['quantity'] or 1))
         selling_price = float(request.form['selling_price'] or 0)
-        buying_price = float(request.form['buying_price'] or 0)
         reason = request.form['reason']
-        loss = abs((buying_price - selling_price) * quantity)
+        c.execute('SELECT quantity, buying_price, item_name FROM stock_info WHERE item_id = %s', (product_id,))
+        result = c.fetchone()
+
+        if not result:
+            flash("Product not found.", "error")
+            return redirect(url_for('edit_damagedinfo'))
+
+            # Convert all numeric values safely
+        try:
+                stock_quantity = int(result['quantity']) # type: ignore
+                buying_price = float(result['buying_price']) # type: ignore
+                product_name = str(result['item_name']) # type: ignore
+        except (ValueError, TypeError, IndexError) as e:
+            flash("Invalid product data in database", "error")
+            return redirect(url_for('edit_damagedinfo'))
+
+        if stock_quantity < int(quantity):
+                flash(f"Only {stock_quantity} items available in stock.", "error")
+                return redirect(url_for('edit_damagedinfo'))
+
+            # Calculate loss
+        loss = (buying_price - selling_price) * quantity
+
+
 
         # Fixed: Make sure the columns and values align exactly
         c.execute('''
             UPDATE damaged_info 
-            SET name = ?, quantity = ?, buying_price = ?, selling_price = ?, loss = ?, reason = ?
-            WHERE id = ?
-        ''', (name, quantity, buying_price, selling_price, loss, reason, id))
+            SET name = %s, quantity = %s, buying_price = %s, selling_price = %s, loss = %s, reason = %s
+            WHERE id = %s
+        ''', (product_name, quantity, buying_price, selling_price, loss, reason, id))
 
         conn.commit()
         conn.close()
         return redirect(url_for('view_damagedinfo'))
 
     else:
-        c.execute('SELECT * FROM damaged_info WHERE id = ?', (id,))
+        c.execute('SELECT * FROM damaged_info WHERE id = %s', (id,))
         damaged_item = c.fetchone()
         conn.close()
 
         if damaged_item:
             product = {
-                'id': damaged_item[0],
-                'date': damaged_item[1],
-                'name': damaged_item[2],
-                'quantity': damaged_item[3],
-                'buying_price': damaged_item[4],
-                'selling_price': damaged_item[5],
-                'loss': damaged_item[6],
-                'reason': damaged_item[7]
+                'id': damaged_item['id'], # type: ignore
+                'date': damaged_item['date'], # type: ignore
+                'name': damaged_item['name'], # type: ignore
+                'quantity': damaged_item['quantity'], # type: ignore
+                'buying_price': damaged_item['buying_price'], # type: ignore
+                'selling_price': damaged_item['selling_price'], # type: ignore
+                'loss': damaged_item['loss'], # type: ignore
+                'reason': damaged_item['reason'] # type: ignore
             }
         else:
             product = None
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         message = f"Damaged info was edited"
         if number:
             try:
@@ -815,12 +966,12 @@ def edit_damagedinfo(id):
 #delete damagedinfo
 @app.route('/delete_damagedinfo/<int:id>')
 def delete_damagedinfo(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
-    c.execute('DELETE FROM damaged_info WHERE id = ?', (id,))
+    c.execute('DELETE FROM damaged_info WHERE id = %s', (id,))
     conn.commit()
     conn.close()
-    number = get_admin_phone()
+    number =  normalize_kenyan_number()
     message = f"Damaged info with ID: {id} was deleted"
     if number:
         try:
@@ -834,34 +985,56 @@ def delete_damagedinfo(id):
 # ADD SALARY
 @app.route('/add_salary', methods=['GET', 'POST'])
 def add_salary():
-    if request.method == 'POST':  # fixed
+    if request.method == 'POST':
         date = datetime.today().strftime('%Y-%m-%d')
         employee_id = request.form['employee_id']
         salary_amount = request.form['salary_amount']
         status = request.form['status']
-        conn = sqlite3.connect('furniture.db')
+
+        conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO salaries(date,employee_id, salary, status) VALUES (?, ?, ?, ?)',
-                       (date, employee_id,  salary_amount, status))
-        conn.commit()  # fixed
-        conn.close()   # fixed
-        number = get_admin_phone()
-        message = f"Employee ID :{employee_id} salary was recorded"
+
+        # Check if employee exists
+        cursor.execute('SELECT name FROM members WHERE company_id = %s', (employee_id,))
+        member = cursor.fetchone()
+
+        if not member:
+            flash("No member with that ID, or not yet registered", "error")
+            conn.close()
+            return redirect(url_for('add_salary'))
+
+        # If using RealDictCursor
+        employee_name = member['name'] if isinstance(member, dict) else member[0] # type: ignore
+
+        # Insert salary record
+        cursor.execute('''
+            INSERT INTO salaries (date, employee_id, name, salary, status)
+            VALUES (%s, %s, %s, %s, %s)
+        ''', (date, employee_id, employee_name, salary_amount, status))
+
+        conn.commit()
+        conn.close()
+
+        # Send SMS notification
+        number = normalize_kenyan_number()
+        message = f"Employee ID: {employee_id} salary was recorded"
         if number:
             try:
                 sms.send(message, [number])
             except Exception as e:
-                print("SMS failed:",e)
+                print("SMS failed:", e)
         else:
             print("No admin number found")
+
         return redirect(url_for('view_salary'))
+
     return render_template('salaries.html')
 
 
 # VIEW SALARY
 @app.route('/view_salary')
 def view_salary():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
     c.execute('SELECT * FROM salaries')
     salaries = c.fetchall()
@@ -871,7 +1044,7 @@ def view_salary():
 #generate payslip
 @app.route('/generate_payslip', methods=['GET', 'POST'])
 def generate_payslip():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     cursor = conn.cursor()
 
     if request.method == 'POST':
@@ -893,7 +1066,7 @@ def generate_payslip():
             SELECT members.name, salaries.salary
             FROM salaries
             JOIN members ON salaries.employee_id = members.id
-            WHERE members.id = ?
+            WHERE members.id = %s
             ORDER BY salaries.date DESC
             LIMIT 1
         """, (member_id,))
@@ -906,7 +1079,7 @@ def generate_payslip():
             net_pay = total_earnings - total_deductions
 
             # ✅ SMS after successful generation
-            number = get_admin_phone()
+            number =  normalize_kenyan_number()
             message = f"Payslip generated for {name} ({member_id})"
             if number:
                 try:
@@ -929,21 +1102,21 @@ def generate_payslip():
 # Edit Salary Route
 @app.route('/edit_salary/<int:id>', methods=['GET', 'POST'])  # FIXED: closing angle bracket
 def edit_salary(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     cursor = conn.cursor()
 
     if request.method == 'POST':
         new_salary = request.form['salary_amount']
         new_status = request.form['status']
-        cursor.execute('UPDATE salaries SET salary = ?, status = ? WHERE id = ?', (new_salary, new_status, id))
+        cursor.execute('UPDATE salaries SET salary = %s, status = %s WHERE id = %s', (new_salary, new_status, id))
         conn.commit()
         conn.close()
         return redirect('/payrolls')  
     
-    cursor.execute('SELECT * FROM salaries WHERE id = ?', (id,))
+    cursor.execute('SELECT * FROM salaries WHERE id = %s', (id,))
     salary = cursor.fetchone()
     conn.close()
-    number = get_admin_phone()
+    number =  normalize_kenyan_number()
     message = f"Employee ID :{id} salary's was edited"
     if number:
         try:
@@ -991,9 +1164,9 @@ def change_password():
             return redirect(url_for('change_password'))
 
         # Fetch current hashed password from DB
-        conn = sqlite3.connect('furniture.db')
+        conn = get_connection()
         c = conn.cursor()
-        c.execute("SELECT password FROM users WHERE username = ?", (username,))
+        c.execute("SELECT password FROM users WHERE username = %s", (username,))
         result = c.fetchone()
 
         if not result or not check_password_hash(result[0], current_password):
@@ -1003,7 +1176,7 @@ def change_password():
 
         # Hash and update new password
         new_hashed = generate_password_hash(new_password)
-        c.execute("UPDATE users SET password = ? WHERE username = ?", (new_hashed, username))
+        c.execute("UPDATE users SET password = %s WHERE username = %s", (new_hashed, username))
         conn.commit()
         conn.close()
 
@@ -1018,7 +1191,7 @@ def change_password():
 
 @app.route('/edit_expense/<int:id>', methods=['POST', 'GET'])
 def edit_expense(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
@@ -1038,20 +1211,23 @@ def edit_expense(id):
         # Salaries & Cost of Goods
         c.execute('''
             SELECT 
-                (SELECT SUM(salary) FROM salaries) AS salary,
-                (SELECT SUM(buying_price * quantity) FROM sales) AS cost_of_goods
-        ''')
+                (SELECT SUM(salary) AS sal FROM salaries) ''')
         data = c.fetchone()
-        salary = data[0] if data and data[0] is not None else  0
-        cost_of_goods = data[1] if data and data[1] is not None else 0
+
+        c.execute('''
+                (SELECT SUM(buying_price * quantity) AS cost FROM stock_info) 
+        ''')
+        price = c.fetchone()
+        salary = data['sal'] if data and data['sal'] is not None else  0 # type: ignore
+        cost_of_goods = price['cost'] if data and price['cost'] is not None else 0 # type: ignore
 
         total_expenses = electricity + water + internet + rent + supplies + ads + insurance + maintenance + transport + taxes
 
         # ✅ Update expense with start/end date
         c.execute('''
             UPDATE expenses
-            SET start_date = ?, end_date = ?, salaries = ?, cost_of_good = ?, electricity = ?, water = ?, internet = ?, rent = ?, supplies = ?, ads = ?, insuarance = ?, maintanance = ?, transport = ?, taxes = ?, total_expenses = ?
-            WHERE id = ?
+            SET start_date = %s, end_date = %s, salaries = %s, cost_of_good = %s, electricity = %s, water = %s, internet = %s, rent = %s, supplies = %s, ads = %s, insuarance = %s, maintanance = %s, transport = %s, taxes = %s, total_expenses = %s
+            WHERE id = %s
         ''', (start_date, end_date, salary, cost_of_goods, electricity, water, internet, rent, supplies, ads, insurance, maintenance, transport, taxes, total_expenses, id))
 
         conn.commit()
@@ -1061,25 +1237,45 @@ def edit_expense(id):
         return redirect(url_for('view_expense'))
 
     # 👉 GET request: fetch existing expense
-    c.execute('SELECT * FROM expenses WHERE id = ?', (id,))
+    c.execute('SELECT * FROM expenses WHERE id = %s', (id,))
     expense = c.fetchone()
     conn.close()
 
     return render_template('record_expense.html', expense=expense)
 
 
+from collections import defaultdict
+
+def get_grouped_expenses():
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('SELECT * FROM expenses ORDER BY end_date DESC')
+    expenses = c.fetchall()
+    conn.close()
+
+    grouped = defaultdict(list)
+    for expense in expenses:
+        grouped[expense['end_date']].append(expense) # type: ignore
+
+    return grouped
+
+@app.route('/accounting')
+def accounting():
+    if 'user' not in session:
+        return redirect('/login')
+    grouped_expenses = get_grouped_expenses()
+    return render_template('account.html', grouped_expenses=grouped_expenses)
+
 @app.route('/view_expenses')
 def view_expense():
-    conn = sqlite3.connect('furniture.db')
-    c = conn.cursor()
-    c.execute('SELECT * FROM expenses')
-    expenses = c.fetchall()
-    c.close()
-    return render_template('account.html', expenses=expenses)
+    grouped_expenses = get_grouped_expenses()
+    return render_template('account.html', grouped_expenses=grouped_expenses)
+
+
 
 @app.route('/create_expense', methods=['GET', 'POST'])
 def create_expense():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
@@ -1098,13 +1294,17 @@ def create_expense():
 
         # Fetch salaries and cost of goods safely
         c.execute('''
-            SELECT 
-                (SELECT SUM(salary) FROM salaries) AS salary,
-                (SELECT SUM(buying_price * quantity) FROM sales) AS cost_of_goods
+             
+                (SELECT SUM(salary) AS total_salary FROM salaries) 
         ''')
-        result = c.fetchone()
-        salary = result[0] if result and result[0] is not None else 0
-        cost_of_goods = result[1] if result and result[1] is not None else 0
+        result = c.fetchone()      
+        salar = result['total_salary'] if result and result['total_salary'] is not None else 0 # type: ignore
+ 
+        c.execute('''
+                (SELECT SUM(buying_price * quantity) AS cost FROM stock_info)  
+        ''')
+        price = c.fetchone()
+        cost_of_goods = price['cost'] if result and price['cost'] is not None else 0 # type: ignore
 
         total_expenses = (
             electricity + water + internet + rent + supplies + ads +
@@ -1116,9 +1316,9 @@ def create_expense():
             INSERT INTO expenses (
                 start_date, end_date, salaries, cost_of_good, electricity, water, internet, rent,
                 supplies, ads, insuarance, maintanance, transport, taxes, total_expenses
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (
-            start_date, end_date, salary, cost_of_goods, electricity, water, internet,
+            start_date, end_date, salar, cost_of_goods, electricity, water, internet,
             rent, supplies, ads, insuarance, maintanance, transport, taxes, total_expenses
         ))
 
@@ -1126,7 +1326,7 @@ def create_expense():
         conn.close()
 
         flash('✅ Expense recorded successfully!', 'success')
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         message = "New Expense was recorded"
         if number:
             try:
@@ -1142,12 +1342,12 @@ def create_expense():
 
 @app.route('/delete_expense/<int:id>')
 def delete_expense(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
-    c.execute('DELETE FROM expenses WHERE id = ?',(id,))
+    c.execute('DELETE FROM expenses WHERE id = %s',(id,))
     conn.commit()
     conn.close()
-    number = get_admin_phone()
+    number =  normalize_kenyan_number()
     message = f"{id} Expense was deleted"
     if number:
         try:
@@ -1158,12 +1358,66 @@ def delete_expense(id):
         print("No admin number found")
     return redirect('/view_expenses')
 
+from flask import request, render_template
+from collections import defaultdict
+
+@app.route('/filter_expenses', methods=['GET', 'POST'])
+def filter_expenses():
+    if request.method == 'POST':
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+
+        if not start_date or not end_date:
+            return "Start and End date required", 400
+
+        conn = get_connection()
+        c = conn.cursor()
+
+        # 1. Get individual expense entries
+        c.execute('''
+            SELECT * FROM expenses
+            WHERE end_date BETWEEN %s AND %s
+            ORDER BY end_date DESC
+        ''', (start_date, end_date))
+        expenses = c.fetchall()
+
+        # 2. Calculate total sums for each column
+        c.execute('''
+            SELECT 
+                SUM(salaries) AS total_salaries,
+                SUM(cost_of_good) AS total_cost_of_good,
+                SUM(electricity) AS total_electricity,
+                SUM(water) AS total_water,
+                SUM(internet) AS total_internet,
+                SUM(rent) AS total_rent,
+                SUM(supplies) AS total_supplies,
+                SUM(ads) AS total_ads,
+                SUM(insuarance) AS total_insuarance,
+                SUM(maintanance) AS total_maintanance,
+                SUM(transport) AS total_transport,
+                SUM(taxes) AS total_taxes,
+                SUM(total_expenses) AS grand_total
+            FROM expenses
+            WHERE end_date BETWEEN %s AND %s
+        ''', (start_date, end_date))
+        totals = c.fetchone()
+        conn.close()
+
+        return render_template(
+            'account.html',
+            expenses=expenses,
+            totals=totals,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    return render_template('filter_form.html')
 
 
 #Add product stock info
 @app.route('/add_stockinfo', methods=['POST', 'GET'])
 def add_stockinfo():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
     if request.method == 'POST':
         date = datetime.today().strftime('%Y-%m-%d')
@@ -1175,11 +1429,11 @@ def add_stockinfo():
         buying_price = float(request.form['buying_price'] or 0)
         c.execute('''
         INSERT INTO stock_info (date, supplier_name, supplier_contact, item_name, quantity, selling_price, buying_price)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         ''', (date, supplier_name, supplier_contact, item_name, quantity, selling_price, buying_price))
         conn.commit()
         conn.close()
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         message = "New Stock  was recorded"
         if number:
             try:
@@ -1195,7 +1449,7 @@ def add_stockinfo():
 #view stock info
 @app.route('/view_stockinfo')
 def view_stockinfo():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
     c.execute('SELECT * FROM stock_info')
     stockinfo = c.fetchall()
@@ -1205,7 +1459,7 @@ def view_stockinfo():
 #edit stock info
 @app.route('/edit_stockinfo/<int:id>', methods=['POST', 'GET'])
 def edit_stockinfo(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
@@ -1216,7 +1470,7 @@ def edit_stockinfo(id):
         quantity = int(request.form['quantity'] or 1)
         selling_price = float(request.form['selling_price'] or 0)
         buying_price = float(request.form['buying_price'] or 0)
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         message = f"{id} salary was edited"
         if number:
             try:
@@ -1227,8 +1481,8 @@ def edit_stockinfo(id):
             print("No admin number found")
         c.execute('''
             UPDATE stock_info
-            SET date = ?, supplier_name = ?, supplier_contact = ?, item_name = ?, quantity = ?, selling_price = ?, buying_price = ?
-            WHERE id = ?
+            SET date = %s, supplier_name = %s, supplier_contact = %s, item_name = %s, quantity = %s, selling_price = %s, buying_price = %s
+            WHERE item_id = %s
         ''', (date, supplier_name, supplier_contact, item_name, quantity, selling_price, buying_price, id))
 
         conn.commit()
@@ -1236,20 +1490,20 @@ def edit_stockinfo(id):
         return redirect(url_for('view_stockinfo'))
 
     else:
-        c.execute('SELECT * FROM stock_info WHERE id = ?', (id,))
+        c.execute('SELECT * FROM stock_info WHERE item_id = %s', (id,))
         row = c.fetchone()
         conn.close()
 
         if row:
             product = {
-                'id': row[0],
-                'date': row[1],
-                'supplier_name': row[2],
-                'supplier_contact': row[3],
-                'item_name': row[4],
-                'quantity': row[5],
-                'selling_price': row[6],
-                'buying_price': row[7]
+                'id': row['item_id'], # type: ignore
+                'date': row['date'], # type: ignore
+                'supplier_name': row['supplier_name'], # type: ignore
+                'supplier_contact': row['supplier_contact'], # type: ignore
+                'item_name': row['item_name'], # type: ignore
+                'quantity': row['quantity'], # type: ignore
+                'selling_price': row['selling_price'], # type: ignore
+                'buying_price': row['buying_price'] # type: ignore
                 # Remove status if your table doesn’t have it
             }
         else:
@@ -1260,12 +1514,12 @@ def edit_stockinfo(id):
 #delete stock info
 @app.route('/delete_stockinfo/<int:id>')
 def delete_stockinfo(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
-    c.execute('DELETE FROM stock_info WHERE id = ?', (id,))
+    c.execute('DELETE FROM stock_info WHERE item_id = %s', (id,))
     conn.commit()
     conn.close()
-    number = get_admin_phone()
+    number =  normalize_kenyan_number()
     message = f"{id} salary was edited"
     if number:
         try:
@@ -1292,15 +1546,14 @@ def sales():
 
 
 #navigate from dashboard to accounting and bookkeeping
-@app.route('/accounting')
-def accounting():
-    if 'user' not in session:
-        return redirect('/login')
-    return render_template('account.html')
+from collections import defaultdict
+
+
+
 
 @app.route('/daily_income_expenses')
 def daily_income_expenses():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
     
     c.execute('''
@@ -1323,7 +1576,7 @@ def daily_income_expenses():
 #calculation of profit and loss in accounting and bookkeeping
 @app.route('/profit_loss')
 def profit_loss():
-        conn = sqlite3.connect('furniture.db')
+        conn = get_connection()
         c = conn.cursor()
         
         c.execute('''
@@ -1351,6 +1604,8 @@ def profit_loss():
 
 @app.route('/cashflow', methods=['GET', 'POST'])
 def cashflow_statements():
+    grouped_expenses = get_grouped_expenses()      
+
     if request.method == 'POST':
         start_date = request.form.get('start_date')
         end_date = request.form.get('end_date')
@@ -1358,36 +1613,37 @@ def cashflow_statements():
         financial = float(request.form.get('financial', 0) or 0)
         notes = request.form.get('notes', '')
 
-        conn = sqlite3.connect('furniture.db')
+        conn = get_connection()
         c = conn.cursor()
 
-        # Use ? placeholders for PostgreSQL
-        c.execute('SELECT SUM(selling_price * quantity) FROM sales WHERE date BETWEEN ? AND ?', (start_date, end_date))
+        # Use %s placeholders for PostgreSQL
+        c.execute('SELECT SUM(selling_price * quantity) AS total_sales FROM sales WHERE date BETWEEN %s AND %s', (start_date, end_date))
         inflow_result = c.fetchone()
-        inflow = inflow_result[0] if inflow_result and inflow_result[0] is not None else 0
+        inflow = inflow_result['total_sales'] if inflow_result and inflow_result['total_sales'] is not None else 0 # type: ignore
 
-        c.execute('SELECT SUM(buying_price * quantity) FROM sales WHERE date BETWEEN ? AND ?', (start_date, end_date))
+        c.execute('SELECT SUM(buying_price * quantity) AS total_cost FROM sales WHERE date BETWEEN %s AND %s', (start_date, end_date))
         outflow_result = c.fetchone()
-        outflow = outflow_result[0] if outflow_result and outflow_result[0] is not None else 0
+        outflow = outflow_result['total_cost'] if outflow_result and outflow_result['total_cost'] is not None else 0 # type: ignore
 
-        c.execute('SELECT SUM(total_expenses) FROM expenses WHERE start_date >= ? AND end_date <= ?', (start_date, end_date))
+        c.execute('SELECT SUM(total_expenses) AS expense FROM expenses WHERE start_date >= %s AND end_date <= %s', (start_date, end_date))
         expenses_result = c.fetchone()
-        expenses = expenses_result[0] if expenses_result and expenses_result[0] is not None else 0
+        expenses = expenses_result['expense'] if expenses_result and expenses_result['expense'] is not None else 0 # type: ignore
 
-        total_outflow = outflow + expenses + investments + financial
-        net_cashflow = inflow - total_outflow
+        total_outflow = float(outflow) + float(expenses) + investments + financial
+        net_cashflow = float(inflow) - total_outflow
 
         # Insert data
         c.execute('''
             INSERT INTO cashflow (start_date, end_date, inflow, outflow, expenses, investments, financial, total_outflow, net_cashflow, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ''', (start_date, end_date, inflow, outflow, expenses, investments, financial, total_outflow, net_cashflow, notes))
 
         conn.commit()
         conn.close()
 
         flash("✅ Cashflow report generated and saved!", "success")
-        number = get_admin_phone()
+
+        number =  normalize_kenyan_number()
         message = "New Cashflow was recorded"
         if number:
             try:
@@ -1395,26 +1651,29 @@ def cashflow_statements():
             except Exception as e:
                 print("SMS failed:",e)
         else:
-            print("No admin number found")        
+            print("No admin number found")  
         return redirect(url_for('view_cashflow'))
 
-    return render_template('cashflow.html')
+
+    return render_template('cashflow.html', grouped_expenses=grouped_expenses)
 
 
 @app.route('/view_cashflow')
 def view_cashflow():
-    conn = sqlite3.connect('furniture.db')
+    grouped_expenses = get_grouped_expenses()      
+
+    conn = get_connection()
     c = conn.cursor()
 
     c.execute('SELECT * FROM cashflow ORDER BY id DESC')
     reports = c.fetchall()
 
     conn.close()
-    return render_template('account.html', reports=reports)
+    return render_template('account.html', reports=reports, grouped_expenses=grouped_expenses)
 
 @app.route('/edit_cashflow/<int:id>', methods=['GET', 'POST'])
 def edit_cashflow(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     cursor = conn.cursor()
 
     if request.method == 'POST':
@@ -1426,35 +1685,35 @@ def edit_cashflow(id):
 
         # Recalculate inflow, outflow, expenses based on new dates
 # inflow
-        cursor.execute('SELECT SUM(selling_price * quantity) FROM sales WHERE date BETWEEN ? AND ?', (new_start_date, new_end_date))
+        cursor.execute('SELECT SUM(selling_price * quantity) AS total_sales FROM sales WHERE date BETWEEN %s AND %s', (new_start_date, new_end_date))
         row = cursor.fetchone()
-        inflow = row[0] if row and row[0] is not None else 0
+        inflow = row['total_sales'] if row and row['total_sales'] is not None else 0 # type: ignore
 
         # outflow
-        cursor.execute('SELECT SUM(buying_price * quantity) FROM sales WHERE date BETWEEN ? AND ?', (new_start_date, new_end_date))
+        cursor.execute('SELECT SUM(buying_price * quantity) AS total_cost FROM sales WHERE date BETWEEN %s AND %s', (new_start_date, new_end_date))
         row = cursor.fetchone()
-        outflow = row[0] if row and row[0] is not None else 0
+        outflow = row['total_cost'] if row and row['total_cost'] is not None else 0 # type: ignore
 
         # expenses
-        cursor.execute('SELECT SUM(total_expenses) FROM expenses WHERE start_date >= ? AND end_date <= ?', (new_start_date, new_end_date))
+        cursor.execute('SELECT SUM(total_expenses) AS expense FROM expenses WHERE start_date >= %s AND end_date <= %s', (new_start_date, new_end_date))
         row = cursor.fetchone()
-        expenses = row[0] if row and row[0] is not None else 0
+        expenses = row['expense'] if row and row['expense'] is not None else 0 # type: ignore
 
-        total_outflow = outflow + expenses + new_investments + new_financial
-        net_cashflow = inflow - total_outflow
+        total_outflow = float(outflow) + float(expenses) + new_investments + new_financial
+        net_cashflow = float(inflow) - float(total_outflow)
 
         # ✅ Update the cashflow record
         cursor.execute('''
             UPDATE cashflow
-            SET start_date = ?, end_date = ?, inflow = ?, outflow = ?, expenses = ?, investments = ?, financial = ?, total_outflow = ?, net_cashflow = ?, notes = ?
-            WHERE id = ?
+            SET start_date = %s, end_date = %s, inflow = %s, outflow = %s, expenses = %s, investments = %s, financial = %s, total_outflow = %s, net_cashflow = %s, notes = %s
+            WHERE id = %s
         ''', (new_start_date, new_end_date, inflow, outflow, expenses, new_investments, new_financial, total_outflow, net_cashflow, new_notes, id))
 
         conn.commit()
         conn.close()
 
         flash("✅ Cashflow report updated successfully!", "success")
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         message = f"Cashflow:{id} salary was edited"
         if number:
             try:
@@ -1466,22 +1725,22 @@ def edit_cashflow(id):
         return redirect('/view_cashflow')
 
     # Fetch the existing record for pre-filling the form
-    cursor.execute('SELECT * FROM cashflow WHERE id = ?', (id,))
+    cursor.execute('SELECT * FROM cashflow WHERE id = %s', (id,))
     report = cursor.fetchone()
     conn.close()
     if report:
         cashflow = {
-            'id': report[0],
-            'start_date': report[1],
-            'end_date': report[2],
-            'inflow': report[3],
-            'outflow': report[4],
-            'expenses': report[5],
-            'investments': report[6],
-            'financial': report[7],
-            'total_outflow': report[8],
-            'net_cashflow': report[9],
-            'notes': report[10]
+            'id': report['id'], # type: ignore
+            'start_date': report['start_date'], # type: ignore
+            'end_date': report['end_date'], # type: ignore
+            'inflow': report['inflow'], # type: ignore
+            'outflow': report['outflow'], # type: ignore
+            'expenses': report['expenses'], # type: ignore
+            'investments': report['investments'], # type: ignore
+            'financial': report['financial'], # type: ignore
+            'total_outflow': report['total_outflow'], # type: ignore
+            'net_cashflow': report['net_cashflow'], # type: ignore
+            'notes': report['notes'] # type: ignore
         }
     else:
         cashflow = {}
@@ -1490,14 +1749,14 @@ def edit_cashflow(id):
 
 @app.route('/delete_cashflow/<int:id>')
 def delete_cashflow(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
-    c.execute('DELETE FROM cashflow WHERE id = ?', (id,))
+    c.execute('DELETE FROM cashflow WHERE id = %s', (id,))
     conn.commit()
     conn.close()
 
     flash("🗑️ Sale deleted successfully!", "success")
-    number = get_admin_phone()
+    number =  normalize_kenyan_number()
     message = f"Cashflow :{id} salary was deleted"
     if number:
         try:
@@ -1512,7 +1771,7 @@ def delete_cashflow(id):
 @app.route('/assign_tasks', methods=['POST', 'GET'])
 def assign_tasks():
     if request.method == 'POST':
-        conn = sqlite3.connect('furniture.db')
+        conn = get_connection()
         c = conn.cursor()
         try:
             company_id = request.form['company_id']
@@ -1525,19 +1784,19 @@ def assign_tasks():
                 flash("❌ Error: Mismatched task and responsibility count.", "danger")
                 return redirect(url_for('assign_tasks'))
 
-            c.execute('SELECT name FROM members WHERE company_id = ?', (company_id,))
+            c.execute('SELECT name FROM members WHERE company_id = %s', (company_id,))
             result = c.fetchone()
             if not result:
                 flash("❌ Error: No employee found with that ID.", "danger")
                 return redirect(url_for('assign_tasks'))
-            name = result[0]
+            name = result['name'] # type: ignore
 
             for task, respo in zip(tasks, responsibilities):
-                c.execute('INSERT INTO respo (name, company_id, respo, tasks, description, date_assigned) VALUES (?, ?, ?, ?, ?, ?)',
+                c.execute('INSERT INTO respo (name, company_id, respo, tasks, description, date_assigned) VALUES (%s, %s, %s, %s, %s, %s)',
                           (name, company_id, respo, task, description, date_assigned))
 
             conn.commit()
-            number = get_admin_phone()
+            number =  normalize_kenyan_number()
             message = f"Member:{company_id} was assigned tasks"
             if number:
                 try:
@@ -1560,7 +1819,7 @@ def assign_tasks():
 
 @app.route('/check_tasks/<int:id>', methods=['GET', 'POST'])
 def check_tasks(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
@@ -1579,8 +1838,8 @@ def check_tasks(id):
         try:
             c.execute('''
                 UPDATE respo
-                SET date_checked = ?, remarks = ?
-                WHERE id = ?
+                SET date_checked = %s, remarks = %s
+                WHERE id = %s
             ''', (date_checked, remarks, id))
             conn.commit()
             flash("✅ Task checked and remarks saved!", "success")
@@ -1589,7 +1848,7 @@ def check_tasks(id):
         except Exception as e:
             flash(f"❌ Error: {e}", "danger")
 
-    c.execute('SELECT * FROM respo WHERE id = ?', (id,))
+    c.execute('SELECT * FROM respo WHERE id = %s', (id,))
     task = c.fetchone()
     conn.close()
 
@@ -1599,7 +1858,7 @@ def check_tasks(id):
 
 @app.route('/edit_task/<int:id>', methods=['GET', 'POST'])
 def edit_task(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
     
     if request.method == 'POST':
@@ -1611,13 +1870,13 @@ def edit_task(id):
 
         c.execute('''
             UPDATE respo
-            SET tasks = ?, respo = ?, description = ?, remarks = ?, date_checked = ?
-            WHERE id = ?
+            SET tasks = %s, respo = %s, description = %s, remarks = %s, date_checked = %s
+            WHERE id = %s
         ''', (task, respo, description, remarks, date_checked, id))
 
         conn.commit()
         conn.close()
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         message = f"Member:{id} tasks were edited"
         if number:
             try:
@@ -1630,19 +1889,19 @@ def edit_task(id):
         return redirect(url_for('view_tasks'))
     
     # GET request — load data into form
-    c.execute('SELECT * FROM respo WHERE id = ?', (id,))
+    c.execute('SELECT * FROM respo WHERE id = %s', (id,))
     files = c.fetchone()
     conn.close()
     return render_template('edit_task.html', files=files)
 @app.route('/delete_task/<int:id>')
 def delete_task(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
-    c.execute('DELETE FROM respo WHERE id = ?', (id,))
+    c.execute('DELETE FROM respo WHERE id = %s', (id,))
     conn.commit()
     conn.close()
     flash("🗑️ Task deleted successfully", "success")
-    number = get_admin_phone()
+    number =  normalize_kenyan_number()
     message = f"Member:{id}  tasks were deleted"
     if number:
         try:
@@ -1657,7 +1916,7 @@ from collections import defaultdict
 
 @app.route('/view_tasks')
 def view_tasks():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
     c.execute('SELECT id, name, company_id, respo, tasks, date_assigned, date_checked, remarks, description FROM respo')
     rows = c.fetchall()
@@ -1666,7 +1925,7 @@ def view_tasks():
     # Group by (name, company_id)
     grouped = defaultdict(list)
     for row in rows:
-        key = (row[1], row[2])  # name, company_id
+        key = (row['name'], row['company_id'])  # type: ignore # name, company_id
         grouped[key].append(row)
 
     return render_template('members.html', grouped_tasks=grouped)
@@ -1704,10 +1963,15 @@ def inventory():
 def summary():
     return render_template('summary.html')
 
+@app.route('/print_contract')
+def print_contract():
+    return render_template('contract.html')
+
+
 #SALES
 @app.route('/dashboard_sales')
 def dashboard_sales():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     # Fetch the latest 40 sales, ordered from oldest to newest
@@ -1721,59 +1985,68 @@ def dashboard_sales():
 
     return render_template('sales.html', sales=sales)
 
-@app.route('/sale')
-def sale():
-    conn = sqlite3.connect('furniture.db')
-    c = conn.cursor()
 
-    # Fetch the latest 40 sales, ordered from oldest to newest
-    c.execute("SELECT * FROM sales ORDER BY sale_id DESC LIMIT 40")
-    recent_sales = c.fetchall()
 
-    # Now reverse the list so the oldest (lowest ID) appears first
-    sales = recent_sales[::-1]
-
-    conn.close()
-
-    return render_template('receipt .html', sales=sales)
-
-@app.route('/print_contract')
-def print_contract():
-    return render_template('contract.html')
 
 
 #navigate from sales.html to record_sales.html
-@app.route('/record_sales')
-def record_sale():
-    return render_template('record_sales.html')
 
 
 @app.route('/record_sales', methods=["GET", "POST"])
 def record_sales():
     if request.method == "POST":
-        conn = sqlite3.connect('furniture.db')
-        cur = conn.cursor()
+        conn = get_connection()
+        cur = conn.cursor() # type: ignore
 
         try:
-            item_id = int(request.form['item_id'])
-            quantity_sold = int(request.form['quantity'])
-            selling_price = float(request.form['selling_price'])
+            # Convert form inputs
+            try:
+                item_id = int(request.form['item_id'])
+                quantity_sold = int(request.form['quantity'])
+                selling_price = float(request.form['selling_price'])
+            except ValueError:
+                flash("❌ Please enter valid numeric values", "danger")
+                return redirect(url_for('record_sales'))
+
             payment_method = request.form['payment']
 
-            # Fetch product from stock_info by ID
-            cur.execute("SELECT item_name, quantity, buying_price FROM stock_info WHERE rowid = ?", (item_id,))
+            # Fetch product
+            cur.execute("SELECT item_name, quantity, buying_price FROM stock_info WHERE item_id = %s", (item_id,))
             item = cur.fetchone()
 
             if not item:
-                flash("❌ Error: Product with that ID not found.", "danger")
+                flash("❌ Product with that ID does not exist.", "danger")
+                return redirect(url_for('record_sales'))
+            name = item['item_name'] # type: ignore
+            stock_qty = int(float(item['quantity'])) # type: ignore # type: ignore))
+            buying_price = item['buying_price'] # type: ignore
+
+            try:
+                
+                # Debug: Print raw values before conversion
+                print(f"Raw values - stock_qty: {stock_qty} (type: {type(stock_qty)}), buying_price: {buying_price} (type: {type(buying_price)})")
+                # Convert quantities
+                stock_quntity = stock_qty if stock_qty not in [None, ''] else 0
+                buying_price = float(buying_price) if buying_price not in [None, ''] else 0.0
+                
+                # Debug: Print converted values
+                print(f"Converted - stock_qty: {stock_quntity}, buying_price: {buying_price}")
+                
+            except (ValueError, TypeError) as e:
+                flash(f"❌ Database contains invalid values. Error: {str(e)}", "danger")
+                print(f"Conversion error. Raw values: stock_qty={stock_qty}, buying_price={buying_price}")
                 return redirect(url_for('record_sales'))
 
-            item_name, stock_qty, buying_price = item
+            # Validate quantities
+            if stock_qty <= 0:
+                flash("❌ Product is out of stock", "danger")
+                return redirect(url_for('record_sales'))
 
             if quantity_sold > stock_qty:
-                flash(f"❌ Not enough stock. Only {stock_qty} available.", "warning")
+                flash("❌ Quantity exceeds stock available.", "danger")
                 return redirect(url_for('record_sales'))
 
+            # Calculate values
             total_selling = selling_price * quantity_sold
             total_buying = buying_price * quantity_sold
             profit_or_loss = total_selling - total_buying
@@ -1782,47 +2055,59 @@ def record_sales():
             # Save sale
             cur.execute("""
                 INSERT INTO sales (item_id, item_name, quantity, selling_price, buying_price, payment, profit_or_loss, date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (item_id, item_name, quantity_sold, selling_price, buying_price, payment_method, profit_or_loss, date))
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (item_id, name, quantity_sold, selling_price, buying_price, payment_method, profit_or_loss, date))
 
-            # Update stock quantity
+            # Update stock
             new_qty = stock_qty - quantity_sold
-            cur.execute("UPDATE stock_info SET quantity = ? WHERE rowid = ?", (new_qty, item_id))
+            cur.execute("UPDATE stock_info SET quantity = %s WHERE item_id = %s", (new_qty, item_id))
 
             conn.commit()
-            number = get_admin_phone()
-            message = "New sale was recorded"
+            
+            # SMS notification
+            number = normalize_kenyan_number()
             if number:
                 try:
-                    sms.send(message, [number])
+                    sms.send("New sale was recorded", [number])
                 except Exception as e:
-                    print("SMS failed:",e)
-            else:
-                print("No admin number found")
+                    print("SMS failed:", e)
+
             return redirect('/dashboard_sales')
 
-        except ValueError:
-            flash("❌ Please enter valid numeric values.", "danger")
         except Exception as e:
-            flash(f"❌ Unexpected error: {str(e)}", "danger")
+            conn.rollback()
+            flash(f"❌ Error processing sale: {str(e)}", "danger")
+            print(f"Unexpected error: {str(e)}")
+            return redirect(url_for('record_sales'))
         finally:
             conn.close()
 
-    return render_template(
-        'record_sales.html',
-        form_action=url_for('record_sales'),
-        sale=None,
-        button_text='Record Sale'
-    )
+    return render_template('record_sales.html', 
+                         form_action=url_for('record_sales'),
+                         sale=None,
+                         button_text='Record Sale')
+
+
 
 @app.route('/edit_sales/<int:id>', methods=['GET', 'POST'])
 def edit_sales(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
         try:
-            new_type = request.form.get('item_name', '')  # This is read-only field when editing
+            # 1. Fetch the existing sale first
+            c.execute("SELECT item_id, quantity FROM sales WHERE sale_id = %s", (id,))
+            old_sale = c.fetchone()
+            if not old_sale:
+                flash("❌ Sale not found.", "danger")
+                return redirect('/dashboard_sales')
+
+            old_quantity = old_sale['quantity'] # type: ignore
+            item_id = old_sale['item_id'] # type: ignore
+
+            # 2. Get updated values from form
+            new_type = request.form.get('item_name', '')
             new_quantity = int(request.form.get('quantity', 0))
             new_selling_price = float(request.form.get('selling_price', 0))
             new_payment = request.form.get('payment', '')
@@ -1832,32 +2117,47 @@ def edit_sales(id):
             new_total_selling = new_selling_price * new_quantity
             new_profit_or_loss = new_total_selling - new_total_buying
 
-            # Update the sale
+            # 3. Calculate the stock difference
+            qty_diff = new_quantity - old_quantity
+            # If qty_diff > 0 → sold more → reduce stock
+            # If qty_diff < 0 → sold less → restore stock
+            c.execute("UPDATE stock_info SET quantity = quantity - %s WHERE item_id = %s", (qty_diff, item_id))
+
+            # 4. Update the sale
             c.execute("""
                 UPDATE sales
-                SET item_name = ?, quantity = ?, selling_price = ?, payment = ?, buying_price = ?, profit_or_loss = ?
-                WHERE sale_id = ?
-            """, (new_type, new_quantity, new_selling_price, new_payment, new_buying_price, new_profit_or_loss, id))
+                SET item_name = %s,
+                    quantity = %s,
+                    selling_price = %s,
+                    payment = %s,
+                    buying_price = %s,
+                    profit_or_loss = %s
+                WHERE sale_id = %s
+            """, (new_type, new_quantity, new_selling_price, new_payment,
+                  new_buying_price, new_profit_or_loss, id))
 
             conn.commit()
-            number = get_admin_phone()
-            message = f"Sales:{id} were edited"
+
+            number = normalize_kenyan_number()
+            message = f"Sales {id} were updated."
             if number:
                 try:
                     sms.send(message, [number])
                 except Exception as e:
-                    print("SMS failed:",e)
+                    print("SMS failed:", e)
             else:
                 print("No admin number found")
+
             return redirect('/dashboard_sales')
 
         except Exception as e:
+            conn.rollback()
             flash(f"❌ Error: {e}", "danger")
         finally:
             conn.close()
 
-    # GET method: fetch existing sale record
-    c.execute('SELECT * FROM sales WHERE sale_id = ?', (id,))
+    # GET request: fetch sale
+    c.execute('SELECT * FROM sales WHERE sale_id = %s', (id,))
     sale_row = c.fetchone()
     conn.close()
 
@@ -1866,45 +2166,61 @@ def edit_sales(id):
         return redirect('/dashboard_sales')
 
     sale = {
-        'id': sale_row[0],
-        'type': sale_row[2],  # item_name
-        'quantity': sale_row[3],
-        'selling_price': sale_row[4],
-        'payment': sale_row[6],
-        'buying_price': sale_row[5]
+        'id': sale_row['sale_id'], # type: ignore
+        'type': sale_row['item_name'], # type: ignore
+        'quantity': sale_row['quantity'], # type: ignore
+        'selling_price': sale_row['selling_price'], # type: ignore
+        'payment': sale_row['payment'], # type: ignore
+        'buying_price': sale_row['buying_price'] # type: ignore
     }
 
     return render_template(
         'record_sales.html',
         form_action=url_for('edit_sales', id=id),
         sale=sale,
-        items=[],  # still pass this to avoid template error
-        button_text = 'Update Sale'
+        items=[],
+        button_text='Update Sale'
     )
 
-@app.route('/delete_sales/<int:id>', methods=['POST', 'GET'])
+ 
+
+@app.route('/delete_sales/<int:id>', methods=['GET'])
 def delete_sales(id):
-    conn = sqlite3.connect('furniture.db')
-    c = conn.cursor()
-    c.execute('DELETE FROM sales WHERE id = ?', (id,))
-    conn.commit()
-    conn.close()
-    number = get_admin_phone()
-    message = f"Sales:{id} were deleted"
-    if number:
-        try:
-            sms.send(message, [number])
-        except Exception as e:
-            print("SMS failed:",e)
-    else:
-        print("No admin number found")
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        # 1. Fetch sale info
+        cur.execute("SELECT item_id, quantity FROM sales WHERE sale_id = %s", (id,))
+        sale = cur.fetchone()
+        if not sale:
+            flash("❌ Sale not found", "danger")
+            return redirect('/dashboard_sales')
+
+        item_id = sale['item_id'] # type: ignore
+        quantity_sold = sale['quantity'] # type: ignore
+
+        # 2. Restore stock
+        cur.execute("UPDATE stock_info SET quantity = quantity + %s WHERE item_id = %s",
+                    (quantity_sold, item_id))
+
+        # 3. Delete the sale
+        cur.execute("DELETE FROM sales WHERE sale_id = %s", (id,))
+        conn.commit()
+
+        flash("✅ Sale deleted and stock restored", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"❌ Error deleting sale: {e}", "danger")
+    finally:
+        conn.close()
+
     return redirect('/dashboard_sales')
 
 
 #daily summary
 @app.route('/daily_summary')
 def daily_summary():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
     
     c.execute('''
@@ -1938,63 +2254,90 @@ def daily_summary():
 #weekly summmary
 @app.route('/weekly_summary')
 def weekly_summary():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
+
     c.execute("""
         SELECT
-              strftime('%Y-%W', date) as week,
+            TO_CHAR(DATE_TRUNC('week', date::DATE), 'IYYY-IW') AS week,
             SUM(selling_price * quantity) AS total_sales,
-            SUM(CASE WHEN (selling_price * quantity) > (buying_price * quantity)
-                     THEN (selling_price * quantity) - (buying_price * quantity)
-                     ELSE 0 END) AS profit,
-            SUM(CASE WHEN (selling_price * quantity) < (buying_price * quantity)
-                     THEN (buying_price * quantity) - (selling_price * quantity)
-                     ELSE 0 END) AS loss,
+            SUM(
+                CASE 
+                    WHEN (selling_price * quantity) > (buying_price * quantity)
+                    THEN (selling_price * quantity) - (buying_price * quantity)
+                    ELSE 0 
+                END
+            ) AS profit,
+            SUM(
+                CASE 
+                    WHEN (selling_price * quantity) < (buying_price * quantity)
+                    THEN (buying_price * quantity) - (selling_price * quantity)
+                    ELSE 0 
+                END
+            ) AS loss,
             SUM(quantity) AS items_sold
-            FROM sales
-            GROUP BY week
-            ORDER BY week DESC
-            """)
+        FROM sales
+        GROUP BY DATE_TRUNC('week', date::DATE)
+        ORDER BY week DESC
+    """)
+
+
     weekly_sales = c.fetchall()
     conn.close()
-    return render_template('sales.html',
-                       sales=[],
-                       summary=[],
-                       weekly_summary=weekly_sales,
-                       monthly_summary=[],
-                       page=1,
-                       total_pages=1)
+
+    return render_template(
+        'sales.html',
+        sales=[],
+        summary=[],
+        weekly_summary=weekly_sales,
+        monthly_summary=[],
+        page=1,
+        total_pages=1
+    )
+
 
 #monthly summary
 @app.route('/monthly_summary')
 def monthly_summary():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
+
     c.execute("""
         SELECT
-              strftime('%Y-%m', date) as month,
+            TO_CHAR(date::DATE, 'YYYY-MM') AS month,
             SUM(selling_price * quantity) AS total_sales,
-            SUM(CASE WHEN (selling_price * quantity) > (buying_price * quantity)
-                     THEN (selling_price * quantity) - (buying_price * quantity)
-                     ELSE 0 END) AS profit,
-            SUM(CASE WHEN (selling_price * quantity) < (buying_price * quantity)
-                     THEN (buying_price * quantity) - (selling_price * quantity)
-                     ELSE 0 END) AS loss,
+            SUM(
+                CASE 
+                    WHEN (selling_price * quantity) > (buying_price * quantity)
+                    THEN (selling_price * quantity) - (buying_price * quantity)
+                    ELSE 0 
+                END
+            ) AS profit,
+            SUM(
+                CASE 
+                    WHEN (selling_price * quantity) < (buying_price * quantity)
+                    THEN (buying_price * quantity) - (selling_price * quantity)
+                    ELSE 0 
+                END
+            ) AS loss,
             SUM(quantity) AS items_sold
-            FROM sales
-            GROUP BY month
-            ORDER BY month DESC
-            """)
+        FROM sales
+        GROUP BY TO_CHAR(date::DATE, 'YYYY-MM')
+        ORDER BY month DESC
+    """)
+
     monthly_sales = c.fetchall()
     conn.close()
-    return render_template('sales.html',
-                       sales=[],
-                       summary=[],
-                       weekly_summary=[],
-                       monthly_summary=monthly_sales,
-                       page=1,
-                       total_pages=1)
 
+    return render_template(
+        'sales.html',
+        sales=[],
+        summary=[],
+        weekly_summary=[],
+        monthly_summary=monthly_sales,
+        page=1,
+        total_pages=1
+    )
 
 
 #MEMBERS
@@ -2002,7 +2345,7 @@ def monthly_summary():
 def members():
     if 'user' not in session:
         return redirect('/login')
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT * FROM members")
     data = c.fetchall()
@@ -2035,9 +2378,9 @@ def add_member():
             photo.save(os.path.join(app.config['UPLOAD_FOLDER'], photo_filename))
 
         # Connect to DB and check if member already exists
-        conn = sqlite3.connect('furniture.db')
+        conn = get_connection()
         cur = conn.cursor()
-        cur.execute("SELECT * FROM members WHERE name=? AND phone=? AND company_id=?", (name, phone, company_id))
+        cur.execute("SELECT * FROM members WHERE name=%s AND phone=%s AND company_id=%s", (name, phone, company_id))
         existing = cur.fetchone()
 
         if existing:
@@ -2046,11 +2389,11 @@ def add_member():
             return redirect("/add_member")
 
         # Insert new member
-        cur.execute("INSERT INTO members (name, phone, role, company_id, status, email,  profile_photo) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        cur.execute("INSERT INTO members (name, phone, role, company_id, status, email,  profile_photo) VALUES (%s, %s, %s, %s, %s, %s, %s)",
                     (name, phone, role, company_id, status, email, photo_filename))
         conn.commit()
         conn.close()
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         message = f"Member:{company_id} was registered to the company"
         if number:
             try:
@@ -2067,7 +2410,7 @@ def add_member():
 # Edit Member (Update)
 @app.route('/edit_member/<int:id>', methods=['GET', 'POST'])
 def edit_member(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
@@ -2086,16 +2429,16 @@ def edit_member(id):
             photo.save(os.path.join(app.config['UPLOAD_FOLDER'], photo_filename))
 
             # With photo
-            c.execute('UPDATE members SET name = ?, phone = ?, role = ?, company_id = ?, status = ?, email = ?, profile_photo = ? WHERE id = ?', 
+            c.execute('UPDATE members SET name = %s, phone = %s, role = %s, company_id = %s, status = %s, email = %s, profile_photo = %s WHERE id = %s', 
                       (name, phone, role, company_id, status, responsibility, photo_filename, id))
         else:
             # Without changing photo
-            c.execute('UPDATE members SET name = ?, phone = ?, role = ?, company_id = ?, status = ?, email = ? WHERE id = ?', 
+            c.execute('UPDATE members SET name = %s, phone = %s, role = %s, company_id = %s, status = %s, email = %s WHERE id = %s', 
                       (name, phone, role, company_id, status, responsibility, id))
 
         conn.commit()
         conn.close()
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         message = f"Member:{company_id} info was edited"
         if number:
             try:
@@ -2108,19 +2451,19 @@ def edit_member(id):
         return redirect(url_for('view_members'))
 
     # GET request - load member data
-    c.execute('SELECT * FROM members WHERE id = ?', (id,))
+    c.execute('SELECT * FROM members WHERE id = %s', (id,))
     mem = c.fetchone()
     conn.close()
 
     person = {
-        'id': mem[0],
-        'name': mem[1],
-        'phone': mem[2],
-        'role': mem[3],
-        'company_id': mem[4],
-        'responsibilities': mem[5],
-        'status': mem[6],
-        'profile_photo': mem[7] if len(mem) > 7 else None
+        'id': mem['id'], # type: ignore
+        'name': mem['name'], # type: ignore
+        'phone': mem['phone'], # type: ignore
+        'role': mem['role'], # type: ignore
+        'company_id': mem['company_id'], # type: ignore
+        'responsibilities': mem['email'], # type: ignore
+        'status': mem['status'], # type: ignore
+        'profile_photo': mem['profile_photo'] if len(mem) > 7 else None # type: ignore
     } if mem else None
 
     return render_template('add_member.html', form_action=url_for('edit_member', id=id), person=person)
@@ -2129,7 +2472,7 @@ def edit_member(id):
 # View Members Page (for table)
 @app.route('/members')
 def view_members():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
     c.execute('SELECT * FROM members')
     members = c.fetchall()
@@ -2138,13 +2481,13 @@ def view_members():
 
 @app.route("/delete/<int:id>")
 def delete_member(id):  # Added 'id' as a function argument
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     cur = conn.cursor()
-    cur.execute("DELETE FROM members WHERE id = ?", (id,))
+    cur.execute("DELETE FROM members WHERE id = %s", (id,))
     conn.commit()
     conn.close()
     flash("🗑️ Member deleted successfully.", "success")
-    number = get_admin_phone()
+    number =  normalize_kenyan_number()
     message = f"Member:{id} was deleted"
     if number:
         try:
@@ -2160,9 +2503,9 @@ def delete_member(id):  # Added 'id' as a function argument
 @app.route("/search", methods=["GET"])
 def search_members():
     keyword = request.args.get("q", "")
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM members WHERE name LIKE ? OR role LIKE ?",
+    cur.execute("SELECT * FROM members WHERE name LIKE %s OR role LIKE %s",
                 (f"%{keyword}%", f"%{keyword}%"))
     members = cur.fetchall()
     conn.close()
@@ -2173,7 +2516,7 @@ def search_members():
 def sort_members():
     by = request.args.get("by", "id")
     order = request.args.get("order", "asc").upper()
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     cur = conn.cursor()
     cur.execute(f"SELECT * FROM members ORDER BY {by} {order}")
     members = cur.fetchall()
@@ -2196,11 +2539,11 @@ def create_invoice():
                 continue
             total += int(q) * float(r)
 
-        conn = sqlite3.connect('furniture.db')
+        conn = get_connection()
         cursor = conn.cursor()
 
         cursor.execute(
-            "INSERT INTO invoices (customer_name, total_price) VALUES (?, ?) RETURNING id",
+            "INSERT INTO invoices (customer_name, total_price) VALUES (%s, %s) RETURNING id",
             (name, total)
         )
         result = cursor.fetchone()
@@ -2211,7 +2554,7 @@ def create_invoice():
                 if item_type[i].strip() == "" or item_quantity[i].strip() == "" or selling_price[i].strip() == "":
                     continue
                 cursor.execute(
-                    "INSERT INTO invoice_items (invoice_id, item_type, item_quantity, selling_price, status) VALUES (?, ?, ?, ?, ?)",
+                    "INSERT INTO invoice_items (invoice_id, item_type, item_quantity, selling_price, status) VALUES (%s, %s, %s, %s, %s)",
                     (
                         invoice_id,
                         item_type[i],
@@ -2235,7 +2578,7 @@ def create_invoice():
 
 @app.route('/invoices')
 def all_invoices():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM invoices")
@@ -2246,7 +2589,7 @@ def all_invoices():
         cursor.execute("""
             SELECT item_type, item_quantity, selling_price, status
             FROM invoice_items
-            WHERE invoice_id = ?
+            WHERE invoice_id = %s
         """, (inv[0],))  # assuming invoice ID is at index 0
         items = cursor.fetchall()
         invoice_data.append({'invoice': inv, 'items': items})
@@ -2261,14 +2604,14 @@ def all_invoices():
 # --- EDIT INVOICE ---
 @app.route('/edit_invoice/<int:id>', methods=['GET', 'POST'])
 def edit_invoice(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     cursor = conn.cursor()
 
     # Fetch invoice and items
-    cursor.execute('SELECT * FROM invoices WHERE id = ?', (id,))
+    cursor.execute('SELECT * FROM invoices WHERE id = %s', (id,))
     invoice = cursor.fetchone()
 
-    cursor.execute('SELECT * FROM invoice_items WHERE invoice_id = ?', (id,))
+    cursor.execute('SELECT * FROM invoice_items WHERE invoice_id = %s', (id,))
     items = cursor.fetchall()
 
     if request.method == 'POST':
@@ -2283,17 +2626,17 @@ def edit_invoice(id):
             if a.strip() and b.strip():
                 new_total += int(a) * float(b)
 
-        cursor.execute("UPDATE invoices SET customer_name = ?, total_price = ? WHERE id = ?", 
+        cursor.execute("UPDATE invoices SET customer_name = %s, total_price = %s WHERE id = %s", 
                        (customer_name, new_total, id))
 
-        cursor.execute("DELETE FROM invoice_items WHERE invoice_id = ?", (id,))
+        cursor.execute("DELETE FROM invoice_items WHERE invoice_id = %s", (id,))
 
         added_any = False
         for t, q, p in zip(item_type, quantity, price):
             if t.strip() and q.strip() and p.strip():
                 cursor.execute("""
                     INSERT INTO invoice_items (invoice_id, item_type, item_quantity, selling_price, status)
-                    VALUES (?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s)
                 """, (id, t.strip(), int(q), float(p), status))
                 added_any = True
 
@@ -2312,17 +2655,17 @@ def edit_invoice(id):
 @app.route('/delete_invoice/<int:id>', methods=['POST'])
 def delete_invoice(id):
     try:
-        conn = sqlite3.connect('furniture.db')
+        conn = get_connection()
         cursor = conn.cursor()
 
-        cursor.execute('SELECT id FROM invoices WHERE id = ?', (id,))
+        cursor.execute('SELECT id FROM invoices WHERE id = %s', (id,))
         invoice = cursor.fetchone()
         if not invoice:
             conn.close()
             return jsonify({'success': False, 'message': 'Invoice not found'}), 404
 
-        cursor.execute('DELETE FROM invoice_items WHERE invoice_id = ?', (id,))
-        cursor.execute('DELETE FROM invoices WHERE id = ?', (id,))
+        cursor.execute('DELETE FROM invoice_items WHERE invoice_id = %s', (id,))
+        cursor.execute('DELETE FROM invoices WHERE id = %s', (id,))
 
         conn.commit()
         conn.close()
@@ -2337,14 +2680,14 @@ def delete_invoice(id):
 # Show meetings dashboard (GET) and handle meeting creation (POST)
 @app.route('/meetings', methods=['GET', 'POST'])
 def meetings():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
         title = request.form['title']
         date = request.form['date']
         time = request.form['time']
-        c.execute("INSERT INTO meetings (title, date, time) VALUES (?, ?, ?)", (title, date, time))
+        c.execute("INSERT INTO meetings (title, date, time) VALUES (%s, %s, %s)", (title, date, time))
         conn.commit()
         flash("✅ Meeting added successfully", "success")
         conn.close()
@@ -2362,7 +2705,7 @@ def view_meetings():
         flash("❌ Please log in", "danger")
         return redirect(url_for('login'))
 
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT title, date, time FROM meetings ORDER BY date ASC")
     rows = c.fetchall()
@@ -2400,15 +2743,15 @@ def add_contract():
         contract_amount = float(request.form['contract_amount'])
         date_assigned = request.form['date_assigned']
 
-        conn = sqlite3.connect('furniture.db')
+        conn = get_connection()
         c = conn.cursor()
         c.execute('''
             INSERT INTO contracts (title, description, status, client_name, client_contact, contract_amount, date_assigned)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         ''', (title, description, status, client_name, client_contact, contract_amount, date_assigned))
         conn.commit()
         conn.close()
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         message = "New contract was added"
         if number:
             try:
@@ -2431,15 +2774,15 @@ def add_expense(contract_id):
         materials = float(request.form['materials'])
         others = float(request.form['others'])
 
-        conn = sqlite3.connect('furniture.db')
+        conn = get_connection()
         c = conn.cursor()
         c.execute('''
             INSERT INTO contract_expenses (contract_id, date, workers, materials, others)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s)
         ''', (contract_id, date, workers, materials, others))
         conn.commit()
         conn.close()
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         message = f"Expense of contract:{contract_id} recorded"
         if number:
             try:
@@ -2456,7 +2799,7 @@ def add_expense(contract_id):
 
 @app.route('/edit_contract/<int:id>', methods=['GET', 'POST'])
 def edit_contract(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
@@ -2470,13 +2813,13 @@ def edit_contract(id):
 
         c.execute('''
             UPDATE contracts
-            SET title = ?, description = ?, status = ?, client_name = ?, client_contact = ?, contract_amount = ?, date_assigned = ?
-            WHERE id = ?
+            SET title = %s, description = %s, status = %s, client_name = %s, client_contact = %s, contract_amount = %s, date_assigned = %s
+            WHERE id = %s
         ''', (title, description, status, client_name, client_contact, contract_amount, date_assigned, id))
 
         conn.commit()
         conn.close()
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         message = f"Expense of contract:{id} was edited"
         if number:
             try:
@@ -2488,7 +2831,7 @@ def edit_contract(id):
         return redirect(url_for('view_contracts', contract_id=id))
 
     # GET request - fetch the contract
-    c.execute("SELECT * FROM contracts WHERE id = ?", (id,))
+    c.execute("SELECT * FROM contracts WHERE id = %s", (id,))
     contract = c.fetchone()
     conn.close()
     return render_template('add_contract.html', contract=contract)
@@ -2496,7 +2839,7 @@ def edit_contract(id):
 
 @app.route('/view_contracts')
 def view_contracts():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
     # Fetch all contracts
@@ -2514,7 +2857,7 @@ def view_contracts():
 
 @app.route('/edit_contract_expense/<int:id>', methods=['GET', 'POST'])
 def edit_contract_expense(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()  
 
     if request.method == 'POST':
@@ -2525,24 +2868,24 @@ def edit_contract_expense(id):
 
         c.execute('''
             UPDATE contract_expenses
-            SET date = ?, workers = ?, materials = ?, others = ?
-            WHERE id = ?
+            SET date = %s, workers = %s, materials = %s, others = %s
+            WHERE id = %s
         ''', (date, workers, materials, others, id))
 
         # Get contract ID to redirect
-        c.execute("SELECT contract_id FROM contract_expenses WHERE id = ?", (id,))
+        c.execute("SELECT contract_id FROM contract_expenses WHERE id = %s", (id,))
         contract_row = c.fetchone()
         conn.commit()
         conn.close()
 
-        contract_id = contract_row['contract_id'] if contract_row else None
+        contract_id = contract_row[0] if contract_row else None
         return redirect(url_for('view_contracts', contract_id=contract_id))
 
     # GET method – fetch data to populate form
-    c.execute("SELECT * FROM contract_expenses WHERE id = ?", (id,))
+    c.execute("SELECT * FROM contract_expenses WHERE id = %s", (id,))
     expense = c.fetchone()
     conn.close()
-    number = get_admin_phone()
+    number =  normalize_kenyan_number()
     message = f"Expense of contract:{id} was edited"
     if number:
         try:
@@ -2556,47 +2899,58 @@ def edit_contract_expense(id):
 
 @app.route('/delete_contract_expense/<int:id>')
 def delete_contract_expense(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
 
-    c.execute("SELECT contract_id FROM contract_expenses WHERE id = ?", (id,))
+    # Try to get contract_id from the expense
+    c.execute("SELECT contract_id FROM contract_expenses WHERE id = %s", (id,))
     row = c.fetchone()
+
     if row:
-        contract_id = row['contract_id']
-        c.execute("DELETE FROM contract_expenses WHERE id = ?", (id,))
+        # If using default cursor, row is a tuple
+        contract_id = row[0]  # instead of row['contract_id']
+
+        # Delete the expense
+        c.execute("DELETE FROM contract_expenses WHERE id = %s", (id,))
         conn.commit()
         conn.close()
+
         return redirect(url_for('view_contracts', contract_id=contract_id))
+
     else:
         conn.close()
-        number = get_admin_phone()
-        message = f"Expense of contract:{id} was deleted"
+
+        # Notify admin (optional but clarified)
+        number = normalize_kenyan_number()
+        message = f"Attempted to delete non-existent contract expense with ID {id}."
+
         if number:
             try:
                 sms.send(message, [number])
             except Exception as e:
-                    print("SMS failed:",e)
+                print("SMS failed:", e)
         else:
-                print("No admin number found")
+            print("No admin number found")
+
         return "Contract expense not found", 404
 
 
 @app.route('/delete_contract/<int:id>')
 def delete_contract(id):
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()  # Added DictCursor for consistency
 
-    c.execute("SELECT * FROM contracts WHERE id = ?", (id,))
+    c.execute("SELECT * FROM contracts WHERE id = %s", (id,))
     contract = c.fetchone()
 
     if contract:
-        c.execute("DELETE FROM contracts WHERE id = ?", (id,))
+        c.execute("DELETE FROM contracts WHERE id = %s", (id,))
         conn.commit()
         conn.close()
         return redirect(url_for('view_contracts'))
     else:
         conn.close()
-        number = get_admin_phone()
+        number =  normalize_kenyan_number()
         message = f"contract:{id} was deleted"
         if number:
             try:
@@ -2609,95 +2963,66 @@ def delete_contract(id):
 
 
 
-
-
 @app.route('/dashboard')
 def dashboard():
-    conn = sqlite3.connect('furniture.db')
-    cur = conn.cursor()  # ✅ Use DictCursor directly
+    conn = get_connection()
+    cur = conn.cursor()
 
-    # Unpaid Invoices
-
-    cur.execute("SELECT username, email, phone, profile_photo FROM users WHERE username = ?", (session['user'],))
-    user_data = cur.fetchone()
+    cur.execute("SELECT username, email, phone, profile_photo FROM users WHERE username = %s", (session.get('username'),))
+    user_data = cur.fetchone()  # Type hint to tell Pylance it's a dict or None
     conn.close()
 
-    user = {
-        'username': user_data[0],
-        'email': user_data[1],
-        'phone': user_data[2],
-        'profile_photo': user_data[3] or 'default.jpg'  # fallback photo
-    }
 
 
-    # Top & Least Sellers
-
-
-    return render_template(
-        'dashboard.html',
-        username=session.get('username', 'Guest'), user=user
-    )
+    return render_template('dashboard.html', username=session.get('username', 'Guest'), user=user_data)
 
 @app.route('/new_dashboard')
 def new_dashboard():
-        conn = sqlite3.connect('furniture.db')
-        cur = conn.cursor()
-        cur.execute("""
-        SELECT invoices.id, invoices.customer_name, invoices.total_price, invoices.date
-        FROM invoices
-        JOIN invoice_items ON invoices.id = invoice_items.invoice_id
-        WHERE invoice_items.status = 'not paid'
-        GROUP BY invoices.id, invoices.customer_name, invoices.total_price, invoices.date
-        LIMIT 3
-        """)
-        unpaid_invoices = [{
-        'id': row['id'],
-        'customer_name': row['customer_name'],
-        'total_price': row['total_price'],
-        'date': row['date'].strftime('%Y-%m-%d'),  # ✅ Safe date format
-        'status': 'Unpaid'
-        } for row in cur.fetchall()]
+    conn = get_connection()
+    cur = conn.cursor()
+
+    # Unpaid Invoices
+
 
     # Contracts
-        cur.execute("""
-            SELECT id, title, client_name, status
-            FROM contracts
-            ORDER BY date_assigned DESC
-            LIMIT 3
-        """)
-        contract_snaps = [{
-            'id': row['id'],
-            'title': row['title'],
-            'client_name': row['client_name'],
-            'status': row['status']
-        } for row in cur.fetchall()]
+    cur.execute("""
+        SELECT id, title, client_name, status
+        FROM contracts
+        ORDER BY date_assigned DESC
+        LIMIT 3
+    """)
+    contract_snaps = [dict(row) for row in cur.fetchall()]
 
-        # Meetings
-        cur.execute("""
-            SELECT title, date, time
-            FROM meetings
-            ORDER BY date ASC, time ASC
-            LIMIT 5
-        """)
-        meetings = cur.fetchall()
-        cur.execute('''
-            SELECT type, SUM(quantity) as total_quantity
-            FROM sales
-            GROUP BY type
-            ORDER BY total_quantity DESC
-        ''')
-        sales_data = cur.fetchall()
+    # Meetings
+    cur.execute("""
+        SELECT title, date, time
+        FROM meetings
+        ORDER BY date ASC, time ASC
+        LIMIT 5
+    """)
+    meetings = [dict(row) for row in cur.fetchall()]
 
-        top_sellers = sales_data[:2]
-        least_sellers = sales_data[-2:] if len(sales_data) >= 2 else []
+    # Top & Least Sellers
+    cur.execute('''
+        SELECT type, SUM(quantity) AS total_quantity
+        FROM sales
+        GROUP BY type
+        ORDER BY total_quantity DESC
+    ''')
+    sales_data = cur.fetchall()
 
-        conn.close()
-        return render_template('new_dashboard.html',
-                                unpaid_invoices=unpaid_invoices,
-                                contract_snaps=contract_snaps,        
-                                top_sellers=top_sellers,
-                                least_sellers=least_sellers, 
-                                meetings=meetings)
+    top_sellers = sales_data[:2]
+    least_sellers = sales_data[-2:] if len(sales_data) >= 2 else []
+
+    conn.close()
+
+    return render_template(
+        'new_dashboard.html',
+        contract_snaps=contract_snaps,
+        top_sellers=top_sellers,
+        least_sellers=least_sellers,
+        meetings=meetings
+    )
 
 
 @app.route('/sales_data')
@@ -2715,7 +3040,7 @@ def sales_data():
         date_str = day.strftime('%Y-%m-%d')
         labels.append(day_name)
 
-        conn = sqlite3.connect('furniture.db')
+        conn = get_connection()
         c = conn.cursor()
         c.execute("""
             SELECT 
@@ -2723,7 +3048,7 @@ def sales_data():
                 SUM(buying_price * quantity),
                 SUM(profit_or_loss)
             FROM sales 
-            WHERE date = ?
+            WHERE date = %s
         """, (date_str,))
         row = c.fetchone()
         conn.close()
@@ -2765,34 +3090,42 @@ def print_receipt():
     return render_template('receipt.html')
 
 
-def get_db_connection():
-    conn = sqlite3.connect('furniture.db')
-    conn.row_factory = sqlite3.Row
-    return conn
+ 
+
+import psycopg2.extras
+
+import psycopg2.extras
 
 @app.route('/receipt/<int:receipt_no>')
 def render_receipt(receipt_no):
-    conn = get_db_connection()
-    sales = conn.execute('SELECT * FROM sales WHERE sale_id = ?', (receipt_no,)).fetchall()
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # Fetch all sales tied to this receipt
+    cur.execute('SELECT * FROM sales WHERE sale_id = %s', (receipt_no,))
+    sales = cur.fetchall()
     conn.close()
 
     if not sales:
         return "No receipt found."
 
-    sale = sales[0]  # if only 1 item, you can also use directly
-    # Assume 16% tax
-    subtotal = sale['quantity'] * sale['selling_price']
+    # Calculate subtotal from all rows
+    subtotal = sum(s['quantity'] * s['selling_price'] for s in sales)
     tax = round(subtotal * 0.16, 2)
     grand_total = round(subtotal + tax, 2)
 
-    return render_template('receipt.html',
-                           sale=sales,
-                           date=sale['date'],
-                           receipt_no=sale['sale_id'],
-                           customer_no=1000 + sale['sale_id'],  # example customer number
-                           subtotal=subtotal,
-                           tax=tax,
-                           grand_total=grand_total)
+    return render_template(
+        'receipt.html',
+        sale=sales,  # list of dicts for the for-loop
+        date=sales[0]['date'],  # assuming all have the same date
+        receipt_no=sales[0]['sale_id'],
+        customer_no=1000 + sales[0]['sale_id'],
+        subtotal=subtotal,
+        tax=tax,
+        grand_total=grand_total
+    )
+
+
 
 # Check if uploaded file is allowed
 def allowed_file(filename):
@@ -2819,14 +3152,14 @@ def add_product():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             image_path = os.path.join('uploads', filename)
 
-            conn = sqlite3.connect('furniture.db')
+            conn = get_connection()
             c = conn.cursor()
             c.execute('''
                     INSERT INTO furniture (name, quantity, selling_price, buying_price, image_path) 
-                    VALUES (?, ?, ?, ?, ?)''',
+                    VALUES (%s, %s, %s, %s, %s)''',
                     (name, quantity, selling_price, buying_price, image_path))
             conn.commit()
-            number = get_admin_phone()
+            number =  normalize_kenyan_number()
             message = "New Product recorded"
             if number:
                 try:
@@ -2845,20 +3178,20 @@ def add_product():
 # Route: View all products
 @app.route('/view_products')
 def view_products():
-    conn = sqlite3.connect('furniture.db')
+    conn = get_connection()
     c = conn.cursor()
     c.execute('SELECT * FROM furniture')
     items = c.fetchall()
     c.close()
     conn.close()
     return render_template('view_products.html', items=items)
-@app.route('/delete_product/<int:product_id>', methods=['POST'])
-def delete_product(product_id):
-    conn = sqlite3.connect('furniture.db')
+@app.route('/delete_product/<int:id>', methods=['POST'])
+def delete_product(id):
+    conn = get_connection()
     c = conn.cursor()
-    c.execute('DELETE FROM furniture WHERE id = ?', (product_id,))
+    c.execute('DELETE FROM furniture WHERE id = %s', (id,))
     conn.commit()
-    number = get_admin_phone()
+    number =  normalize_kenyan_number()
     message = f"Product :{id} was deleted"
     if number:
         try:
@@ -2870,9 +3203,9 @@ def delete_product(product_id):
     return redirect(url_for('view_products'))
 
 #Edit product
-@app.route('/edit_product/<int:product_id>', methods=['GET', 'POST'])
-def edit_product(product_id):
-    conn = sqlite3.connect('furniture.db')
+@app.route('/edit_product/<int:id>', methods=['GET', 'POST'])
+def edit_product(id):
+    conn = get_connection()
     c = conn.cursor()
     if request.method == 'POST':
             name = request.form.get('name')
@@ -2881,12 +3214,12 @@ def edit_product(product_id):
             buying_price = request.form.get('buying_price')
             c.execute('''
                 UPDATE furniture 
-                SET name=?, quantity=?, selling_price=?, buying_price=?
-                WHERE id=?
-            ''', (name, quantity, selling_price, buying_price, product_id))
+                SET name=%s, quantity=%s, selling_price=%s, buying_price=%s
+                WHERE item_id=%s
+            ''', (name, quantity, selling_price, buying_price, id))
             conn.commit()
-            number = get_admin_phone()
-            message = f"Product:{product_id} was edited"
+            number =  normalize_kenyan_number()
+            message = f"Product:{id} was edited"
             if number:
                 try:
                     sms.send(message, [number])
@@ -2896,16 +3229,16 @@ def edit_product(product_id):
                 print("No admin number found")
             return redirect(url_for('view_products'))
 
-    c.execute('SELECT * FROM furniture WHERE id=?', (product_id,))
+    c.execute('SELECT * FROM furniture WHERE item_id=%s', (id,))
     row = c.fetchone()
     if row:
             product = {
-                'id': row[0],
-                'name': row[1],
-                'quantity': row[2],
-                'selling_price': row[3],
-                'buying_price': row[4],
-                'image_path': row[5]
+                'id': row['item_id'], # type: ignore
+                'name': row['name'], # type: ignore
+                'quantity': row['quantity'], # type: ignore
+                'selling_price': row['selling_price'], # type: ignore
+                'buying_price': row['buying_price'], # type: ignore
+                'image_path': row['image_path'] # type: ignore
             }
     else:
         product = None
@@ -2913,7 +3246,7 @@ def edit_product(product_id):
     c.close()
     conn.close()
 
-    return render_template('add_product.html', form_action=url_for('edit_product', product_id=product_id), button_text='Update Product', product=product)
+    return render_template('add_product.html', form_action=url_for('edit_product', id=id), button_text='Update Product', product=product)
 
 
 # Optional: Logout route

@@ -1,70 +1,73 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Add Member</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 40px;
-            background-color: #f5f5f5;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        padding: 40px;
+        background-color: #f5f5f5;
+      }
 
-        h2 {
-            color: #333;
-        }
+      h2 {
+        color: #333;
+      }
 
-        form {
-            background: white;
-            padding: 20px;
-            border-radius: 6px;
-            max-width: 400px;
-        }
+      form {
+        background: white;
+        padding: 20px;
+        border-radius: 6px;
+        max-width: 400px;
+      }
 
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 16px;
-        }
+      input,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        font-size: 16px;
+      }
 
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-        }
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+      }
 
-        button:hover {
-            background-color: #0056b3;
-        }
+      button:hover {
+        background-color: #0056b3;
+      }
 
-        .error {
-            color: red;
-        }
+      .error {
+        color: red;
+      }
 
-        .success {
-            color: green;
-        }
+      .success {
+        color: green;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h2>New Salary Registration</h2>
-    
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <p class="{{ category }}">{{ message }}</p>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %}
+    <p class="{{ category }}">{{ message }}</p>
+    {% endfor %} {% endif %} {% endwith %}
 
     <form method="POST">
-        <input type="number" name="employee_id" placeholder="employee ID" required>
-        <input type="number" name="salary_amount" placeholder="Salary" required>
-        <input type="text" name="status" placeholder="Status" required>
-        <button type="submit">Regiter Salary</button>
+      <input
+        type="number"
+        name="employee_id"
+        placeholder="employee ID"
+        required
+      />
+      <input type="number" name="salary_amount" placeholder="Salary" required />
+      <input type="text" name="status" placeholder="Status" required />
+      <button type="submit">Regiter Salary</button>
     </form>
 
-    <br>
+    <br />
     <a href="/accounting">← Back to Dashboard</a>
-</body>
+  </body>
 </html>

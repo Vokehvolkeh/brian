@@ -105,52 +105,59 @@
     </style>
   </head>
   <body>
-    <div class="container">
-        <h2>{{ button_text if button_text else 'Add Sale' }}</h2>
-      
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="flash-message {{ category }}">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-      
-        <form action="{{ form_action }}" method="POST">
-          <input
-            type="number"
-            placeholder="Product ID"
-            name="item_id"
-            required
-          /><br />
-      
-          <input
-            type="number"
-            placeholder="Quantity"
-            name="quantity"
-            min="1"
-            required
-          /><br />
-      
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Selling Price"
-            name="selling_price"
-            required
-          /><br />
-      
-          <input
-            type="text"
-            placeholder="Payment Method"
-            name="payment"
-            required
-          /><br />
-      
-          <button type="submit">{{ button_text if button_text else 'Record Sale' }}</button>
-        </form>
-      
-        <a href="/dashboard_sales">← Back to Sales Dashboard</a>
-      </div>
+   <div class="container">
+    <h2>{{ button_text if button_text else 'Add Sale' }}</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul>
+        {% for category, message in messages %}
+            <li style="color: {{ 'red' if category == 'danger' else 'green' }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+
+    <form action="{{ form_action }}" method="POST">
+      <input
+        type="number"
+        placeholder="Product ID"
+        name="item_id"
+        required
+        value="{{ sale.item_id if sale else '' }}"
+      /><br />
+
+      <input
+        type="number"
+        placeholder="Quantity"
+        name="quantity"
+        min="1"
+        required
+        value="{{ sale.quantity if sale else '' }}"
+      /><br />
+
+      <input
+        type="number"
+        step="0.01"
+        placeholder="Selling Price"
+        name="selling_price"
+        required
+        value="{{ sale.selling_price if sale else '' }}"
+      /><br />
+
+      <input
+        type="text"
+        placeholder="Payment Method"
+        name="payment"
+        required
+        value="{{ sale.payment if sale else '' }}"
+      /><br />
+
+      <button type="submit">{{ button_text if button_text else 'Record Sale' }}</button>
+    </form>
+
+    <a href="/dashboard_sales">← Back to Sales Dashboard</a>
+</div>
+
       
 </html>

@@ -117,7 +117,7 @@
 
         <form method="POST" enctype="multipart/form-data" action="{{ form_action }}">
             <label>Profile Photo</label>
-            <input type="file" name="profile_photo" value="{{person.profile_photo if person else  ''}}" required>
+            <input type="file" name="profile_photo" value="{{ person.profile_photo if person else  ''}}" required>
 
             <label>Name</label>
             <input type="text" name="name" value="{{ person.name if person else '' }}" required>
@@ -132,7 +132,7 @@
             <input type="text" name="company_id" value="{{ person.company_id if person else '' }}" required>
 
             <label>Email</label>
-            <input type="text" name="email" value="{{person.responsibilty if person else ''}}" required>
+            <input type="text" name="email" value="{{person.Responsibilities if person else ''}}" required>
 
  
             <label>Status</label>
