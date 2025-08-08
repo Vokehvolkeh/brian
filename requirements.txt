@@ -1,5 +1,5 @@
-flask
+Flask
 gunicorn
 werkzeug
 africastalking
-
+psycopg2-binary
