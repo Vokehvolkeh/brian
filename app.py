@@ -706,30 +706,34 @@ def register():
 
     if request.method == 'POST':
         username = request.form['username']
-        password = request.form['password']  # Hash in production!
-        email = request.form['email']
-        phone = request.form['phone']
-        photo = request.files['profile_photo']  # <-- match the form field name
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']  # Hash in production!
+        if password != confirm_password:
+            return "error"
+        else:
+            email = request.form['email']
+            phone = request.form['phone']
+            photo = request.files['profile_photo']  # <-- match the form field name
 
-        profile_photo_path = None
-        if photo and photo.filename and allowed_file(photo.filename):
-            filename = secure_filename(photo.filename)
-            profile_photo_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            photo.save(profile_photo_path)
+            profile_photo_path = None
+            if photo and photo.filename and allowed_file(photo.filename):
+                filename = secure_filename(photo.filename)
+                profile_photo_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                photo.save(profile_photo_path)
 
-        hashed_password = generate_password_hash(password)
+            hashed_password = generate_password_hash(password)
 
-        try:
-            c.execute('INSERT INTO users (username, password, profile_photo, email, phone) VALUES (%s, %s, %s, %s, %s)', 
-                      (username, hashed_password, profile_photo_path, email, phone))
-            conn.commit()
-            conn.close()
-            return redirect(url_for('normal_user'))  # or home/dashboard
-        except psycopg2.IntegrityError:
-            conn.close()
-            return "Username already taken."
+            try:
+                c.execute('INSERT INTO users (username, password, profile_photo, email, phone) VALUES (%s, %s, %s, %s, %s)', 
+                        (username, hashed_password, profile_photo_path, email, phone))
+                conn.commit()
+                conn.close()
+                return redirect(url_for('normal_user'))  # or home/dashboard
+            except psycopg2.IntegrityError:
+                conn.close()
+                return "Username already taken."
 
-    conn.close()
+        conn.close()
     return render_template('create_user.html')
 
 from werkzeug.security import check_password_hash
@@ -778,6 +782,82 @@ def normal_user():
 
     conn.close()
     return render_template('login.html')
+
+#Edit user info@app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+def edit_user(user_id):
+    conn = get_connection()
+    c = conn.cursor()
+
+    # Fetch user info to pre-fill form
+    c.execute('SELECT username, email, phone, profile_photo FROM users WHERE id = %s', (user_id,))
+    user = c.fetchone()
+    if not user:
+        conn.close()
+        return "User not found."
+
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        phone = request.form['phone']
+
+        # Password update is optional
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        hashed_password = None
+        if password:
+            if password != confirm_password:
+                conn.close()
+                return "Passwords do not match."
+            hashed_password = generate_password_hash(password)
+
+        # Handle profile photo
+        photo = request.files.get('profile_photo')
+        profile_photo_path = user[3]  # keep old path unless new uploaded
+        if photo and photo.filename and allowed_file(photo.filename):
+            filename = secure_filename(photo.filename)
+            profile_photo_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            photo.save(profile_photo_path)
+
+        try:
+            if hashed_password:
+                c.execute('''
+                    UPDATE users 
+                    SET username=%s, password=%s, email=%s, phone=%s, profile_photo=%s
+                    WHERE id=%s
+                ''', (username, hashed_password, email, phone, profile_photo_path, user_id))
+            else:
+                c.execute('''
+                    UPDATE users 
+                    SET username=%s, email=%s, phone=%s, profile_photo=%s
+                    WHERE id=%s
+                ''', (username, email, phone, profile_photo_path, user_id))
+
+            conn.commit()
+            conn.close()
+            return redirect(url_for('normal_user'))  # send back to dashboard or list
+        except psycopg2.IntegrityError:
+            conn.close()
+            return "Username already taken."
+
+    conn.close()
+    return render_template('create_user.html', user=user)
+
+@app.route('/delete_user/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    conn = get_connection()
+    c = conn.cursor()
+
+    try:
+        # Delete user by id
+        c.execute('DELETE FROM users WHERE id = %s', (user_id,))
+        conn.commit()
+        conn.close()
+        return jsonify({"success": True, "message": "User deleted successfully."})
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @app.route('/add_damagedinfo', methods=['GET', 'POST'])
 def add_damagedinfo():
     conn = None
@@ -3247,6 +3327,7 @@ def edit_product(id):
     conn.close()
 
     return render_template('add_product.html', form_action=url_for('edit_product', id=id), button_text='Update Product', product=product)
+#Create a user
 
 
 # Optional: Logout route
