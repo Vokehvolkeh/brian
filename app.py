@@ -5,7 +5,6 @@ import traceback
 from flask import jsonify
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
-import africastalking
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -255,17 +254,10 @@ app = Flask(__name__)
 app.secret_key = 'supersecret'
 
 #initialize africastalking 
-import africastalking
-import sqlite3
+
 
 # Africa's Talking setup
-username = "sandbox"
-api_key = "atsk_59e13e2d3ea2984cad5a658b8ff327d2bdb35b6eab7fbc1935aacafe9e2c6f8e984e3888"
 
-africastalking.initialize(username, api_key)
-from typing import Any
-
-sms: Any = africastalking.SMS
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
@@ -364,26 +356,6 @@ def settings():
 
 
 
-def  normalize_kenyan_number():
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute("SELECT value FROM settings WHERE key = 'admin_phone'")
-    row = c.fetchone()
-    conn.close()
-    if row:
-        return row[0]
-    return None
-
-def send_sms(message):
-    phone =  normalize_kenyan_number()
-    if phone:
-        try:
-            response = sms.send(message, [phone])
-            print("SMS sent:", response)
-        except Exception as e:
-            print("SMS failed:", str(e))
-    else:
-        print("No phone number found for admin.")
 
 
 
@@ -435,14 +407,7 @@ def reset_password():
 
 from flask import jsonify
 
-from flask import request, jsonify
-import sqlite3
-from datetime import datetime
-from africastalking import SMS, initialize
 
-# Initialize Africa's Talking
-initialize("sandbox", "your_api_key")
-sms = SMS
 
 @app.route('/check_in', methods=['POST'])
 def check_in():
@@ -473,18 +438,6 @@ def check_in():
     conn.commit()
 
     # Fetch phone number from policy table
-    c.execute('SELECT phone FROM policy LIMIT 1')
-    phone_row = c.fetchone()
-    conn.close()
-
-    number = normalize_kenyan_number()
-    message = f"{member_name} was checked in at {time_in}"
-
-    if number:
-        try:
-            sms.send(message, [number])
-        except Exception as e:
-            print("❌ SMS failed:", e)
 
     return jsonify({"status": "success", "time_in": time_in})
 
@@ -550,12 +503,7 @@ def check_out():
     conn.close()
 
     # SMS (optional)
-    try:
-        number =  normalize_kenyan_number()
-        if number:
-            sms.send(f"{staff_id} checked out at {time_out}", [number])
-    except:
-        pass
+
 
     return jsonify({
         "status": "success",
@@ -930,13 +878,7 @@ def add_damagedinfo():
             flash("Damaged stock recorded successfully!", "success")
             
             # SMS Notification (optional)
-            try:
-                number = normalize_kenyan_number()  # Make sure this exists
-                if number:
-                    message = f"Damaged: {product_name}, Qty: {quantity}, Loss: {loss:.2f}"
-                    sms.send(message, [number])
-            except Exception as e:
-                print(f"SMS failed: {e}")
+
 
             return redirect(url_for('view_damagedinfo'))
 
@@ -1030,15 +972,7 @@ def edit_damagedinfo(id):
             }
         else:
             product = None
-        number =  normalize_kenyan_number()
-        message = f"Damaged info was edited"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:",e)
-        else:
-            print("No admin number found")
+
 
         return render_template('add_damagedinfo.html', product=product, form_action=url_for('edit_damagedinfo', id=id), button_text='Update Damaged Info')
 
@@ -1051,15 +985,7 @@ def delete_damagedinfo(id):
     c.execute('DELETE FROM damaged_info WHERE id = %s', (id,))
     conn.commit()
     conn.close()
-    number =  normalize_kenyan_number()
-    message = f"Damaged info with ID: {id} was deleted"
-    if number:
-        try:
-            sms.send(message, [number])
-        except Exception as e:
-            print("SMS failed:",e)
-    else:
-        print("No admin number found")
+
     return redirect(url_for('view_damagedinfo'))
 
 # ADD SALARY
@@ -1096,15 +1022,7 @@ def add_salary():
         conn.close()
 
         # Send SMS notification
-        number = normalize_kenyan_number()
-        message = f"Employee ID: {employee_id} salary was recorded"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:", e)
-        else:
-            print("No admin number found")
+
 
         return redirect(url_for('view_salary'))
 
@@ -1158,14 +1076,7 @@ def generate_payslip():
             total_deductions = paye + others + advance + nhif
             net_pay = total_earnings - total_deductions
 
-            # ✅ SMS after successful generation
-            number =  normalize_kenyan_number()
-            message = f"Payslip generated for {name} ({member_id})"
-            if number:
-                try:
-                    sms.send(message, [number])
-                except Exception as e:
-                    print("SMS failed:", e)
+
 
             return render_template('payrolls.html', name=name, member_id=member_id, payment_date=payment_date,
                                    allowance=allowance, commission=commission, basic_salary=basic_salary,
@@ -1196,15 +1107,7 @@ def edit_salary(id):
     cursor.execute('SELECT * FROM salaries WHERE id = %s', (id,))
     salary = cursor.fetchone()
     conn.close()
-    number =  normalize_kenyan_number()
-    message = f"Employee ID :{id} salary's was edited"
-    if number:
-        try:
-            sms.send(message, [number])
-        except Exception as e:
-                print("SMS failed:",e)
-    else:
-        print("No admin number found")
+
 
     return render_template('salaries.html', salary=salary, salaries=None)  # FIXED: Use correct template and pass data
 
@@ -1406,15 +1309,7 @@ def create_expense():
         conn.close()
 
         flash('✅ Expense recorded successfully!', 'success')
-        number =  normalize_kenyan_number()
-        message = "New Expense was recorded"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:",e)
-        else:
-            print("No admin number found")
+
         return redirect(url_for('view_expense'))
 
     return render_template('record_expense.html')
@@ -1427,15 +1322,7 @@ def delete_expense(id):
     c.execute('DELETE FROM expenses WHERE id = %s',(id,))
     conn.commit()
     conn.close()
-    number =  normalize_kenyan_number()
-    message = f"{id} Expense was deleted"
-    if number:
-        try:
-            sms.send(message, [number])
-        except Exception as e:
-                print("SMS failed:",e)
-    else:
-        print("No admin number found")
+
     return redirect('/view_expenses')
 
 from flask import request, render_template
@@ -1513,15 +1400,7 @@ def add_stockinfo():
         ''', (date, supplier_name, supplier_contact, item_name, quantity, selling_price, buying_price))
         conn.commit()
         conn.close()
-        number =  normalize_kenyan_number()
-        message = "New Stock  was recorded"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:",e)
-        else:
-            print("No admin number found")
+
         return redirect(url_for('view_stockinfo'))
 
     return render_template('add_productstock.html')
@@ -1550,15 +1429,7 @@ def edit_stockinfo(id):
         quantity = int(request.form['quantity'] or 1)
         selling_price = float(request.form['selling_price'] or 0)
         buying_price = float(request.form['buying_price'] or 0)
-        number =  normalize_kenyan_number()
-        message = f"{id} salary was edited"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:",e)
-        else:
-            print("No admin number found")
+
         c.execute('''
             UPDATE stock_info
             SET date = %s, supplier_name = %s, supplier_contact = %s, item_name = %s, quantity = %s, selling_price = %s, buying_price = %s
@@ -1599,15 +1470,7 @@ def delete_stockinfo(id):
     c.execute('DELETE FROM stock_info WHERE item_id = %s', (id,))
     conn.commit()
     conn.close()
-    number =  normalize_kenyan_number()
-    message = f"{id} salary was edited"
-    if number:
-        try:
-            sms.send(message, [number])
-        except Exception as e:
-            print("SMS failed:",e)
-    else:
-        print("No admin number found")    
+ 
     return redirect(url_for('view_stockinfo'))
 
 
@@ -1723,15 +1586,7 @@ def cashflow_statements():
 
         flash("✅ Cashflow report generated and saved!", "success")
 
-        number =  normalize_kenyan_number()
-        message = "New Cashflow was recorded"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:",e)
-        else:
-            print("No admin number found")  
+
         return redirect(url_for('view_cashflow'))
 
 
@@ -1793,15 +1648,7 @@ def edit_cashflow(id):
         conn.close()
 
         flash("✅ Cashflow report updated successfully!", "success")
-        number =  normalize_kenyan_number()
-        message = f"Cashflow:{id} salary was edited"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:",e)
-        else:
-            print("No admin number found")
+
         return redirect('/view_cashflow')
 
     # Fetch the existing record for pre-filling the form
@@ -1836,15 +1683,7 @@ def delete_cashflow(id):
     conn.close()
 
     flash("🗑️ Sale deleted successfully!", "success")
-    number =  normalize_kenyan_number()
-    message = f"Cashflow :{id} salary was deleted"
-    if number:
-        try:
-            sms.send(message, [number])
-        except Exception as e:
-            print("SMS failed:",e)
-    else:
-        print("No admin number found")
+
     return redirect('/view_cashflow')
 
 #assign tasks and responsibilties@app.route('/assign_tasks', methods=['POST', 'GET'])
@@ -1876,15 +1715,7 @@ def assign_tasks():
                           (name, company_id, respo, task, description, date_assigned))
 
             conn.commit()
-            number =  normalize_kenyan_number()
-            message = f"Member:{company_id} was assigned tasks"
-            if number:
-                try:
-                    sms.send(message, [number])
-                except Exception as e:
-                    print("SMS failed:",e)
-            else:
-                print("No admin number found")
+
             flash("✅ Tasks assigned successfully!", "success")
             return redirect(url_for('view_tasks'))
 
@@ -1956,15 +1787,7 @@ def edit_task(id):
 
         conn.commit()
         conn.close()
-        number =  normalize_kenyan_number()
-        message = f"Member:{id} tasks were edited"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                    print("SMS failed:",e)
-            else:
-                print("No admin number found")
+
         flash("✅ Task updated successfully", "success")
         return redirect(url_for('view_tasks'))
     
@@ -1981,15 +1804,7 @@ def delete_task(id):
     conn.commit()
     conn.close()
     flash("🗑️ Task deleted successfully", "success")
-    number =  normalize_kenyan_number()
-    message = f"Member:{id}  tasks were deleted"
-    if number:
-        try:
-            sms.send(message, [number])
-        except Exception as e:
-                print("SMS failed:",e)
-        else:
-                print("No admin number found")
+
     return redirect(url_for('view_tasks'))
 
 from collections import defaultdict
@@ -2144,13 +1959,7 @@ def record_sales():
 
             conn.commit()
             
-            # SMS notification
-            number = normalize_kenyan_number()
-            if number:
-                try:
-                    sms.send("New sale was recorded", [number])
-                except Exception as e:
-                    print("SMS failed:", e)
+
 
             return redirect('/dashboard_sales')
 
@@ -2218,15 +2027,7 @@ def edit_sales(id):
 
             conn.commit()
 
-            number = normalize_kenyan_number()
-            message = f"Sales {id} were updated."
-            if number:
-                try:
-                    sms.send(message, [number])
-                except Exception as e:
-                    print("SMS failed:", e)
-            else:
-                print("No admin number found")
+
 
             return redirect('/dashboard_sales')
 
@@ -2473,15 +2274,7 @@ def add_member():
                     (name, phone, role, company_id, status, email, photo_filename))
         conn.commit()
         conn.close()
-        number =  normalize_kenyan_number()
-        message = f"Member:{company_id} was registered to the company"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:",e)
-        else:
-            print("No admin number found")
+
         flash("✅ Member added successfully.", "success")
         return redirect(url_for('view_members'))
 
@@ -2518,15 +2311,7 @@ def edit_member(id):
 
         conn.commit()
         conn.close()
-        number =  normalize_kenyan_number()
-        message = f"Member:{company_id} info was edited"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:",e)
-        else:
-            print("No admin number found")
+
         flash("✅ Member updated successfully.", "success")
         return redirect(url_for('view_members'))
 
@@ -2567,15 +2352,7 @@ def delete_member(id):  # Added 'id' as a function argument
     conn.commit()
     conn.close()
     flash("🗑️ Member deleted successfully.", "success")
-    number =  normalize_kenyan_number()
-    message = f"Member:{id} was deleted"
-    if number:
-        try:
-            sms.send(message, [number])
-        except Exception as e:
-            print("SMS failed:",e)
-    else:
-        print("No admin number found")
+
     return redirect("/members")
 
 
@@ -2831,15 +2608,7 @@ def add_contract():
         ''', (title, description, status, client_name, client_contact, contract_amount, date_assigned))
         conn.commit()
         conn.close()
-        number =  normalize_kenyan_number()
-        message = "New contract was added"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:",e)
-            else:
-                print("No admin number found")
+
 
         return redirect(url_for('dashboard'))  
 
@@ -2862,15 +2631,7 @@ def add_expense(contract_id):
         ''', (contract_id, date, workers, materials, others))
         conn.commit()
         conn.close()
-        number =  normalize_kenyan_number()
-        message = f"Expense of contract:{contract_id} recorded"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:",e)
-        else:
-            print("No admin number found")
+
 
         return redirect(url_for('view_contracts'))
 
@@ -2899,15 +2660,7 @@ def edit_contract(id):
 
         conn.commit()
         conn.close()
-        number =  normalize_kenyan_number()
-        message = f"Expense of contract:{id} was edited"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:",e)
-        else:
-            print("No admin number found")        
+      
         return redirect(url_for('view_contracts', contract_id=id))
 
     # GET request - fetch the contract
@@ -2965,15 +2718,7 @@ def edit_contract_expense(id):
     c.execute("SELECT * FROM contract_expenses WHERE id = %s", (id,))
     expense = c.fetchone()
     conn.close()
-    number =  normalize_kenyan_number()
-    message = f"Expense of contract:{id} was edited"
-    if number:
-        try:
-            sms.send(message, [number])
-        except Exception as e:
-            print("SMS failed:",e)
-    else:
-        print("No admin number found")
+
     return render_template('add_expense.html', expense=expense)
 
 
@@ -3001,16 +2746,7 @@ def delete_contract_expense(id):
         conn.close()
 
         # Notify admin (optional but clarified)
-        number = normalize_kenyan_number()
-        message = f"Attempted to delete non-existent contract expense with ID {id}."
 
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:", e)
-        else:
-            print("No admin number found")
 
         return "Contract expense not found", 404
 
@@ -3030,15 +2766,7 @@ def delete_contract(id):
         return redirect(url_for('view_contracts'))
     else:
         conn.close()
-        number =  normalize_kenyan_number()
-        message = f"contract:{id} was deleted"
-        if number:
-            try:
-                sms.send(message, [number])
-            except Exception as e:
-                print("SMS failed:",e)
-        else:
-            print("No admin number found")        
+     
         return "Contract not found", 404
 
 
@@ -3239,15 +2967,7 @@ def add_product():
                     VALUES (%s, %s, %s, %s, %s)''',
                     (name, quantity, selling_price, buying_price, image_path))
             conn.commit()
-            number =  normalize_kenyan_number()
-            message = "New Product recorded"
-            if number:
-                try:
-                    sms.send(message, [number])
-                except Exception as e:
-                    print("SMS failed:",e)
-            else:
-                print("No admin number found")           
+    
 
         return redirect(url_for('view_products'))
 
@@ -3271,15 +2991,7 @@ def delete_product(id):
     c = conn.cursor()
     c.execute('DELETE FROM furniture WHERE id = %s', (id,))
     conn.commit()
-    number =  normalize_kenyan_number()
-    message = f"Product :{id} was deleted"
-    if number:
-        try:
-            sms.send(message, [number])
-        except Exception as e:
-            print("SMS failed:",e)
-    else:
-        print("No admin number found")
+
     return redirect(url_for('view_products'))
 
 #Edit product
@@ -3298,15 +3010,7 @@ def edit_product(id):
                 WHERE item_id=%s
             ''', (name, quantity, selling_price, buying_price, id))
             conn.commit()
-            number =  normalize_kenyan_number()
-            message = f"Product:{id} was edited"
-            if number:
-                try:
-                    sms.send(message, [number])
-                except Exception as e:
-                    print("SMS failed:",e)
-            else:
-                print("No admin number found")
+
             return redirect(url_for('view_products'))
 
     c.execute('SELECT * FROM furniture WHERE item_id=%s', (id,))
