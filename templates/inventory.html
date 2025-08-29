@@ -228,18 +228,38 @@
     <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
 
     <div class="sidebar hidden" id="sidebar">
-      <h2>INVENTORY MANAGEMENT</h2>
+      <h2>📦 INVENTORY MANAGEMENT</h2>
+
+      <!-- Active links -->
       <a href="{{url_for('add_stockinfo')}}">➕ Add New Item 🛋️ 📦</a>
       <a href="{{url_for('view_stockinfo')}}">👀 Browse Inventory 🖼️ 📃</a>
-      <a href="{{url_for('add_product')}}">📦 Receive New Stock 🚚 🛒</a>
+      <a href="{{url_for('add_product')}}">🚚 Receive New Stock 🛒</a>
       <a href="{{url_for('view_products')}}">📋 Inventory Overview 🏷️ 📊</a>
       <a href="{{url_for('add_damagedinfo')}}">💔 Report Damaged Stock 🛠️ 🚨</a>
-      <a href="{{url_for('view_damagedinfo')}}">📝 Damage Reports 🛑 📝</a>
-      <a href="/unit cost and total inventory value"
-        >💰 Inventory Valuation 💲 📈</a
-      >
-      <a href="/dashboard">🏠 Control Center 📊 🏠</a>
-      <a href="/logout">Logout</a>
+      <a href="{{url_for('view_damagedinfo')}}">📝 Damage Reports 🛑</a>
+      <a href="/unit-cost-value">💰 Inventory Valuation 💲 📈</a>
+
+      <!-- Future / inactive modules -->
+      <a href="#" class="inactive">📦 Stock Reordering Alerts 🔔</a>
+      <a href="#" class="inactive">🌍 Supplier Management 🤝</a>
+      <a href="#" class="inactive">📊 Demand Forecasting 📈</a>
+      <a href="#" class="inactive">🧾 Purchase Orders ✍️</a>
+      <a href="#" class="inactive">🚀 Automated Restocking ⚡</a>
+      <a href="#" class="inactive">📦 Warehouse Transfers 🚛</a>
+      <a href="#" class="inactive">🏭 Multiple Warehouse Tracking 🏢</a>
+      <a href="#" class="inactive">📦 Batch & Lot Tracking 🔍</a>
+      <a href="#" class="inactive">🧊 Cold Storage Monitoring ❄️</a>
+      <a href="#" class="inactive">📍 Location Mapping (Aisle/Shelf) 🗂️</a>
+      <a href="#" class="inactive">📡 RFID/Barcode Integration 🏷️</a>
+      <a href="#" class="inactive">⚖️ Unit Conversion Tools 🔄</a>
+      <a href="#" class="inactive">📑 Compliance & Auditing 🧑‍⚖️</a>
+      <a href="#" class="inactive">🛡️ Stock Security & Theft Reports 🚨</a>
+      <a href="#" class="inactive">💹 Depreciation Tracking 📉</a>
+      <a href="#" class="inactive">🔄 Returns & Reverse Logistics ↩️</a>
+
+      <!-- General -->
+      <a href="/dashboard">🏠 Control Center 📊</a>
+      <a href="/logout">🚪 Logout</a>
     </div>
 
     <div class="content" id="content">

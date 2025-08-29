@@ -31,6 +31,7 @@
         border-bottom-right-radius: 15px;
         box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
         z-index: 1000;
+        overflow-y: auto;
       }
 
       .sidebar.hidden {
@@ -222,12 +223,31 @@
 
     <div class="sidebar hidden" id="sidebar">
       <h1>📊 SALES HUB</h1>
+
+      <!-- Active links -->
       <a href="{{url_for('record_sales')}}">➕ New Sale</a>
       <a href="{{url_for('dashboard_sales')}}">📈 Sales Overview</a>
       <a href="{{url_for('daily_summary')}}">🗓️ Daily Snapshot</a>
       <a href="{{url_for('weekly_summary')}}">📅 Weekly Insights</a>
       <a href="{{url_for('monthly_summary')}}">🗓 Monthly Trends</a>
       <a href="/sales_summary">📊 Full Summary</a>
+
+      <!-- Inactive / future modules -->
+      <a href="#" class="inactive">🎯 Sales Targets</a>
+      <a href="#" class="inactive">🧾 Invoice Management</a>
+      <a href="#" class="inactive">👥 Customer CRM</a>
+      <a href="#" class="inactive">💼 B2B Deals</a>
+      <a href="#" class="inactive">🌍 Regional Sales</a>
+      <a href="#" class="inactive">🛒 Product Catalog</a>
+      <a href="#" class="inactive">📦 Inventory Sync</a>
+      <a href="#" class="inactive">📢 Marketing Campaigns</a>
+      <a href="#" class="inactive">📡 Lead Generation</a>
+      <a href="#" class="inactive">💳 Payment Tracking</a>
+      <a href="#" class="inactive">🧮 Profit & Loss</a>
+      <a href="#" class="inactive">🔒 Restricted Reports</a>
+      <a href="#" class="inactive">🚀 Sales Forecast AI</a>
+
+      <!-- General -->
       <a href="/dashboard">🏠 Main Dashboard</a>
       <a href="/logout">🚪 Log Out</a>
     </div>

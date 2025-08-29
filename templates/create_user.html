@@ -32,6 +32,14 @@
         🎉 Welcome to BIG-ZA ELITE WORKS!
       </h1>
       <p class="text-center text-gray-600 mb-6">Let's get you started 🎈</p>
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
 
       <form
         id="registerForm"

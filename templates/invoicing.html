@@ -1,91 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice and Quotation Dashboard</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invoice and Quotation Dashboard</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-    }
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+      }
 
-    /* Sidebar Styles */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 250px;
-      height: 100%;
-      background: linear-gradient(180deg, #1e3c29, #000000);
-      color: white;
-      padding-top: 60px;
-      transition: transform 0.3s ease;
-      font-family: 'Segoe UI', sans-serif;
-      border-top-right-radius: 15px;
-      border-bottom-right-radius: 15px;
-      box-shadow: 2px 0 8px rgba(0,0,0,0.2);
-      z-index: 1000;
-    }
-
-    .sidebar.hidden {
-      transform: translateX(-100%);
-    }
-
-    .sidebar.visible {
-      transform: translateX(0);
-    }
-
-    .sidebar h2 {
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 24px;
-    }
-
-    .sidebar a {
-      display: block;
-      padding: 15px 30px;
-      color: white;
-      text-decoration: none;
-      transition: background 0.3s;
-    }
-
-    .sidebar a:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    /* Content Styles */
-    .content {
-      margin-left: 250px;
-      padding: 20px;
-      transition: margin-left 0.3s ease;
-    }
-
-    /* Menu Toggle Button */
-    .menu-toggle {
-      display: none;
-      background-color: #0f3460;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      font-size: 20px;
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 1001;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
+      /* Sidebar Styles */
       .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 250px;
+        height: 100%;
+        background: linear-gradient(180deg, #1e3c29, #000000);
+        color: white;
+        padding-top: 60px;
+        transition: transform 0.3s ease;
+        font-family: "Segoe UI", sans-serif;
+        border-top-right-radius: 15px;
+        border-bottom-right-radius: 15px;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+
+      .sidebar.hidden {
         transform: translateX(-100%);
       }
 
@@ -93,445 +42,616 @@
         transform: translateX(0);
       }
 
-      .content {
-        margin-left: 0;
+      .sidebar h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 24px;
       }
 
-      .menu-toggle {
+      .sidebar a {
         display: block;
+        padding: 15px 30px;
+        color: white;
+        text-decoration: none;
+        transition: background 0.3s;
+      }
+
+      .sidebar a:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      /* Content Styles */
+      .content {
+        margin-left: 250px;
+        padding: 20px;
+        transition: margin-left 0.3s ease;
+      }
+
+      /* Menu Toggle Button */
+      .menu-toggle {
+        display: none;
+        background-color: #0f3460;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        font-size: 20px;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+
+        .sidebar.visible {
+          transform: translateX(0);
+        }
+
+        .content {
+          margin-left: 0;
+        }
+
+        .menu-toggle {
+          display: block;
+        }
+
+        .invoice-container {
+          width: 100%;
+          padding: 20px;
+        }
+
+        .sales_summary {
+          min-width: 100%;
+        }
+      }
+
+      .topbar {
+        height: 60px;
+        background: #0f3460;
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      .main-content {
+        margin-top: 30px;
+      }
+
+      .invoice-box {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .invoice-box h3 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .invoice-box .button-group {
+        margin-bottom: 15px;
+      }
+
+      .invoice-box .button-group button {
+        margin-right: 10px;
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+
+      .invoice-box .button-group .delete-btn {
+        background-color: red;
+        color: white;
+        border: none;
+        border-radius: 5px;
+      }
+
+      .invoice-box p {
+        color: #333;
+        font-size: 16px;
+        text-align: center;
       }
 
       .invoice-container {
-        width: 100%;
-        padding: 20px;
+        width: 794px;
+        min-height: 1123px;
+        margin: 20px auto;
+        padding: 40px;
+        background: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+        border-radius: 8px;
+      }
+
+      .print-button {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .print-button:hover {
+        background-color: #2980b9;
+      }
+
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+
+        .print-area,
+        .print-area * {
+          visibility: visible;
+        }
+
+        .print-area {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
+
+        .print-button,
+        .button-group,
+        .pagination {
+          display: none !important;
+        }
+      }
+
+      .totals-section {
+        margin-top: 25px;
+        text-align: right;
+        font-size: 16px;
+      }
+
+      .totals-section h4 {
+        margin-bottom: 10px;
+        color: #2c2cd8;
+      }
+
+      .totals-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .totals-section li {
+        margin-bottom: 5px;
       }
 
       .sales_summary {
-        min-width: 100%;
-      }
-    }
-
-    .topbar {
-      height: 60px;
-      background: #0f3460;
-      color: white;
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-    }
-
-    .main-content {
-      margin-top: 30px;
-    }
-
-    .invoice-box {
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 30px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .invoice-box h3 {
-      color: #333;
-      margin-bottom: 10px;
-    }
-
-    .invoice-box .button-group {
-      margin-bottom: 15px;
-    }
-
-    .invoice-box .button-group button {
-      margin-right: 10px;
-      padding: 8px 16px;
-      cursor: pointer;
-    }
-
-    .invoice-box .button-group .delete-btn {
-      background-color: red;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-
-    .invoice-box p {
-      color: #333;
-      font-size: 16px;
-      text-align: center;
-    }
-
-    .invoice-container {
-      width: 794px;
-      min-height: 1123px;
-      margin: 20px auto;
-      padding: 40px;
-      background: white;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-      border-radius: 8px;
-    }
-
-    .print-button {
-      display: block;
-      margin: 20px auto;
-      padding: 10px 20px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .print-button:hover {
-      background-color: #2980b9;
-    }
-
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-
-      .print-area, .print-area * {
-        visibility: visible;
-      }
-
-      .print-area {
-        position: absolute;
-        left: 0;
-        top: 0;
         width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 16px;
+        table-layout: auto;
       }
 
-      .print-button,
-      .button-group,
+      .sales_summary th,
+      .sales_summary td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+        overflow-wrap: break-word;
+      }
+
+      .sales_summary th {
+        background-color: #f2f2f2;
+        color: #333;
+      }
+
+      /* Pagination Styles */
       .pagination {
-        display: none !important;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
       }
-    }
 
-    .totals-section {
-      margin-top: 25px;
-      text-align: right;
-      font-size: 16px;
-    }
+      .pagination button {
+        padding: 8px 16px;
+        background-color: #0f3460;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+      }
 
-    .totals-section h4 {
-      margin-bottom: 10px;
-      color: #2c2cd8;
-    }
+      .pagination button:hover {
+        background-color: #1e3c29;
+      }
 
-    .totals-section ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
+      .pagination button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+    </style>
+    <script>
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("hidden");
+        sidebar.classList.toggle("visible");
+      }
+    </script>
+  </head>
+  <body>
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
 
-    .totals-section li {
-      margin-bottom: 5px;
-    }
+    <div class="sidebar hidden" id="sidebar">
+      <h2>🧾 INVOICE & QUOTATION</h2>
 
-    .sales_summary {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 16px;
-      table-layout: auto;
-    }
+      <!-- Core actions -->
+      <a href="{{ url_for('create_invoice') }}">➕ Create Invoice</a>
+      <a href="{{ url_for('all_invoices') }}">📑 View Invoices</a>
+      <a href="#">📄 Create Quotation</a>
+      <a href="#">📜 View Quotations</a>
 
-    .sales_summary th, .sales_summary td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: left;
-      overflow-wrap: break-word;
-    }
+      <!-- Extended active/inactive modules -->
+      <a href="#" class="inactive">💳 Record Payments</a>
+      <a href="#" class="inactive">🚫 Pending / Overdue Invoices</a>
+      <a href="#" class="inactive">🔄 Recurring Invoices</a>
+      <a href="#" class="inactive">🌍 Client Management</a>
+      <a href="#" class="inactive">📈 Invoice Analytics & Reports</a>
+      <a href="#" class="inactive">💰 Tax & VAT Integration</a>
+      <a href="#" class="inactive">🌐 Multi-Currency Billing</a>
+      <a href="#" class="inactive">⚡ Auto Email Invoices to Clients</a>
+      <a href="#" class="inactive">🔗 Invoice-to-Inventory Link</a>
+      <a href="#" class="inactive">💵 Discount & Credit Notes</a>
+      <a href="#" class="inactive">📊 Aging Reports (30/60/90 days)</a>
+      <a href="#" class="inactive">🔒 Digital Signatures on Invoices</a>
+      <a href="#" class="inactive">💹 Profit & Loss from Invoices</a>
+      <a href="#" class="inactive">📤 Export Invoices (PDF/Excel)</a>
+      <a href="#" class="inactive">🖨️ Print Invoice Templates</a>
 
-    .sales_summary th {
-      background-color: #f2f2f2;
-      color: #333;
-    }
-
-    /* Pagination Styles */
-    .pagination {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .pagination button {
-      padding: 8px 16px;
-      background-color: #0f3460;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.3s;
-    }
-
-    .pagination button:hover {
-      background-color: #1e3c29;
-    }
-
-    .pagination button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-  </style>
-  <script>
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('hidden');
-      sidebar.classList.toggle('visible');
-    }
-  </script>
-</head>
-<body>
-  <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-
-  <div class="sidebar hidden" id="sidebar">
-    <h2>INVOICE AND QUOTATION</h2>
-    <a href="#">INVOICE AND QUOTATION</a>
-    <a href="{{ url_for('create_invoice') }}">Add Invoice</a>
-    <a href="{{ url_for('all_invoices') }}">View Invoice</a>
-    <a href="/dashboard">Dashboard</a>
-    <a href="/logout">Logout</a>
-  </div>
-
-  <div class="content" id="content">
-    <div class="topbar">
-      <h1>INVOICE AND QUOTATION</h1>
+      <!-- General navigation -->
+      <a href="/dashboard">🏠 Dashboard</a>
+      <a href="/logout">🚪 Logout</a>
     </div>
 
-    <div class="invoice-container">
-      {% if data %}
-        {% for group in data %}
-          <!-- BEGIN PRINT AREA -->
-          <div class="print-area">
-            <div class="invoice-box" data-invoice-id="{{ group.invoice[0]|int }}">
-              <!-- Header -->
-              <div style="background: linear-gradient(to right, #004e92, #000428); padding: 30px 20px; color: white; border-top-left-radius: 10px; border-top-right-radius: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <h2 style="margin: 0;">INVOICE</h2>
-                  <p style="margin: 0;">No: INV-{{ '%05d'|format(group.invoice[0]|int) }}</p>
-                </div>
-              </div>
+    <div class="content" id="content">
+      <div class="topbar">
+        <h1>INVOICE AND QUOTATION</h1>
+      </div>
 
-              <!-- Logo -->
-              <div style="text-align: center; margin-top: -70px;">
-                <img src="{{ url_for('static', filename='images/final.jpeg') }}" alt="Logo" style="width: 100px; height: 100px; border-radius: 50%; border: 5px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.2); background-color: white;">
-              </div>
-
-              <!-- Client & Sender Info -->
-              <div style="padding: 10px 20px;">
-                <div style="display: flex; justify-content: space-between;">
-                  <div>
-                    <strong>Bill To:</strong><br/>
-                    {{ group.invoice[1] }}<br/>
-                    +254-700-000000<br/>
-                    Kibwezi, Kenya
-                  </div>
-                  <div>
-                    <strong>From:</strong><br/>
-                    BIG-ZA ELITE WORKS<br/>
-                    +254-700-123456<br/>
-                    Nairobi, Kenya
-                  </div>
-                </div>
-                <p style="margin-top: 10px;"><strong>Date:</strong> {{ group.invoice[3] if group.invoice[3] else "Unknown" }}</p>
-              </div>
-
-              <!-- Payment Status -->
-              {% set statuses = group["items"] | map(attribute=3) | list %}
-              {% set paid = 'not paid' not in statuses %}
-              <div style="text-align: right; padding: 0 20px;">
-                {% if paid %}
-                  <span style="background-color: #27ae60; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold;">PAID</span>
-                {% else %}
-                  <span style="background-color: #e74c3c; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold;">NOT PAID</span>
-                {% endif %}
-              </div>
-
-              <!-- Invoice Table -->
-              <div style="padding: 10px 20px;">
-                <h3 style="margin-bottom: 10px;">Customer Name: {{ group.invoice[0] }} - {{ group.invoice[1] }}</h3>
-                <p><strong>Total:</strong> {{ group.invoice[2] }} KES</p>
-
-                <table class="sales_summary" data-invoice-id="{{ group.invoice[0]|int }}">
-                  <thead>
-                    <tr>
-                      <th>Item Name</th>
-                      <th>Quantity</th>
-                      <th>Selling Price (KES)</th>
-                    </tr>
-                  </thead>
-                  <tbody class="invoice-items">
-                    {% for item in group["items"] %}
-                    <tr class="item-row">
-                      <td>{{ item[0] }}</td>
-                      <td>{{ item[1] }}</td>
-                      <td>{{ "%.2f" | format(item[2]) }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-
-                <!-- Pagination -->
-                <div class="pagination" data-invoice-id="{{ group.invoice[0]|int }}">
-                  <button onclick="prevPage({{ group.invoice[0]|int }})" class="prev-btn">Previous</button>
-                  <button onclick="nextPage({{ group.invoice[0]|int }})" class="next-btn">Next</button>
-                </div>
-
-                <!-- Total Per Item -->
-                <div class="totals-section">
-                  <h4>Total Per Item</h4>
-                  <ul>
-                    {% for item in group["items"] %}
-                      <li><strong>{{ item[0] }}:</strong> KES {{ "%.2f" | format(item[1] * item[2]) }}</li>
-                    {% endfor %}
-                  </ul>
-                </div>
-
-                <p style="text-align: center; margin-top: 20px; font-weight: bold;">Thank you for doing business with us!</p>
+      <div class="invoice-container">
+        {% if data %} {% for group in data %}
+        <!-- BEGIN PRINT AREA -->
+        <div class="print-area">
+          <div class="invoice-box" data-invoice-id="{{ group.invoice[0]|int }}">
+            <!-- Header -->
+            <div
+              style="
+                background: linear-gradient(to right, #004e92, #000428);
+                padding: 30px 20px;
+                color: white;
+                border-top-left-radius: 10px;
+                border-top-right-radius: 10px;
+              "
+            >
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <h2 style="margin: 0">INVOICE</h2>
+                <p style="margin: 0">
+                  No: INV-{{ '%05d'|format(group.invoice[0]|int) }}
+                </p>
               </div>
             </div>
-          </div>
-          <!-- END PRINT AREA -->
 
-          <!-- Visible Buttons (Not Printed) -->
-          <div class="button-group">
-            <a href="{{ url_for('edit_invoice', id=group.invoice[0])}}"><button>Edit Invoice</button></a>
-            <button class="delete-btn" onclick="deleteInvoice('{{ group.invoice[0]|int }}')">Delete Invoice</button>
-            <button class="print-button" onclick="window.print()">🖨️ Print Invoice</button>
+            <!-- Logo -->
+            <div style="text-align: center; margin-top: -70px">
+              <img
+                src="{{ url_for('static', filename='images/final.jpeg') }}"
+                alt="Logo"
+                style="
+                  width: 100px;
+                  height: 100px;
+                  border-radius: 50%;
+                  border: 5px solid white;
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                  background-color: white;
+                "
+              />
+            </div>
+
+            <!-- Client & Sender Info -->
+            <div style="padding: 10px 20px">
+              <div style="display: flex; justify-content: space-between">
+                <div>
+                  <strong>Bill To:</strong><br />
+                  {{ group.invoice[1] }}<br />
+                  +254-700-000000<br />
+                  Kibwezi, Kenya
+                </div>
+                <div>
+                  <strong>From:</strong><br />
+                  BIG-ZA ELITE WORKS<br />
+                  +254-700-123456<br />
+                  Nairobi, Kenya
+                </div>
+              </div>
+              <p style="margin-top: 10px">
+                <strong>Date:</strong> {{ group.invoice[3] if group.invoice[3]
+                else "Unknown" }}
+              </p>
+            </div>
+
+            <!-- Payment Status -->
+            {% set statuses = group["items"] | map(attribute=3) | list %} {% set
+            paid = 'not paid' not in statuses %}
+            <div style="text-align: right; padding: 0 20px">
+              {% if paid %}
+              <span
+                style="
+                  background-color: #27ae60;
+                  color: white;
+                  padding: 5px 12px;
+                  border-radius: 20px;
+                  font-weight: bold;
+                "
+                >PAID</span
+              >
+              {% else %}
+              <span
+                style="
+                  background-color: #e74c3c;
+                  color: white;
+                  padding: 5px 12px;
+                  border-radius: 20px;
+                  font-weight: bold;
+                "
+                >NOT PAID</span
+              >
+              {% endif %}
+            </div>
+
+            <!-- Invoice Table -->
+            <div style="padding: 10px 20px">
+              <h3 style="margin-bottom: 10px">
+                Customer Name: {{ group.invoice[0] }} - {{ group.invoice[1] }}
+              </h3>
+              <p><strong>Total:</strong> {{ group.invoice[2] }} KES</p>
+
+              <table
+                class="sales_summary"
+                data-invoice-id="{{ group.invoice[0]|int }}"
+              >
+                <thead>
+                  <tr>
+                    <th>Item Name</th>
+                    <th>Quantity</th>
+                    <th>Selling Price (KES)</th>
+                  </tr>
+                </thead>
+                <tbody class="invoice-items">
+                  {% for item in group["items"] %}
+                  <tr class="item-row">
+                    <td>{{ item[0] }}</td>
+                    <td>{{ item[1] }}</td>
+                    <td>{{ "%.2f" | format(item[2]) }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+
+              <!-- Pagination -->
+              <div
+                class="pagination"
+                data-invoice-id="{{ group.invoice[0]|int }}"
+              >
+                <button
+                  onclick="prevPage({{ group.invoice[0]|int }})"
+                  class="prev-btn"
+                >
+                  Previous
+                </button>
+                <button
+                  onclick="nextPage({{ group.invoice[0]|int }})"
+                  class="next-btn"
+                >
+                  Next
+                </button>
+              </div>
+
+              <!-- Total Per Item -->
+              <div class="totals-section">
+                <h4>Total Per Item</h4>
+                <ul>
+                  {% for item in group["items"] %}
+                  <li>
+                    <strong>{{ item[0] }}:</strong> KES {{ "%.2f" |
+                    format(item[1] * item[2]) }}
+                  </li>
+                  {% endfor %}
+                </ul>
+              </div>
+
+              <p
+                style="text-align: center; margin-top: 20px; font-weight: bold"
+              >
+                Thank you for doing business with us!
+              </p>
+            </div>
           </div>
-        {% endfor %}
-      {% else %}
-        <div class="invoice-box">
-          <p>No invoices found. <a href="{{ url_for('create_invoice') }}">Create a new invoice</a> to get started.</p>
         </div>
-      {% endif %}
+        <!-- END PRINT AREA -->
+
+        <!-- Visible Buttons (Not Printed) -->
+        <div class="button-group">
+          <a href="{{ url_for('edit_invoice', id=group.invoice[0])}}"
+            ><button>Edit Invoice</button></a
+          >
+          <button
+            class="delete-btn"
+            onclick="deleteInvoice('{{ group.invoice[0]|int }}')"
+          >
+            Delete Invoice
+          </button>
+          <button class="print-button" onclick="window.print()">
+            🖨️ Print Invoice
+          </button>
+        </div>
+        {% endfor %} {% else %}
+        <div class="invoice-box">
+          <p>
+            No invoices found.
+            <a href="{{ url_for('create_invoice') }}">Create a new invoice</a>
+            to get started.
+          </p>
+        </div>
+        {% endif %}
+      </div>
     </div>
-  </div>
 
-  <script>
-    // Sidebar Toggle
-    function toggleSidebar() {
-      const sidebar = document.getElementById("sidebar");
-      sidebar.classList.toggle("hidden");
-      sidebar.classList.toggle("visible");
-      const content = document.getElementById("content");
-      content.classList.toggle("shifted");
-    }
-
-    // Set initial sidebar state based on screen size
-    document.addEventListener("DOMContentLoaded", () => {
-      const sidebar = document.getElementById("sidebar");
-      const content = document.getElementById("content");
-      if (window.innerWidth > 768) {
-        sidebar.classList.remove("hidden");
-        sidebar.classList.add("visible");
-        content.classList.add("shifted");
-      }
-      // Initialize pagination for all invoice tables
-      document.querySelectorAll(".sales_summary").forEach(table => {
-        const invoiceId = table.getAttribute("data-invoice-id");
-        updateTable(invoiceId);
-      });
-    });
-
-    // Pagination Logic
-    const recordsPerPage = 10;
-    const currentPages = {};
-
-    function updateTable(invoiceId) {
-      const table = document.querySelector(`.sales_summary[data-invoice-id="${invoiceId}"]`);
-      const rows = table.querySelectorAll(".item-row");
-      const totalRows = rows.length;
-      const totalPages = Math.ceil(totalRows / recordsPerPage);
-
-      // Initialize or get current page for this invoice
-      if (!currentPages[invoiceId]) currentPages[invoiceId] = 1;
-      let currentPage = currentPages[invoiceId];
-
-      // Ensure currentPage is within bounds
-      if (currentPage < 1) currentPage = 1;
-      if (currentPage > totalPages) currentPage = totalPages;
-      currentPages[invoiceId] = currentPage;
-
-      // Hide all rows
-      rows.forEach(row => row.style.display = "none");
-
-      // Show only the rows for the current page
-      const start = (currentPage - 1) * recordsPerPage;
-      const end = start + recordsPerPage;
-      for (let i = start; i < end && i < totalRows; i++) {
-        rows[i].style.display = "";
+    <script>
+      // Sidebar Toggle
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("hidden");
+        sidebar.classList.toggle("visible");
+        const content = document.getElementById("content");
+        content.classList.toggle("shifted");
       }
 
-      // Update button states
-      const pagination = document.querySelector(`.pagination[data-invoice-id="${invoiceId}"]`);
-      if (pagination) {
-        pagination.querySelector(".prev-btn").disabled = currentPage === 1;
-        pagination.querySelector(".next-btn").disabled = currentPage === totalPages;
-      }
-    }
-
-    function prevPage(invoiceId) {
-      if (currentPages[invoiceId] > 1) {
-        currentPages[invoiceId]--;
-        updateTable(invoiceId);
-      }
-    }
-
-    function nextPage(invoiceId) {
-      const table = document.querySelector(`.sales_summary[data-invoice-id="${invoiceId}"]`);
-      const rows = table.querySelectorAll(".item-row");
-      const totalPages = Math.ceil(rows.length / recordsPerPage);
-      if (currentPages[invoiceId] < totalPages) {
-        currentPages[invoiceId]++;
-        updateTable(invoiceId);
-      }
-    }
-
-    function deleteInvoice(invoiceId) {
-      if (!confirm('Are you sure you want to delete this invoice?')) {
-        return;
-      }
-
-      console.log('Attempting to delete invoice ID:', invoiceId);
-
-      fetch(`/delete_invoice/${invoiceId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      .then(response => {
-        console.log('Response status:', response.status);
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+      // Set initial sidebar state based on screen size
+      document.addEventListener("DOMContentLoaded", () => {
+        const sidebar = document.getElementById("sidebar");
+        const content = document.getElementById("content");
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove("hidden");
+          sidebar.classList.add("visible");
+          content.classList.add("shifted");
         }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Response data:', data);
-        if (data.success) {
-          const invoiceBox = document.querySelector(`.invoice-box[data-invoice-id="${invoiceId}"]`);
-          if (invoiceBox) {
-            invoiceBox.parentElement.remove(); // Remove print-area div
-            alert(data.message);
-          } else {
-            console.error('Invoice box not found in DOM for ID:', invoiceId);
-            alert('Invoice deleted, but UI update failed');
-          }
-        } else {
-          alert(`Error deleting invoice: ${data.message}`);
-        }
-      })
-      .catch(error => {
-        console.error('Fetch error:', error);
-        alert(`Error deleting invoice: ${error.message}`);
+        // Initialize pagination for all invoice tables
+        document.querySelectorAll(".sales_summary").forEach((table) => {
+          const invoiceId = table.getAttribute("data-invoice-id");
+          updateTable(invoiceId);
+        });
       });
-    }
-  </script>
-</body>
+
+      // Pagination Logic
+      const recordsPerPage = 10;
+      const currentPages = {};
+
+      function updateTable(invoiceId) {
+        const table = document.querySelector(
+          `.sales_summary[data-invoice-id="${invoiceId}"]`
+        );
+        const rows = table.querySelectorAll(".item-row");
+        const totalRows = rows.length;
+        const totalPages = Math.ceil(totalRows / recordsPerPage);
+
+        // Initialize or get current page for this invoice
+        if (!currentPages[invoiceId]) currentPages[invoiceId] = 1;
+        let currentPage = currentPages[invoiceId];
+
+        // Ensure currentPage is within bounds
+        if (currentPage < 1) currentPage = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        currentPages[invoiceId] = currentPage;
+
+        // Hide all rows
+        rows.forEach((row) => (row.style.display = "none"));
+
+        // Show only the rows for the current page
+        const start = (currentPage - 1) * recordsPerPage;
+        const end = start + recordsPerPage;
+        for (let i = start; i < end && i < totalRows; i++) {
+          rows[i].style.display = "";
+        }
+
+        // Update button states
+        const pagination = document.querySelector(
+          `.pagination[data-invoice-id="${invoiceId}"]`
+        );
+        if (pagination) {
+          pagination.querySelector(".prev-btn").disabled = currentPage === 1;
+          pagination.querySelector(".next-btn").disabled =
+            currentPage === totalPages;
+        }
+      }
+
+      function prevPage(invoiceId) {
+        if (currentPages[invoiceId] > 1) {
+          currentPages[invoiceId]--;
+          updateTable(invoiceId);
+        }
+      }
+
+      function nextPage(invoiceId) {
+        const table = document.querySelector(
+          `.sales_summary[data-invoice-id="${invoiceId}"]`
+        );
+        const rows = table.querySelectorAll(".item-row");
+        const totalPages = Math.ceil(rows.length / recordsPerPage);
+        if (currentPages[invoiceId] < totalPages) {
+          currentPages[invoiceId]++;
+          updateTable(invoiceId);
+        }
+      }
+
+      function deleteInvoice(invoiceId) {
+        if (!confirm("Are you sure you want to delete this invoice?")) {
+          return;
+        }
+
+        console.log("Attempting to delete invoice ID:", invoiceId);
+
+        fetch(`/delete_invoice/${invoiceId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => {
+            console.log("Response status:", response.status);
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Response data:", data);
+            if (data.success) {
+              const invoiceBox = document.querySelector(
+                `.invoice-box[data-invoice-id="${invoiceId}"]`
+              );
+              if (invoiceBox) {
+                invoiceBox.parentElement.remove(); // Remove print-area div
+                alert(data.message);
+              } else {
+                console.error(
+                  "Invoice box not found in DOM for ID:",
+                  invoiceId
+                );
+                alert("Invoice deleted, but UI update failed");
+              }
+            } else {
+              alert(`Error deleting invoice: ${data.message}`);
+            }
+          })
+          .catch((error) => {
+            console.error("Fetch error:", error);
+            alert(`Error deleting invoice: ${error.message}`);
+          });
+      }
+    </script>
+  </body>
 </html>

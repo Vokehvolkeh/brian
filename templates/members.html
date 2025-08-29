@@ -42,6 +42,8 @@
         color: white;
         padding: 16px;
         box-shadow: var(--shadow-md);
+        overflow-y: auto;
+        overflow-x: auto;
       }
 
       .sidebar a {
@@ -504,14 +506,34 @@
   </head>
   <body>
     <div class="sidebar">
-      <a href="{{url_for('add_member')}}">Add Staff</a>
-      <a href="{{url_for('view_members')}}">View Staff</a>
-      <a href="{{url_for('attendance_view')}}">Attendance View</a>
+      <h1>👥 MEMBERS HUB</h1>
+
+      <!-- Active links -->
+      <a href="{{url_for('add_member')}}">➕ Add Staff</a>
+      <a href="{{url_for('view_members')}}">📋 View Staff</a>
+      <a href="{{url_for('attendance_view')}}">🕒 Attendance View</a>
       <a href="{{url_for('assign_tasks')}}"
-        >Assign Responsibilities and Tasks</a
+        >📝 Assign Responsibilities & Tasks</a
       >
-      <a href="{{url_for('view_tasks')}}">View Assigned Tasks</a>
-      <a href="{{url_for('view_employee_details')}}">View Employee Details</a>
+      <a href="{{url_for('view_tasks')}}">📂 View Assigned Tasks</a>
+      <a href="{{url_for('view_employee_details')}}"
+        >📑 View Employee Details</a
+      >
+
+      <!-- Future / inactive modules -->
+      <a href="#" class="inactive">📈 Performance Reviews</a>
+      <a href="#" class="inactive">🎓 Training & Development</a>
+      <a href="#" class="inactive">🛠️ Skills Management</a>
+      <a href="#" class="inactive">🏆 Employee Recognition</a>
+      <a href="#" class="inactive">📅 Leave Requests</a>
+      <a href="#" class="inactive">🧑‍⚖️ HR Compliance</a>
+      <a href="#" class="inactive">📊 Workforce Analytics</a>
+      <a href="#" class="inactive">🤝 Team Collaboration</a>
+      <a href="#" class="inactive">📬 Internal Messaging</a>
+      <a href="#" class="inactive">🔐 Access Control</a>
+      <a href="#" class="inactive">🌍 Remote Work Tracker</a>
+
+      <!-- General -->
       <a href="/dashboard" class="dashboard-link">← Back to Dashboard</a>
     </div>
 

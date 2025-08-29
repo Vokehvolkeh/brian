@@ -31,6 +31,7 @@
         border-bottom-right-radius: 15px;
         box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
         z-index: 1000;
+        overflow-y: auto;
       }
 
       .sidebar.hidden {
@@ -309,11 +310,29 @@
     <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
 
     <div class="sidebar hidden" id="sidebar">
-      <h2>Dashboard</h2>
-      <a href="{{url_for('add_salary')}}">Record Salary</a>
-      <a href="{{url_for('view_salary')}}">View Salary</a>
-      <a href="{{url_for('generate_payslip')}}">Generate Payslip</a>
-      <a href="/dashboard">Dashboard</a>
+      <h2>💼 Payroll Center</h2>
+
+      <!-- Core Payroll -->
+      <a href="{{ url_for('add_salary') }}">➕ Record Salary</a>
+      <a href="{{ url_for('view_salary') }}">👀 View Salary Records</a>
+      <a href="{{ url_for('generate_payslip') }}">🧾 Generate Payslip</a>
+
+      <!-- Advanced Payroll (future / inactive for now) -->
+      <a href="#" class="inactive">📋 Salary Structure & Grades</a>
+      <a href="#" class="inactive">📊 Payroll Reports</a>
+      <a href="#" class="inactive">📅 Payroll Calendar</a>
+      <a href="#" class="inactive">⚖️ Tax Deduction (PAYE)</a>
+      <a href="#" class="inactive">🏥 NSSF & NHIF Contributions</a>
+      <a href="#" class="inactive">🏖️ Leave & Overtime Integration</a>
+      <a href="#" class="inactive">💳 Direct Bank Transfers</a>
+      <a href="#" class="inactive">🌍 Multi-Currency Payroll</a>
+      <a href="#" class="inactive">🔒 Payroll Compliance & Audit</a>
+      <a href="#" class="inactive">📤 Export Payroll Reports (Excel, PDF)</a>
+      <a href="#" class="inactive">🖨️ Print Payslips</a>
+
+      <!-- Navigation -->
+      <a href="/dashboard">🏠 Main Dashboard</a>
+      <a href="/logout">🚪 Logout</a>
     </div>
 
     <div class="content" id="content">

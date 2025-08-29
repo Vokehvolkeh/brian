@@ -637,6 +637,8 @@ from flask import Flask, request, redirect, url_for, render_template, flash
 import sqlite3
 
 
+from flask import flash, get_flashed_messages
+
 @app.route('/create_user', methods=['GET', 'POST'])
 def register():
     conn = get_connection()
@@ -645,44 +647,52 @@ def register():
     # Count existing users
     c.execute('SELECT COUNT(*) FROM users')
     count = c.fetchone()
-    # Handle different database adapter return types
     user_count = list(count.values())[0] if isinstance(count, dict) else (count[0] if count else 0)
 
-    if user_count >= 2:
+    if user_count >= 3:
         conn.close()
-        return "Maximum number of users already registered."
+        flash("⚠️ Maximum number of users already registered.", "error")
+        return redirect(url_for('settings'))   # redirect instead of plain text
 
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        confirm_password = request.form['confirm_password']  # Hash in production!
+        confirm_password = request.form['confirm_password']
+        
         if password != confirm_password:
-            return "error"
-        else:
-            email = request.form['email']
-            phone = request.form['phone']
-            photo = request.files['profile_photo']  # <-- match the form field name
+            flash("❌ Passwords do not match!", "error")
+            return redirect(url_for('register'))
+            
+        email = request.form['email']
+        phone = request.form['phone']
+        photo = request.files['profile_photo']
 
-            profile_photo_path = None
-            if photo and photo.filename and allowed_file(photo.filename):
-                filename = secure_filename(photo.filename)
-                profile_photo_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                photo.save(profile_photo_path)
+        profile_photo_path = None
+        if photo and photo.filename and allowed_file(photo.filename):
+            filename = secure_filename(photo.filename)
+            profile_photo_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            photo.save(profile_photo_path)
 
-            hashed_password = generate_password_hash(password)
+        hashed_password = generate_password_hash(password)
 
-            try:
-                c.execute('INSERT INTO users (username, password, profile_photo, email, phone) VALUES (%s, %s, %s, %s, %s)', 
-                        (username, hashed_password, profile_photo_path, email, phone))
-                conn.commit()
-                conn.close()
-                return redirect(url_for('normal_user'))  # or home/dashboard
-            except psycopg2.IntegrityError:
-                conn.close()
-                return "Username already taken."
+        try:
+            c.execute(
+                'INSERT INTO users (username, password, profile_photo, email, phone) VALUES (%s, %s, %s, %s, %s)',
+                (username, hashed_password, profile_photo_path, email, phone)
+            )
+            conn.commit()
+            conn.close()
+            flash("✅ User created successfully!", "success")
+            return redirect(url_for('normal_user'))
+        except psycopg2.IntegrityError:
+            conn.rollback()
+            conn.close()
+            flash("⚠️ Username already taken.", "error")
+            return redirect(url_for('register'))
 
-        conn.close()
+    conn.close()
     return render_template('create_user.html')
+
 
 from werkzeug.security import check_password_hash
 
@@ -1244,8 +1254,7 @@ def get_grouped_expenses():
 
 @app.route('/accounting')
 def accounting():
-    if 'user' not in session:
-        return redirect('/login')
+
     grouped_expenses = get_grouped_expenses()
     return render_template('account.html', grouped_expenses=grouped_expenses)
 
@@ -2224,8 +2233,6 @@ def monthly_summary():
 #MEMBERS
 @app.route('/members')
 def members():
-    if 'user' not in session:
-        return redirect('/login')
     conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT * FROM members")
